@@ -1,0 +1,680 @@
+#############################################
+## DBA.R -- Differential Binding Analysis  ##
+## 20 April 2011                           ##
+## Rory Stark                              ##
+## Cancer Research UK                      ##
+#############################################
+
+## dba	            Construct a dba object
+## dba.peakset	    Add a peakset to a dba object
+	
+## dba.overlap	    Compute binding site overlaps
+## dba.count  	    Count reads in binding sites
+	
+## dba.contrast	    Establish contrast(s) for analysis
+## dba.analyze  	Execute affinity analysis
+## dba.report	    Generate report for a contrast analysis
+	
+## dba.plotClust	Cluster dendrogram plo
+## dba.plotHeatmap	Heatmap plot
+## dba.plotPCA	    Principal Components plot
+## dba.plotBox	    Boxplots
+## dba.plotMA	    MA/scatter plot
+## dba.plotVenn	    2, 3, or 4-way Venn diagram plot
+	
+## dba.show	        List dba metadata
+## dba.mask	        Mask samples or sites 
+	
+## dba.save	        Save dba object
+## dba.load	        Load dba object
+
+### NOTE: DBA is a front-end to a package formerly known as pv, with most DBA
+### functions being simple pass-thoughs to pv functions
+
+#########################################################
+## dba -- construct DBA object, e.g. from sample sheet ##
+#########################################################
+
+DBA_GROUP     = PV_GROUP
+DBA_ID        = PV_ID 
+DBA_TISSUE    = PV_TISSUE 
+DBA_FACTOR    = PV_FACTOR
+DBA_CONDITION = PV_CONDITION
+DBA_CONSENSUS = PV_CONSENSUS
+DBA_CALLER    = PV_CALLER
+DBA_CONTROL   = PV_CONTROL
+DBA_READS     = PV_READS
+DBA_REPLICATE = PV_REPLICATE
+
+dba = function(DBA,mask, 
+               sampleSheet="dba_samples.csv", 
+               config=data.frame(RunParallel=TRUE, reportInit="DBA"),
+               bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, minOverlap=2,
+               bCorPlot=FALSE, attributes) 
+{
+   res = pv.model(DBA, mask=mask, samplesheet=sampleSheet, config=config, 
+                    bAddCallerConsensus=bAddCallerConsensus, bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
+                    minOverlap=minOverlap, bKeepAll=TRUE, bAnalysis=TRUE, 
+                    attributes=attributes)
+                    
+   res$contrasts=NULL
+   
+   if(is.null(res$config$RangedData)) {
+      res$config$RangedData=T
+   }
+
+   
+   if(class(res)!="DBA") {
+      class(res) = "DBA"
+   }
+   
+   if(bCorPlot) {
+      dba.plotHeatmap(res)
+   }
+    
+   return(res)                 
+}
+
+###############################################
+## dba.peakset -- add a peakset to the model ##
+###############################################
+
+dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replicate,
+                       control, peak.caller, reads=0, consensus=FALSE, bamReads, bamControl,
+                       normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
+                       minOverlap=2, bMerge=TRUE,
+                       bRetrieve=FALSE, writeFile, numCols=4,
+                       bRangedData=DBA$config$RangedData)
+{
+   res = NULL
+   
+   if(!missing(peaks)){
+   	 if(class(peaks) != "DBA") {
+        peaks = pv.RangedData2Peaks(peaks)
+     }
+   }
+   
+   if(bRetrieve==TRUE || !missing(writeFile)) {
+   
+      if(missing(writeFile)) {
+         writeFile = NULL
+      }
+      
+      res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
+      
+      if(bRangedData) {
+         res = pv.peaks2RangedData(res)
+      }    
+   
+   } else {
+   	  if(!missing(peaks)) {
+   	     if(class(peaks)=="DBA") {
+   	  
+   	        res = pv.peakset_all(DBA, addpv=peaks, minOverlap=minOverlap)
+   	     
+   	     }
+   	   }
+   	   if(is.null(res)) {
+   
+         res = pv.peakset(DBA, peaks=peaks, 
+                          sampID=sampID, tissue=tissue, factor=factor,condition=condition,replicate=replicate,
+                          control=control, peak.caller=peak.caller,reads=reads, consensus=consensus, 
+                          readBam=bamReads, controlBam=bamControl,
+                          bNormCol=normCol, bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
+                          minOverlap=minOverlap)
+      }
+      
+      if(class(res)!="DBA") {
+         class(res) = "DBA"
+      }
+    
+      if(is.null(DBA$config$RangedData)) {
+         res$config$RangedData=T
+      }
+      if(is.null(DBA$parallelPackage)){
+         res$config$parallelPackage=DBA_PARALLEL_MULTICORE
+      }
+      if(is.null(DBA$RunParallel)){
+         res$config$RunParallel=T
+      }
+      if(is.null(DBA$reportInit)){
+         res$config$reportInit="DBA"
+      }
+      
+      if(bMerge) {
+         res = pv.check(res)
+      }
+   }   
+                       
+   return(res)                       
+
+}                      
+
+##################################################
+## dba.overlap -- compute binding site overlaps ##
+##################################################
+
+DBA_OLAP_PEAKS = 1 # Return list of peaksets (common/unique peaks) 
+DBA_OLAP_ALL   = 2 # Return overlap report with statstics for peakset pairs
+DBA_OLAP_RATE  = 3 # Return vector of number of peaks in overlap for all values of minOverlap
+
+DBA_OLAP  = PV_OLAP
+DBA_COR   = PV_COR
+DBA_INALL = PV_INALL
+
+dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
+                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
+                       byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
+                       bRangedData=DBA$config$RangedData)
+{                      
+   if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) ) {
+   	
+      if(!missing(contrast)) {
+      
+         rep   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,bRangedData=F)
+         sites = as.numeric(rownames(rep))
+         
+         if(missing(mask)) {
+         	mask  = DBA$contrasts[[contrast]]$group1 | DBA$contrasts[[contrast]]$group2   
+         }  else if (length(mask)==1) {
+            mask = 1:length(DBA$peaks)         
+         }
+         
+         res = pv.occupancy(DBA, mask=mask, sites = sites, byAttribute=byAttribute, 
+                            Sort='cor', CorMethod=CorMethod,
+                            minVal=minVal, bCorOnly=bCorOnly)         
+      
+      } else {
+   	
+         res = pv.occupancy(DBA, mask=mask, byAttribute=byAttribute, 
+                            Sort='cor', CorMethod=CorMethod,
+                            minVal=minVal, bCorOnly=bCorOnly)
+      } 
+   }  else if(mode == DBA_OLAP_RATE) {
+   
+      res = pv.consensus(DBA,sampvec=mask,minOverlap=NULL)
+   
+   }  else {
+   
+      res = pv.overlap(DBA,mask=mask,minVal=minVal)
+      
+      if(bRangedData) {
+         for(i in 1:length(res)) {
+            res[[i]] = pv.peaks2RangedData(res[[i]])
+         }
+      }   
+   }                       
+   
+   return(res)
+}
+  
+###############################################  
+## dba.count -- count reads in binding sites ##
+###############################################   
+
+DBA_SCORE_RPKM        = PV_SCORE_RPKM
+DBA_SCORE_RPKM_FOLD   = PV_SCORE_RPKM_FOLD
+DBA_SCORE_READS       = PV_SCORE_READS
+DBA_SCORE_READS_FOLD  = PV_SCORE_READS_FOLD
+DBA_SCORE_READS_MINUS = PV_SCORE_READS_MINUS
+
+dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=TRUE,
+                     insertLength, minMaxval=0,
+                     bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+{
+                   
+   bUseLast = F
+  
+   if(!missing(peaks)) {
+      peaks = pv.RangedData2Peaks(peaks)
+   }
+   
+   if(missing(insertLength)) {
+      insertLength=0
+   }
+  
+   res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
+                   defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
+                   bCalledMasks=bCalledMasks, minMaxval=minMaxval, bParallel=bParallel, bUseLast=bUseLast)
+   
+   if(bCorPlot){
+      x = dba.plotHeatmap(res,correlations=T)
+   }
+
+   if(class(res)!="DBA") {
+      class(res) = "DBA"
+   }
+      
+   return(res)
+}
+
+########################################################
+## dba.contrast -- establish contrast(s) for analysis ##
+########################################################
+
+dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="group2",
+                        minMembers=3, block,
+                        categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION))
+{
+   if(minMembers < 2) {
+      stop('minMembers must be at least 2. Use of replicates strongly advised.')	
+   }
+   
+   DBA = pv.check(DBA)
+      
+   res = pv.contrast(DBA, group1=group1, group2=group2, name1=name1, name2=name2,
+                     minMembers=minMembers, categories=categories,block=block)
+
+   if(class(res)!="DBA") {
+      class(res) = "DBA"
+   }
+                        
+   return(res)                       	
+}
+
+###################################################################
+## dba.analyze -- perform differential binding affinity analysis ##
+###################################################################
+
+DBA_EDGER = 'edgeR'
+DBA_DESEQ = 'DESeq'
+DBA_EDGER_BLOCK = 'edgeRlm'
+
+dba.analyze = function(DBA, method=DBA_EDGER, 
+                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=FALSE,
+                       bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
+{
+	
+   DBA = pv.check(DBA)
+      
+   res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
+    
+   if(bCorPlot){
+   	  if(nrow(dba.report(res,method=method[1],bRangedData=F))>1) {
+         x = dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T)
+      }
+   }
+
+
+   if(class(res)!="DBA") {
+      class(res) = "DBA"
+   }
+      	
+   return(res)
+}
+
+###########################################################
+## dba.report -- generate report for a contrast analysis ##
+###########################################################
+
+dba.report = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, fold=0, bNormalized=TRUE,
+                      bCalled=F, bCounts=FALSE, bCalledDetail=FALSE,
+                      file,initString=DBA$config$reportInit,ext='csv',bRangedData=DBA$config$RangedData) 
+                     
+{
+
+   DBA = pv.check(DBA) 
+
+   res = pv.DBAreport(pv=DBA,contrast=contrast,method=method,th=th,bUsePval=bUsePval,
+                      bCalled=bCalled,bCounts=bCounts,bCalledDetail=bCalledDetail,
+                      file=file,initString=initString,bNormalized=bNormalized,ext=ext,minFold=fold) 
+
+   if(bRangedData) {
+      res = pv.peaks2RangedData(res)
+   }
+   
+   return(res)	
+
+}                      
+
+################################################
+## dba.plotHeatmap -- Heatmap with clustering ##
+################################################
+
+dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
+                           contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE,
+                           mask, sites, sortFun,
+                           correlations=TRUE, olPlot=DBA_COR, 
+                           margin=10, colScheme="Greens", distMethod="pearson",
+                           ...)
+{
+   DBA = pv.check(DBA)
+   	  
+   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
+      if(missing(contrast)) {
+   	     correlations = pv.occupancy(DBA, mask=mask, sites=sites, 
+                                     Sort='cor', bCorOnly=T) 
+   	   } else {
+   	      correlations = dba.overlap(DBA,mask=mask,mode=DBA_OLAP_ALL,bCorOnly=T,
+   	                               contrast=contrast,method=method,th=th,bUsePval=bUsePval)
+   	   }
+   }
+   	  
+   if(correlations[1]!=FALSE) {
+      res = pv.plotHeatmap(DBA, attributes=attributes, overlaps=correlations, olPlot=olPlot,
+                           ColScheme=colScheme, distMeth=distMethod, bReorder=TRUE,
+                           minval=minval, maxval=maxval, margins=c(margin,margin),
+                           ...)
+      return(res)
+   }
+      
+   if(!missing(contrast)) {
+      res = pv.DBAplotHeatmap(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval,
+                              maxSites=maxSites, PCA=NULL,
+                              minval=minval, maxval=maxval,
+                              ColScheme=colScheme, distMeth=distMethod,attributes=attributes, margins=c(margin,margin),
+                              ...)
+
+   } else {
+     
+	  if(!missing(sortFun)) {
+	     savevecs = DBA$vectors
+		 DBA = pv.sort(DBA, sortFun, mask=mask)
+      }
+		 
+      res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, mask=mask, sites=sites,
+                           minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, margins=c(margin,margin),
+                           ...)
+      
+      res = NULL
+         
+	  if(!missing(sortFun)) {
+         DBA$vectors = savevecs
+	  }
+   }
+     
+   return(res)	
+}
+
+#######################################################
+## dba.plotPCA -- Principal Components Analysis plot ##
+#######################################################
+
+dba.plotPCA = function(DBA, attributes, minval, maxval,
+                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE,
+                       mask, sites,
+                       b3D=FALSE, vColors, dotSize, ...)
+                       
+{
+   DBA = pv.check(DBA)
+   
+   if(!missing(contrast)){
+   	  if(missing(attributes)) {
+   	     attributes = DBA_GROUP
+   	  }
+   	  if(missing(dotSize)) {
+   	     dotSize=NULL
+   	  } 
+      res = pv.DBAplotHeatmap(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval,
+                              maxSites=10000000, PCA=attributes, minval=minval, maxval=maxval,
+                              bPCAonly=T, b3D=b3D, vColors=vColors, size=dotSize, ...)
+   } else {
+   	  if(missing(attributes)) {
+   	     attributes = DBA_CONDITION
+   	  }
+   
+      res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, numSites=10000000,
+                       sites=sites, b3D=b3D, vColors=vColors, ...)  
+   }
+
+   return(res)	
+}
+
+#############################
+## dba.plotBox --Boxplots  ##
+#############################
+                                      
+dba.plotBox = function(DBA, contrast=1, method=DBA_EDGER, th=0.1, bUsePval=FALSE, bNormalized=TRUE,
+                       attribute=DBA_GROUP, 
+                       bAll=FALSE, bAllIncreased=FALSE, bAllDecreased=FALSE, 
+                       bDB=TRUE, bDBIncreased=TRUE, bDBDecreased=TRUE,
+                       pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, 
+                       vColors, varwidth=TRUE, notch=TRUE, ...) 
+
+{
+   DBA = pv.check(DBA)
+   
+   res = pv.plotBoxplot(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval, bNormalized=bNormalized,
+                        attribute=attribute,
+                                          bAll=bAll, bAllIncreased=bAllIncreased, bAllDecreased=bAllDecreased, 
+                                          bDB=bDB, bDBIncreased=bDBIncreased, bDBDecreased=bDBDecreased,
+                                          pvalMethod=pvalMethod,  bReversePos=bReversePos, attribOrder=attribOrder, vColors=vColors, 
+                                          varwidth=varwidth, notch=notch, ...)
+ 
+   return(res)	
+}
+
+#########################################
+## dba.plotMA -- MA or XY scatter plot ##
+#########################################
+                                      
+dba.plotMA = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, bNormalized=TRUE,
+                      factor="", bXY=FALSE, dotSize=.33, ...)
+
+{
+   DBA = pv.check(DBA)
+   res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval,
+                      facname=factor, bNormalized=bNormalized, cex=dotSize, ...)
+ 
+   return(res)	
+}
+                                                                                                           
+###########################################################
+## dba.plotClust -- Hierarchical clister dengrogram plot ##
+###########################################################
+
+dba.plotClust = function(DBA, mask, sites, attributes=DBA$attributes, distMethod="pearson",
+                         contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE)
+{
+   
+   if(!missing(contrast)) {
+      
+      message('dba.plotClust: Contrast clustering not implemented.')
+      res = NULL
+      
+   } else {
+   
+      res = pv.plotClust(DBA, mask=mask, sites=sites, 
+                         attributes = attributes, distMeth=distMethod)
+   }
+
+   return(res)
+}                         
+
+####################################################
+## dba.plotVenn -- Venn diagram plots of overlaps ##
+####################################################
+
+dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
+{
+
+   if(!missing(mask)) {
+      overlaps = dba.overlap(DBA,mask,mode=DBA_OLAP_PEAKS,bRangedData=F)
+      
+      res = pv.whichPeaksets(DBA,mask)
+      if(missing(label1)) {
+         label1 = DBA$class[PV_ID,res$A]
+      }
+      if(missing(label2)) {
+         label2 = DBA$class[PV_ID,res$B]
+      }
+      if(missing(label3)) {
+         label3 = DBA$class[PV_ID,res$C]
+      }
+
+   } else {
+   
+      if(missing(label1)) {
+         label1 = "A"
+      }
+      if(missing(label2)) {
+         label2 = "B"
+      }
+      if(missing(label3)) {
+         label3 = "C"
+      }
+      for(i in 1:length(overlaps)) {
+         overlaps[[i]] = pv.RangedData2Peaks(overlaps[[i]])
+      }
+   }
+         
+   pv.plotVenn(overlaps,label1=label1,label2=label2,label3=label3,...)
+  
+}
+
+###################################
+## dba.show -- List DBA metadata ##
+###################################
+
+dba.show = function(DBA, mask, attributes, bContrasts=FALSE, th=0.1, bUsePval=FALSE) 
+{
+
+   res = pv.list(DBA, mask=mask, bContrasts=bContrasts, attributes=attributes, th=th, bUsePval=bUsePval)
+   
+   return(res)
+}
+
+#######################################
+## dba.mask -- mask samples or sites ##
+#######################################
+
+dba.mask = function(DBA, attribute, value, combine='or', mask, merge='or', bApply=FALSE,
+                    peakset, minValue=-1)
+                    
+{
+   if(missing(peakset)) {
+      
+      res = pv.mask(DBA, attribute=attribute, value=value, combine=combine,
+                         mask=mask, merge=merge, bApply=bApply)
+      
+   } else {
+   
+      res = pv.whichSites(DBA, pnum=peakset, combine=combine, minVal=minValue)
+   
+   }
+   
+   return(res)
+ 
+ }
+ 
+ ###################################
+ ## dba.save -- save a DBA object ##
+ ###################################
+
+dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize=FALSE)
+{
+
+   if(bMinimize) {
+      DBA$allvectors = NULL
+   }
+   
+   DBA$vectors = NULL	
+   DBA$values  = NULL
+   DBA$hc      = NULL
+   DBA$pc      = NULL
+   res = pv.save(DBA,file=file ,
+                 dir=dir, pre=pre, ext=ext,
+                 compress=TRUE)
+   
+   return(res)
+} 
+
+ ###################################
+ ## dba.load -- load a DBA object ##
+ ###################################
+
+dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
+{
+	
+   res = pv.load(file=file, dir=dir, pre=pre, ext=ext)
+   
+   if(is.null(res$allvectors)) {
+      if(is.null(res$minOverlap)) {
+         minOverlap=2
+      } else {
+         minOverlap = res$minOverlap
+      }
+      contrasts = res$contrasts
+      res = dba(res,minOverlap=minOverlap)
+      res$contrasts = contrasts
+   }
+   
+   if(is.null(res$vectors)) {
+      if(!is.null(res$overlapping)) {
+         res$vectors = res$allvectors[res$overlapping,]
+      } else {
+         res$vectors = res$allvectors
+      }
+      if(!is.null(res$vectors)) {
+         rownames(res$vectors) = 1:nrow(res$vectors)
+      }
+   }
+   
+   if(is.null(res$config$RangedData)) {
+      res$config$RangedData=F
+   }
+   
+   if(is.null(res$config$saveDir)) {
+      res$config$saveDir = "Robjects"
+   }
+
+   if(is.null(res$config$savePrefix)) {
+      res$config$saveDir = "dba_"
+   }
+   
+   if(is.null(res$config$saveExt)) {
+      res$config$saveDir = "RData"
+   }
+
+   if(is.null(res$config$reportInit)) {
+      res$config$saveDir = "reports/DBA"
+   }
+         
+   if(class(res)!="DBA") {
+      class(res) = "DBA"
+   }
+   
+   return(res)
+} 
+
+##########################
+## DBA object functions ##
+##########################
+
+print.DBA = function(x,...){
+   #if(is.null(x$allvectors)) {
+   #   print(dba.show(x))
+   #} else {
+   	  x = pv.check(x)
+   	  cat(sprintf("%s:\n",summary(x)))
+      print(dba.show(x))
+      if(!is.null(x$contrasts)){
+   	     cat("\n")
+
+         if(length(x$contrasts) == 1) {
+           cat(sprintf("1 Contrast:\n") )
+   	     } else {
+           cat(sprintf("%d Contrasts:\n",length(x$contrasts)))
+         }
+         print(dba.show(x,bContrasts=T))
+      }
+   #}
+}
+
+summary.DBA = function(object,...) {
+   if(is.null(object$allvectors)) {
+      cat('Run dba first\n')
+      return
+   }
+   res = sprintf("%d Samples, %d sites in matrix",
+          length(object$peaks),nrow(object$vectors))
+   if(nrow(object$vectors) != nrow(object$allvectors)) {
+      res = sprintf("%s (%d total)",res,nrow(object $allvectors))
+   }
+   return(res)
+}
+
+plot.DBA = function(x,...){
+   x = pv.check(x)
+   res = dba.plotHeatmap(x,...)
+}

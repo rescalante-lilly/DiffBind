@@ -1,0 +1,84 @@
+import(zlibbioc)
+
+export(dba,
+       dba.peakset,
+       dba.overlap,
+       dba.count,
+       dba.contrast,
+       dba.analyze,
+       dba.report,
+       dba.plotHeatmap,
+       dba.plotPCA,
+       dba.plotMA,
+       dba.plotVenn,
+       dba.plotBox,
+       dba.show,
+       dba.mask,
+       dba.save,
+       dba.load,
+       print.DBA,
+       summary.DBA,
+       plot.DBA,
+       DBA_GROUP,
+       DBA_ID,
+       DBA_TISSUE,
+       DBA_FACTOR,
+       DBA_CONDITION,
+       DBA_CONSENSUS,
+       DBA_CALLER,
+       DBA_CONTROL,
+       DBA_REPLICATE,
+       DBA_OLAP_PEAKS,
+       DBA_OLAP_ALL,
+       DBA_OLAP_RATE,
+       DBA_SCORE_RPKM,
+       DBA_SCORE_RPKM_FOLD,
+       DBA_SCORE_READS,
+       DBA_SCORE_READS_FOLD,
+       DBA_SCORE_READS_MINUS,
+       DBA_EDGER,
+       DBA_EDGER_BLOCK,
+       DBA_DESEQ)
+
+exportClasses("DBA")
+
+useDynLib(DiffBind)
+
+#importMethodsFrom(IRanges, as.data.frame, as.factor, as.matrix, cbind,
+#                  colnames, "colnames<-", cor, duplicated, ifelse,
+#                  "%in%", lapply, match, mean, ncol, nrow, order, paste,
+#                  rbind, rownames, "rownames<-", sapply, sd, sort, sub,
+#                  summary, t, unique, which, which.max)
+
+
+importFrom(amap, Dist)
+
+#importFrom(DESeq, counts, estimateSizeFactors,
+#           estimateVarianceFunctions, nbinomTest, newCountDataSet,
+#           sizeFactors, "sizeFactors<-")
+
+importFrom(edgeR, calcNormFactors, DGEList, estimateCommonDisp,
+           estimateTagwiseDisp, exactTest, glmFit,
+           glmLRT, topTags)
+
+importFrom(gplots, heatmap.2)
+
+import(IRanges)
+
+importFrom(graphics, abline, boxplot, plot, points, smoothScatter)
+
+importFrom(grDevices, colorRampPalette)
+
+importFrom(limma, vennDiagram)
+
+#importFrom(multicore, collect, mclapply, mcparallel)
+
+importFrom(RColorBrewer, brewer.pal)
+
+#importFrom(rgl, plot3d)
+
+importFrom(stats, model.matrix, p.adjust, princomp, t.test,
+           wilcox.test)
+
+importFrom(utils, read.table, write.csv, write.table)
+
