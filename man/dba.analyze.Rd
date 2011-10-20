@@ -9,7 +9,7 @@ Performs differential binding affinity analysis
 }
 \usage{
 dba.analyze(DBA, method=DBA_EDGER, 
-                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=FALSE,
+                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
                        bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -36,7 +36,7 @@ logical indicating whether Control read counts are subtracted for each site in e
 logical indicating if the full library size (total number of reads in BAM/SAM/BED file) for each sample is used for scaling normalization. If FALSE, the total number of reads present in the peaks for each sample is used (generally preferable).
 }
 \item{bTagwise}{
-when method is DBA_EDGER, logical indicating if dispersion should be calculated on a tagwise basis. If there are only a very few members of each group in a contrast (e.g. no replicates), this should be set to FALSE.
+logical indicating if dispersion should be calculated on a tagwise (or per-condition) basis. If there are only a very few members of each group in a contrast (e.g. no replicates), this should be set to FALSE.
 }
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the analyzed data (first contrast only). 

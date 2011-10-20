@@ -9,7 +9,7 @@ Draws a binding site heatmap
 }
 \usage{
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
+                contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
                 mask, sites, sortFun,
                 correlations=TRUE, olPlot=DBA_COR,
                 margin=10, colScheme="Greens", distMethod="pearson",
@@ -69,6 +69,9 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 }
 \item{bUsePval}{
 logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding. Used in conjunction with contrast.
+}
+\item{report}{
+report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
 }
 
 \item{mask}{
@@ -159,9 +162,14 @@ data(tamoxifen_peaks)
 # peak overlap correlation heatmap
 dba.plotHeatmap(tamoxifen)
 
-data(tamoxifen_analysis)
+data(tamoxifen_counts)
 # counts correlation heatmap
 dba.plotHeatmap(tamoxifen)
+
+# prepare a DBA object with a completed analysis
+data(tamoxifen_counts)
+tamoxifen = dba.contrast(tamoxifen,categories=DBA_CONDITION)
+tamoxifen = dba.analyze(tamoxifen)
 
 #correlation heatmap based on all normalized data
 dba.plotHeatmap(tamoxifen,contrast=1,th=1)

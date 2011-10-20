@@ -9,8 +9,8 @@ Principal Component Analysis plot
 }
 \usage{
 dba.plotPCA(DBA, attributes, minval, maxval,
-            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE,
-            mask, sites,
+            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+            mask, sites, cor=FALSE,
             b3D=FALSE, vColors, dotSize, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -67,14 +67,19 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 \item{bUsePval}{
 if TRUE, uses p-value instead of FDR for thresholding. Used in conjunction with contrast.
 }
+\item{report}{
+report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
+}
 
 \item{mask}{
 mask indicating a subset of peaksets to use when using global binding matrix (contrast is missing). See dba.mask.
 }
-  \item{sites}{
+ \item{sites}{
 logical vector indicating which sites to include in PCA. Only relevant when using global binding matrix (contrast is missing).
 }
-
+ \item{cor}{
+a logical value indicating whether the calculation should use the correlation matrix or the covariance matrix. Passed into princomp.
+}
 \item{b3D}{
 logical indicating that three principal components should be plotted (requires package\{rgl\}). If FALSE, the first two principal components are plotted.
 }

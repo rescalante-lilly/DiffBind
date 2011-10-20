@@ -61,8 +61,8 @@ dba.Rlsf.init = function(config){
 ### INITIALIZE ###
 dba.multicore.init = function(config) {
    
-   if (length(find.package(package='multicore',quiet=T))>0) {
-      library(multicore)
+   if (length(find.package(package='parallel',quiet=T))>0) {
+      library(parallel)
    } else {
       config$RunParallel = FALSE
       config$parallelPackage = 0
@@ -77,7 +77,7 @@ dba.multicore.init = function(config) {
    config$lapplyFun    = dba.multicore.lapply
    config$wait4jobsFun = dba.multicore.wait4jobs
 
-   config$cores = multicore:::detectCores()
+   config$cores = parallel:::detectCores()
    
    return(config)
 }

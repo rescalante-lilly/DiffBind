@@ -8,10 +8,11 @@ Construct a DBA object
 Constructs a new DBA object from a sample sheet,  or based on an existing DBA object
 }
 \usage{
-dba(DBA,mask, 
+dba(DBA,mask, minOverlap=2,
         sampleSheet="dba_samples.csv", 
         config=data.frame(RunParallel=TRUE, reportInit="DBA"),
-        bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, minOverlap=2,
+        caller='raw', skipLines=0, bAddCallerConsensus=FALSE, 
+        bRemoveM=TRUE, bRemoveRandom=TRUE, 
         bCorPlot=FALSE, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -25,6 +26,9 @@ existing DBA object -- if present, will return a fully-constructed DBA object ba
 \item{mask}{
 logical or numerical vetcor indicating which peaksets to include in the resulting model if basing DBA object on an existing one. See dba.mask.
 }
+\item{minOverlap}{
+only include peaks in at least this many peaksets in main matrix if basing DBA object on an existing one.
+}
 \item{sampleSheet}{
 data frame containing sample sheet, or file name of sample sheet to load (ignored if DBA is specified). Columns names in sample sheet should include:
 \itemize{
@@ -36,12 +40,13 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 \item {bamReads:}	{file path for bam file containing aligned reads for ChIP sample}
 \item {bamControl:}	{file path for bam file containing aligned reads for control sample}
 \item {ControlID:}	{Identifier string for control sample}
-\item {Peaks:}	{path for file containing peaks for sample. format determined by Peakcaller field}
+\item {Peaks:}	{path for file containing peaks for sample. format determined by PeakCaller field or caller parameter}
 \item {PeakCaller:}	{Identifier string for peak caller used. If Peaks is not a bed file, this will determine how the Peaks file is parsed. Possible values:}
 \itemize{
+\item {\dQuote{raw}:}	{text file file; peak score is in fourth column}
+\item {\dQuote{bed}:}	{.bed file; peak score is in fifth column}
 \item {\dQuote{macs}:}	{MACS .xls file}
 \item {\dQuote{swembl}:}	{SWEMBL .peaks file}
-\item {\dQuote{bed}:}	{.bed file}
 \item {\dQuote{bayes}:}	{bayesPeak file}
 \item {\dQuote{peakset}:}	{peakset written out using pv.writepeakset}
 \item {\dQuote{fp4}:}	{FindPeaks v4}
@@ -55,6 +60,12 @@ data frame containing sample sheet, or file name of config file to load when con
 \item {RangedData:}	{logical indicating if peaks should be RangedData objects by default.}
 }
 }
+  \item{caller}{
+if a sampleSheet is specified, the default peak file format that will be used id the PeakCaller column is absent.
+}
+  \item{skipLines}{
+if a sampleSheet is specified, the number of lines (ie header lines)  at the top of each peak caller to skip.
+}
   \item{bAddCallerConsensus}{
 add a consensus peakset for each sample with more than one peakset (i.e. different peak callers) when constructing a new DBA object from a sample sheet.
 }
@@ -64,9 +75,7 @@ logical indicating whether to remove peaks on chrM (mitochondria) when construct
  \item{bRemoveRandom}{
 logical indicating whether to remove peaks on chrN_random when constructing a new DBA object from a sample sheet.
 }
-\item{minOverlap}{
-only include peaks in at least this many peaksets in main matrix.
-}
+
 \item{bCorPlot}{
 logical indicating that a correlation heatmap should be plotted before returning
 }

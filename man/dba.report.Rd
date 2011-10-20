@@ -9,7 +9,7 @@ Generates a report for a differential binding affinity analysis
 }
 \usage{
 dba.report(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, fold=0,
-                    bNormalized=TRUE,  bCalled=F, bCounts=FALSE, bCalledDetail=FALSE,
+                    bNormalized=TRUE,  bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
                     file,initString=DBA$config$reportInit,ext='csv',
                     bRangedData=DBA$config$RangedData)
 }

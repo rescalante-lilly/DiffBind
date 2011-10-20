@@ -46,15 +46,17 @@ DBA_CONTROL   = PV_CONTROL
 DBA_READS     = PV_READS
 DBA_REPLICATE = PV_REPLICATE
 
-dba = function(DBA,mask, 
+dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE, reportInit="DBA"),
-               bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, minOverlap=2,
+               caller="raw", skipLines=0, bAddCallerConsensus=FALSE, 
+               bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
 {
-   res = pv.model(DBA, mask=mask, samplesheet=sampleSheet, config=config, 
-                    bAddCallerConsensus=bAddCallerConsensus, bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
-                    minOverlap=minOverlap, bKeepAll=TRUE, bAnalysis=TRUE, 
+   res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
+                    caller=caller, skipLines=skipLines,bAddCallerConsensus=bAddCallerConsensus, 
+                    bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
+                    bKeepAll=TRUE, bAnalysis=TRUE, 
                     attributes=attributes)
                     
    res$contrasts=NULL
@@ -163,16 +165,22 @@ DBA_COR   = PV_COR
 DBA_INALL = PV_INALL
 
 dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
+                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        bRangedData=DBA$config$RangedData)
 {                      
    if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) ) {
    	
       if(!missing(contrast)) {
-      
-         rep   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,bRangedData=F)
-         sites = as.numeric(rownames(rep))
+         
+         if(missing(report)) {
+            report   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,bRangedData=F)
+         } else {
+         	if(class(report)=="RangedData") {
+         	   stop('RandgedData class not supported for report parameter. Call dba.report with RangedData=FALSE.')	
+         	}
+         }
+         sites = as.numeric(rownames(report))
          
          if(missing(mask)) {
          	mask  = DBA$contrasts[[contrast]]$group1 | DBA$contrasts[[contrast]]$group2   
@@ -281,7 +289,7 @@ DBA_DESEQ = 'DESeq'
 DBA_EDGER_BLOCK = 'edgeRlm'
 
 dba.analyze = function(DBA, method=DBA_EDGER, 
-                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=FALSE,
+                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
                        bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
 {
 	
@@ -308,7 +316,7 @@ dba.analyze = function(DBA, method=DBA_EDGER,
 ###########################################################
 
 dba.report = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, fold=0, bNormalized=TRUE,
-                      bCalled=F, bCounts=FALSE, bCalledDetail=FALSE,
+                      bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
                       file,initString=DBA$config$reportInit,ext='csv',bRangedData=DBA$config$RangedData) 
                      
 {
@@ -332,7 +340,7 @@ dba.report = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
 ################################################
 
 dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                           contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE,
+                           contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
                            mask, sites, sortFun,
                            correlations=TRUE, olPlot=DBA_COR, 
                            margin=10, colScheme="Greens", distMethod="pearson",
@@ -345,7 +353,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    	     correlations = pv.occupancy(DBA, mask=mask, sites=sites, 
                                      Sort='cor', bCorOnly=T) 
    	   } else {
-   	      correlations = dba.overlap(DBA,mask=mask,mode=DBA_OLAP_ALL,bCorOnly=T,
+   	      correlations = dba.overlap(DBA,mask=mask,mode=DBA_OLAP_ALL,bCorOnly=T, report=report,
    	                               contrast=contrast,method=method,th=th,bUsePval=bUsePval)
    	   }
    }
@@ -359,22 +367,30 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    }
       
    if(!missing(contrast)) {
-      res = pv.DBAplotHeatmap(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval,
-                              maxSites=maxSites, PCA=NULL,
-                              minval=minval, maxval=maxval,
-                              ColScheme=colScheme, distMeth=distMethod,attributes=attributes, margins=c(margin,margin),
-                              ...)
-
+   	
+      if(!missing(report)) {
+         report = pv.RangedData2Peaks(report)
+      }
+       	
+      DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
+   	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
+   	                       bPCA=F,bLog=T,minval=minval,maxval=maxval)
+      res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, 
+                           ColScheme=colScheme, distMeth=distMethod, 
+                           margins=c(margin,margin),...)
+      res = NULL
+                      
    } else {
      
 	  if(!missing(sortFun)) {
 	     savevecs = DBA$vectors
 		 DBA = pv.sort(DBA, sortFun, mask=mask)
       }
-		 
+      
+	 
       res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, mask=mask, sites=sites,
-                           minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, margins=c(margin,margin),
-                           ...)
+                           minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, 
+                           margins=c(margin,margin),...)
       
       res = NULL
          
@@ -391,8 +407,8 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 #######################################################
 
 dba.plotPCA = function(DBA, attributes, minval, maxval,
-                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE,
-                       mask, sites,
+                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+                       mask, sites, cor=FALSE,
                        b3D=FALSE, vColors, dotSize, ...)
                        
 {
@@ -404,16 +420,22 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    	  }
    	  if(missing(dotSize)) {
    	     dotSize=NULL
-   	  } 
-      res = pv.DBAplotHeatmap(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval,
-                              maxSites=10000000, PCA=attributes, minval=minval, maxval=maxval,
-                              bPCAonly=T, b3D=b3D, vColors=vColors, size=dotSize, ...)
+   	  }
+      if(!missing(report)) {
+         report = pv.RangedData2Peaks(report)
+      }  	  
+   	  DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,method=method,th=th,
+   	                       bUsePval=bUsePval,report=report,bPCA=T,minval=minval,maxval=maxval)
+   	  if(attributes[1] == PV_GROUP) {
+   	     attributes = PV_ID
+   	  }
+   	  res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,b3D=b3D,vColors=vColors,...)
    } else {
    	  if(missing(attributes)) {
    	     attributes = DBA_CONDITION
    	  }
    
-      res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, numSites=10000000,
+      res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, 
                        sites=sites, b3D=b3D, vColors=vColors, ...)  
    }
 
@@ -435,11 +457,10 @@ dba.plotBox = function(DBA, contrast=1, method=DBA_EDGER, th=0.1, bUsePval=FALSE
    DBA = pv.check(DBA)
    
    res = pv.plotBoxplot(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval, bNormalized=bNormalized,
-                        attribute=attribute,
-                                          bAll=bAll, bAllIncreased=bAllIncreased, bAllDecreased=bAllDecreased, 
-                                          bDB=bDB, bDBIncreased=bDBIncreased, bDBDecreased=bDBDecreased,
-                                          pvalMethod=pvalMethod,  bReversePos=bReversePos, attribOrder=attribOrder, vColors=vColors, 
-                                          varwidth=varwidth, notch=notch, ...)
+                        attribute=attribute,bAll=bAll, bAllIncreased=bAllIncreased, bAllDecreased=bAllDecreased, 
+                        bDB=bDB, bDBIncreased=bDBIncreased, bDBDecreased=bDBDecreased,
+                        pvalMethod=pvalMethod,  bReversePos=bReversePos, attribOrder=attribOrder, vColors=vColors, 
+                        varwidth=varwidth, notch=notch, ...)
  
    return(res)	
 }
@@ -675,6 +696,6 @@ summary.DBA = function(object,...) {
 }
 
 plot.DBA = function(x,...){
-   x = pv.check(x)
+   DBA = pv.check(x)
    res = dba.plotHeatmap(x,...)
 }

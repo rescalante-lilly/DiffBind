@@ -5,7 +5,7 @@
 ## Rory Stark                      ##
 ## Cancer Research UK              ##
 #####################################
-PV_DEBUG=FALSE
+
 #########################
 ## pv HELPER FUNCTIONS ##
 #########################
@@ -461,7 +461,7 @@ pv.activefun = function(x){
    }	
 }
 
-pv.pcmask = function(pv,numSites, mask, sites,removeComps){
+pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
 
    if(missing(numSites)) numSites = nrow(pv$vectors)
    if(is.null(numSites)) numSites = nrow(pv$vectors)  
@@ -485,7 +485,7 @@ pv.pcmask = function(pv,numSites, mask, sites,removeComps){
    }
 
    if(nrow(pv$values) >= sum(mask)) {
-      res$pc   = princomp(pv$values)
+      res$pc   = princomp(pv$values,cor=cor)
    }
    res$mask = mask
    

@@ -1,20 +1,20 @@
 Package: DiffBind
 Type: Package
-Version: 0.99.5
-Title: DiffBind - Differential Binding Analyis package for analyzing
-        ChIP-Seq peaksets
-Date: 2011-10-04
+Version: 0.99.7
+Title: DiffBind - Differential Binding Analysis of ChIP-Seq peak data
+Date: 2011-10-20
 Author: Rory Stark<rory.stark@cancer.org.uk>, Gordon Brown <gordon.brown@cancer.org.uk>
 Maintainer: Rory Stark<rory.stark@cancer.org.uk>
-Description: Package for analyzing mulitple ChIP-Seq peaksets, enabling occupancy (overlap) analysis as well as affinity (quantitative) analysis of differentially bound sites.
+Description: Compute differentially bound sites from multiple ChIP-seq experiments using affinity (quantitative) data. Also enables occupancy (overlap) analysis and plotting functions.
 biocViews: Bioinformatics, HighThroughputSequencing, ChIPseq
 License: Artistic-2.0
 LazyLoad: yes
-Depends: R (>= 2.10.0)
-Imports: RColorBrewer, amap, edgeR, gplots, limma, DESeq, grDevices,
+Depends: R (>= 2.14.0)
+Imports: RColorBrewer, amap, edgeR (>= 2.3.58), gplots, limma, DESeq, grDevices,
         stats, utils, IRanges, zlibbioc
 Suggests: DESeq
-Enhances: rgl, multicore
+Enhances: rgl, parallel
 LinkingTo: Rsamtools
 Collate: core.R parallel.R counts.R contrast.R analyze.R io.R helper.R
         utils.R DBA.R
+Packaged: 2011-10-12 05:34:18 UTC; biocbuild

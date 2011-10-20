@@ -57,10 +57,11 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
   	   params = dba.parallel.params(pv$config,c('pv.DESeq'))
        jobs = pv.listadd(jobs,dba.parallel.addjob(pv$config,params,pv.allDESeq,pv,
                                                   bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
+                                                  bTagwise=bTagwise,
                                                   bParallel=T))
        } else {
        results = pv.listadd(results,pv.allDESeq(pv,bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
-                                                bParallel=F))
+                            bTagwise=bTagwise,bParallel=F))
     }
   }
   if('t-test' %in% method) {
@@ -271,7 +272,7 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
   	    colnames(counts) = NULL
         res = newCountDataSet(counts,groups)
         if(bFullLibrarySize) {
-           sizeFactors(res) = libsize
+           sizeFactors(res) = libsize/min(libsize)
         }
      }
   }                
@@ -298,10 +299,10 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
      fdebug('pv.DEedgeR: NO blocking factor')
      res = estimateCommonDisp(res)
      if(bTagwise){
-  	    res = estimateTagwiseDisp(res,prior.n=20/(ncol(res$counts)-2),trend="none")
-  	    res$db     = exactTest(res,common.disp=F)
+  	    res = estimateTagwiseDisp(res,prior.n=50/(ncol(res$counts)-2),trend="none")
+  	    res$db     = exactTest(res,dispersion='tagwise')
      } else {
-        res$db     = exactTest(res,common.disp=T)	
+        res$db     = exactTest(res,dispersion='common')	
      }
      fdebug('pv.DEedgeR: estimateTagwiseDisp complete')
      
@@ -354,7 +355,7 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
 
 
 pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
-                    bSubControl=T,bFullLibrarySize=F){
+                    bSubControl=T,bFullLibrarySize=F,bTagwise=T){
     if (length(find.package(package='DESeq',quiet=T))>0) {
        require(DESeq)
     } else {
@@ -372,7 +373,11 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
    if(sum(group1)+sum(group2)==2){
       res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='blind')
    } else {
-      res$DEdata = estimateDispersions(res$DEdata,fitType='local')
+   	  if(bTagwise) {
+   	  	 res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='per-condition')
+   	  } else {
+         res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled')
+      }
    }
    res$de = nbinomTest(res$DEdata,label1,label2)
   
@@ -455,14 +460,14 @@ fdebug('ENTER pv.allDEedgeR')
 }
 
 
-pv.DESeq_parallel = function(contrast,pv,bSubControl,bFullLibrarySize) {
+pv.DESeq_parallel = function(contrast,pv,bSubControl,bFullLibrarySize,bTagwise=bTagwise) {
    crec = pv$contrasts[[contrast]]
    res = pv.DESeq(pv,crec$group1,crec$group2,crec$name1,crec$name2,
-                    bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize)
+                    bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagwise=bTagwise)
    return(res)
 }
 
-pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bParallel=F) {
+pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bParallel=F,bTagwise=T) {
 
   	if (length(find.package(package='DESeq',quiet=T))>0) {
        require(DESeq)
@@ -483,11 +488,11 @@ pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bParallel=F) {
       jobs = NULL
    	  params = dba.parallel.params(pv$config,c('pv.DESeq_parallel','pv.DESeq'))
       reslist  = dba.parallel.lapply(pv$config,params,1:length(pv$contrasts),pv.DESeq_parallel,pv, 
-                                             bSubControl,bFullLibrarySize)
+                                             bSubControl,bFullLibrarySize,bTagwise=bTagwise)
 
    } else {
    	  reslist = lapply(1:length(pv$contrasts),pv.DESeq_parallel,pv,
-                         bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize)
+                         bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagiwse=bTagwise)
    }  
    
    return(reslist)

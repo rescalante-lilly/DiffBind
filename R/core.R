@@ -52,7 +52,7 @@ PV_DEBUG = FALSE
 pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate,
                       control, peak.caller,reads=0, consensus=F, readBam, controlBam,
                       bNormCol=4, bRemoveM=T, bRemoveRandom=T,
-                      minOverlap=2,bFast=F,bMakeMasks=T){
+                      minOverlap=2,bFast=F,bMakeMasks=T,skipLines=1){
 	
    zeroVal = -1
    bLog=F
@@ -82,14 +82,16 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
       return(pv)
    }
    
-   if(missing(tissue))      tissue=''
-   if(missing(factor))      factor=''
-   if(missing(condition))   condition=''
-   if(missing(replicate))   replicate=''
-   if(missing(control))     control=''
-   if(missing(peak.caller)) peak.caller=''
-   if(missing(readBam))     readBam=NA
-   if(missing(controlBam))  controlBam=NA
+   if(missing(tissue))       tissue=''
+   if(missing(factor))       factor=''
+   if(missing(condition))    condition=''
+   if(missing(replicate))    replicate=''
+   if(missing(control))      control=''
+   if(missing(peak.caller))  peak.caller=''
+   if(missing(readBam))      readBam=NA
+   if(length(readBam)==0)    readBam=NA
+   if(missing(controlBam))   controlBam=NA
+   if(length(controlBam)==0) controlBam=NA
                         
    if(is.character(peaks)){
       pcaller = strtrim(peak.caller,6)
@@ -114,8 +116,14 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
       } else if (pcaller == 'fp4') {
         peaks   = pv.readbed(peaks,1)
         bNormCol = 5
+      } else if (pcaller == 'bed') {
+        peaks   = pv.readbed(peaks,skipLines)
+        bNormCol = 5
+      } else if (pcaller == 'raw') {
+        peaks   = pv.readbed(peaks,skipLines)
+        bNormCol = 4
       } else {
-     	peaks = pv.readbed(peaks)
+     	peaks = pv.readbed(peaks,skipLines)
       }
    }
    
@@ -162,7 +170,8 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
          sampID = length(pv$peaks)
       }
    }
-   clascol = cbind(NULL,c(sampID,tissue,factor,condition,consensus,peak.caller,control,reads,replicate,readBam,controlBam))
+   clascol = cbind(NULL,c(sampID,tissue,factor,condition,consensus,peak.caller,control,
+                          reads,replicate,readBam,controlBam))
    colnames(clascol) = sampID
    pv$class = cbind(pv$class,clascol)
    rownames(pv$class) = c("ID","Tissue","Factor","Condition",
@@ -610,7 +619,7 @@ pv.plotClust = function(pv,mask,numSites,sites,attributes=pv$attributes,distMeth
 
 ## pv.plotPCA -- 3D plot of PCA
 pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
-                      numSites,sites,startComp=1,b3D=T,vColors,...){
+                      numSites,sites,cor=F,startComp=1,b3D=T,vColors,...){
    
    pv = pv.check(pv)
    
@@ -626,16 +635,17 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    }
    
    if(missing(sites)) sites = NULL
-   
+
+    if(missing(numSites)){
+       numSites = nrow(pv$vectors)
+    }
+         	  
    if(!missing(mask) || !missing(numSites)){
    	  if(missing(mask)) {
    	     mask = rep(T,ncol(pv$class))
    	  }
-   	  if(missing(numSites)){
-   	     numSites = nrow(pv$vectors)
-   	  }
-      pv = pv.pcmask(pv,numSites,mask,sites)
-   }
+      pv = pv.pcmask(pv,numSites,mask,sites,cor=cor)
+   } 
    
    pc = pv$pc
    

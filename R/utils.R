@@ -149,7 +149,7 @@ pv.getCounts = function(bamfile,intervals,insertLength=0) {
    widths = intervals[,3] - intervals[,2]
    rpkm = (counts/(widths/1000))/(libsize/1E6)
    
-   return(list(counts=counts,rpkm=rpkm))
+   return(list(counts=counts,rpkm=rpkm,libsize=libsize))
 }
 
 
@@ -338,6 +338,68 @@ pv.RangedData2Peaks = function(RDpeaks){
    }
    return(res)
 }
+
+pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=.1,bUsePval=FALSE,bNormalized=T,report,
+                          bPCA=F,bLog=T,minval,maxval) {
+                          	
+   if(contrast > length(pv$contrasts)) {
+      stop('Specified contrast number is greater than number of contrasts')
+      return(NULL)
+   }
+  
+   con = pv$contrasts[[contrast]]
+  
+   if(missing(report)) {
+     report = pv.DBAreport(pv,contrast=contrast,method=method,th=th,bUsePval=bUsePval,bNormalized=bNormalized,bCounts=T)
+   }
+      
+   repcols = colnames(report)
+   numsamps = sum(con$group1)+sum(con$group2)
+   if(length(repcols) < (numsamps+9)) {
+      stop('Report does not have count data, re-run dba.report with bCounts=T')
+   }
+   first = 10
+   if(repcols[10]=="Called1") {
+     first = 12	
+   }
+   
+   domap = report[,first:(first+numsamps-1)]
+   
+   if(bLog) {
+   	  domap[domap<=0]=1
+      domap = log2(domap)
+      if(missing(minval)) {
+         minval = 0
+      } else {
+      	minval = max(0,minval)
+      }
+   }
+   
+   if(!missing(minval)) {
+      domap[domap< minval]= minval
+   }
+   if(!missing(maxval)) {
+      domap[domap>maxval] = maxval
+   }
+   
+
+   
+   pv$vectors = cbind(report[,1:3],domap)
+   pv$allvectors = pv$vectors
+   pv$class = cbind(pv$class[,con$group1],pv$class[,con$group2])
+   
+   if(bPCA)  {
+   	
+      #pv$pc = princomp(domap,cor=bPCAcor)
+
+      if(attributes[1] == PV_GROUP) {
+         pv$class[PV_ID,] = c(rep(con$name1,sum(con$group1)),rep(con$name2,sum(con$group2)))
+      }
+   } 
+   
+   return(pv)     
+}
+
 
 
 

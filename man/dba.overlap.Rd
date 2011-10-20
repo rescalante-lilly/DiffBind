@@ -9,7 +9,7 @@ Computes binding overlaps and co-occupancy statistics
 }
 \usage{
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
+            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
             byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
             bRangedData=DBA$config$RangedData)
 }
@@ -57,6 +57,9 @@ if contrast is specified and mode=DBA_OLAP_ALL, significance threshold; all site
 }
 \item{bUsePval}{
 if contrast is specified and mode=DBA_OLAP_ALL, logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding.
+}
+\item{report}{
+if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
 }
 \item{byAttribute}{
 when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peaksets with the same value for a specific attribute, one of:

@@ -5,12 +5,12 @@
 ## Rory Stark                      ##
 ## Cancer Research UK              ##
 #####################################
-
+PV_DEBUG = FALSE
 ## pv.model -- build model, e.g. from sample sheet
-pv.model = function(model,mask, 
+pv.model = function(model,mask,minOverlap=2,
                     samplesheet='sampleSheet.csv',config=data.frame(RunParallel=FALSE),
-                    bAddCallerConsensus=T,bRemoveM=T, bRemoveRandom=T,
-                    minOverlap=2,bKeepAll=T,bAnalysis=T,attributes) {
+                    caller="raw",skipLines=0,bAddCallerConsensus=T,bRemoveM=T, bRemoveRandom=T,
+                    bKeepAll=T,bAnalysis=T,attributes) {
 
    
    
@@ -55,10 +55,10 @@ pv.model = function(model,mask,
    for(i in 1:nrow(samples)) {
    	  
    	  if(is.null(samples$PeakCaller[i])) {
-   	     peakcaller  = 'raw'
+   	     peakcaller  = caller
    	     normCol = 0
    	  } else if(is.na(samples$PeakCaller[i])) {
-   	     peakcaller  = 'raw'
+   	     peakcaller  = caller
    	     normCol = 0
       } else {
    	     peakcaller = as.character(samples$PeakCaller[i])
@@ -91,7 +91,7 @@ pv.model = function(model,mask,
                          replicate   = as.integer(samples$Replicate[i]),
                          readBam     = as.character(samples$bamReads[i]),
                          controlBam  = as.character(samples$bamControl[i]),
-                         bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom)
+                         bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,skipLines=skipLines)
       }
 
    model$samples = samples
@@ -113,7 +113,7 @@ PV_RES_RPKM             = 1
 PV_RES_RPKM_FOLD        = 2
 PV_RES_READS            = 3
 PV_RES_READS_FOLD       = 4
-PV_RES_READS_MINUS    = 5
+PV_RES_READS_MINUS      = 5
 PV_SCORE_RPKM           = PV_RES_RPKM
 PV_SCORE_RPKM_FOLD      = PV_RES_RPKM_FOLD
 PV_SCORE_READS          = PV_RES_READS
@@ -235,7 +235,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
                          consensus   = T,
                          peak.caller = 'counts',
                          control     = pv$class[PV_CONTROL,chipnum],
-                         reads       = pv$class[PV_READS,chipnum],
+                         reads       = cond$libsize, #pv$class[PV_READS,chipnum],
                          replicate   = pv$class[PV_REPLICATE,chipnum],
                          readBam     = pv$class[PV_BAMREADS,chipnum],
                          controlBam  = pv$class[PV_BAMCONTROL,chipnum],
