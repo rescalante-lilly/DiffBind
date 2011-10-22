@@ -492,7 +492,7 @@ pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bParallel=F,bTa
 
    } else {
    	  reslist = lapply(1:length(pv$contrasts),pv.DESeq_parallel,pv,
-                         bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagiwse=bTagwise)
+                         bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagwise=bTagwise)
    }  
    
    return(reslist)

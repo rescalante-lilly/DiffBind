@@ -59,11 +59,23 @@ dba.Rlsf.init = function(config){
 ################# multicore INTERFACE #################
 
 ### INITIALIZE ###
+
 dba.multicore.init = function(config) {
-   
-   if (length(find.package(package='parallel',quiet=T))>0) {
-      library(parallel)
+
+   noparallel=F
+   if (length(find.package(package="multicore",quiet=T))>0) {
+      library(multicore)
+      if(!exists("mcparallel","package:multicore")) {
+         noparallel=T
+      }     
+      if(!exists("mclapply","package:multicore")) {
+         noparallel=T
+      } 
    } else {
+      noparallel=T
+   }
+   if(noparallel){
+      warning("Parallel execution unavailable: executing serially.")
       config$RunParallel = FALSE
       config$parallelPackage = 0
       return(config)
@@ -77,7 +89,7 @@ dba.multicore.init = function(config) {
    config$lapplyFun    = dba.multicore.lapply
    config$wait4jobsFun = dba.multicore.wait4jobs
 
-   config$cores = parallel:::detectCores()
+   config$cores = multicore:::detectCores()#logical=FALSE)
    
    return(config)
 }
@@ -91,6 +103,7 @@ dba.multicore.params = function(config,funlist) {
 dba.multicore.lapply = function(config,params,arglist,fn,...){
    savecores = options("cores")
    options(cores = config$cores)
+   options(mc.cores = config$cores)
    res = mclapply(arglist,fn,...,mc.preschedule=FALSE)
    options(cores=savecores)
    return(res)

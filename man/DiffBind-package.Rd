@@ -13,8 +13,8 @@ DiffBind -  differential binding analysis of ChIP-seq peaksets
 \tabular{ll}{
 Package: \tab DiffBind\cr
 Type: \tab Package\cr
-Version: \tab 0.99.7\cr
-Date: \tab 2011-10-20\cr
+Version: \tab 1.0.0\cr
+Date: \tab 2011-10-22\cr
 License: \tab Artistic-2.0\cr
 LazyLoad: \tab yes\cr
 }
