@@ -24,7 +24,7 @@
 
 \begin{document}
 
-%\VignetteIndexEntry{DBA User's Guide}
+%\VignetteIndexEntry{DiffBind User's Guide}
 
 \title{\DBA: differential binding analysis \\ of ChIP-Seq peak data}
 \author{Rory Stark \\ \texttt{rory.stark@cancer.org.uk}
@@ -35,7 +35,7 @@ Gordon Brown \\ \texttt{gordon.brown@cancer.org.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{20 October 2011}
+\date{22 October 2011}
 \maketitle
 
 \section{Introduction}
@@ -173,7 +173,7 @@ Using only this peak caller data, a correlation heatmap can be generated which g
 plot(tamoxifen)
 @
 
-The resulting plot (\reff{tamox-occ-corhm}) shows that while the replicates for each cell line cluster together appropriately, the cell lines do not cluster into groups corresponding to those that are responsive (MXF7, T47D, and ZR75) vs. those resistant (BT474 and TAMR) to tamoxifen treatment. It also shows that the two most highly correlated cell lines are TAMR and MCF7. This is probably due to the fact that the TAMR cell line is derived directly from the MCF7 cell line by exposing it to tamoxifen until a resistant strain emerges.
+The resulting plot (\reff{tamox-occ-corhm}) shows that while the replicates for each cell line cluster together appropriately, the cell lines do not cluster into groups corresponding to those that are responsive (MCF7, T47D, and ZR75) vs. those resistant (BT474 and TAMR) to tamoxifen treatment. It also shows that the two most highly correlated cell lines are TAMR and MCF7. This is probably due to the fact that the TAMR cell line is derived directly from the MCF7 cell line by exposing it to tamoxifen until a resistant strain emerges.
 
 \begin{figure}
   \centering
@@ -703,7 +703,7 @@ The final steps are to perform testing to determine the significance measure of 
 When data are retrieved for plotting or reporting, \texttt{topTags} is called on the \texttt{DGEExact} object, using the default FDR method \texttt{BH}.
 
 \subsection{\DESeq analysis}
-When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_DESEQ}, a standardized differential analysis is performed using the \DESeq package (\cite{Anders:2010p792}). This section details the precise steps in that analysis.
+When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_DESEQ}\footnote{Note that \DESeq can be made the default analysis method for a DBA object by setting \texttt{DBA\$config\$AnalysisMethod=DBA\_DESEQ}.}, a standardized differential analysis is performed using the \DESeq package (\cite{Anders:2010p792}). This section details the precise steps in that analysis.
 
 For each contrast, a separate analysis is performed. First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted. Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. The first step concludes with a call to DESeq's \texttt{newCountDataSet} function, which returns a \texttt{CountDataSet} object.  If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/SAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. Either way, the resulting \texttt{CountDataSet} object is accessible as 
 
@@ -713,7 +713,7 @@ Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} obje
 
 \section{Acknowledgements}
 
-This package was developed at Cancer Research UK's Cambridge Research Institute with the help and support of many people there. We wish to acknowledge everyone the Bioinformatics Core under the leadership of Matthew Eldridge, as well as the Nuclear Receptor Transcription Laboratory under the leadership of Jason Carroll. Researchers who contributed ideas and/or pushed us in the right direction include Vasiliki Theodorou, Caryn-Ross Innes, and Tamir Chandra among many others. We also thank  members of the Gordon Smyth laboratory the WEHI, Melbourne, particularly Mark Robinson and Davis McCarthy, for helpful discussions.
+This package was developed at Cancer Research UK's Cambridge Research Institute with the help and support of many people there. We wish to acknowledge everyone the Bioinformatics Core under the leadership of Matthew Eldridge, as well as the Nuclear Receptor Transcription Laboratory under the leadership of Jason Carroll. Researchers who contributed ideas and/or pushed us in the right direction include Vasiliki Theodorou, Caryn-Ross Innes, and Tamir Chandra among many others. We also thank  members of the Gordon Smyth laboratory at the WEHI, Melbourne, particularly Mark Robinson and Davis McCarthy, for helpful discussions.
 
 \section{Setup}
 

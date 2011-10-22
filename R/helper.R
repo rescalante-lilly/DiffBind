@@ -336,7 +336,7 @@ fdebug = function(str,file='debug.txt'){
       return
    }
    
-   write(sprintf('%s\n',str),file=file,append=T)
+   #write(sprintf('%s\n',str),file=file,append=T)
 
 }
 

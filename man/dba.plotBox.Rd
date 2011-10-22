@@ -8,13 +8,13 @@ Boxplots
 Boxplots for read count distributions within differentially bound sites
 }
 \usage{
-dba.plotBox(DBA, contrast=1, method=DBA_EDGER,
-                       th=0.1, bUsePval=FALSE, bNormalized=TRUE,
-                       attribute=DBA_GROUP, 
-                       bAll=FALSE, bAllIncreased=FALSE, bAllDecreased=FALSE, 
-                       bDB=TRUE, bDBIncreased=TRUE, bDBDecreased=TRUE,
-                      pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, 
-                      vColors, varwidth=TRUE, notch=TRUE, ...) 
+dba.plotBox(DBA, contrast=1, method=DBA$config$AnalysisMethod,
+            th=0.1, bUsePval=FALSE, bNormalized=TRUE,
+            attribute=DBA_GROUP, 
+            bAll=FALSE, bAllIncreased=FALSE, bAllDecreased=FALSE, 
+            bDB=TRUE, bDBIncreased=TRUE, bDBDecreased=TRUE,
+            pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, 
+            vColors, varwidth=TRUE, notch=TRUE, ...) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

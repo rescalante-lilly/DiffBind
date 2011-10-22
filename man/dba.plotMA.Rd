@@ -8,8 +8,8 @@ Generate MA and scatter plots of differential binding analysis results
 Generates MA and scatter plots of differential binding analysis results.
 }
 \usage{
-dba.plotMA(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
-                      bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33, ...)
+dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
+           bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33, ...)
 }
 
 %- maybe also 'usage' for other objects documented here.

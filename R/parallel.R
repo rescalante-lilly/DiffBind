@@ -63,12 +63,12 @@ dba.Rlsf.init = function(config){
 dba.multicore.init = function(config) {
 
    noparallel=F
-   if (length(find.package(package="multicore",quiet=T))>0) {
-      library(multicore)
-      if(!exists("mcparallel","package:multicore")) {
+   if (length(find.package(package="parallel",quiet=T))>0) {
+      library(parallel)
+      if(!exists("mcparallel","package:parallel")) {
          noparallel=T
       }     
-      if(!exists("mclapply","package:multicore")) {
+      if(!exists("mclapply","package:parallel")) {
          noparallel=T
       } 
    } else {
@@ -89,7 +89,7 @@ dba.multicore.init = function(config) {
    config$lapplyFun    = dba.multicore.lapply
    config$wait4jobsFun = dba.multicore.wait4jobs
 
-   config$cores = multicore:::detectCores()#logical=FALSE)
+   config$cores = parallel:::detectCores(logical=FALSE)
    
    return(config)
 }
@@ -102,10 +102,12 @@ dba.multicore.params = function(config,funlist) {
 ### PARALLEL LAPPLY ###
 dba.multicore.lapply = function(config,params,arglist,fn,...){
    savecores = options("cores")
+   savemccores = options("mc.cores")
    options(cores = config$cores)
    options(mc.cores = config$cores)
    res = mclapply(arglist,fn,...,mc.preschedule=FALSE)
    options(cores=savecores)
+   options(mc.cores=savemccores)
    return(res)
 }
 

@@ -8,9 +8,9 @@ Perform differential binding affinity analysis
 Performs differential binding affinity analysis
 }
 \usage{
-dba.analyze(DBA, method=DBA_EDGER, 
-                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
-                       bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
+dba.analyze(DBA, method=DBA$config$AnalysisMethod, 
+            bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
+            bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

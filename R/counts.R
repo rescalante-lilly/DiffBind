@@ -172,7 +172,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
          }	
       }
       if(PV_DEBUG){
-         save(results,file='dba_last_result.RData')
+         #save(results,file='dba_last_result.RData')
       }
    } else {
    	  if(PV_DEBUG) {

@@ -9,7 +9,7 @@ Principal Component Analysis plot
 }
 \usage{
 dba.plotPCA(DBA, attributes, minval, maxval,
-            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
             mask, sites, cor=FALSE,
             b3D=FALSE, vColors, dotSize, ...)
 }

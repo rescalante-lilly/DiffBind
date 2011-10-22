@@ -9,7 +9,7 @@ Draws a binding site heatmap
 }
 \usage{
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+                contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
                 mask, sites, sortFun,
                 correlations=TRUE, olPlot=DBA_COR,
                 margin=10, colScheme="Greens", distMethod="pearson",

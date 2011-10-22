@@ -9,7 +9,7 @@ Computes binding overlaps and co-occupancy statistics
 }
 \usage{
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-            contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
             byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
             bRangedData=DBA$config$RangedData)
 }

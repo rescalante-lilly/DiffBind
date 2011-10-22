@@ -9,11 +9,11 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 }
 \usage{
 dba(DBA,mask, minOverlap=2,
-        sampleSheet="dba_samples.csv", 
-        config=data.frame(RunParallel=TRUE, reportInit="DBA"),
-        caller='raw', skipLines=0, bAddCallerConsensus=FALSE, 
-        bRemoveM=TRUE, bRemoveRandom=TRUE, 
-        bCorPlot=FALSE, attributes) 
+    sampleSheet="dba_samples.csv", 
+    config=data.frame(RunParallel=TRUE, reportInit="DBA"),
+    caller='raw', skipLines=0, bAddCallerConsensus=FALSE, 
+    bRemoveM=TRUE, bRemoveRandom=TRUE, 
+    bCorPlot=FALSE, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -58,6 +58,7 @@ data frame containing sample sheet, or file name of config file to load when con
 \itemize{
 \item {RunParallel:}	{logical indicating if counting and analysis operations should be run in parallel using multicore by default.}
 \item {RangedData:}	{logical indicating if peaks should be RangedData objects by default.}
+\item {AnalysisMethod:}	{either DBA_EDGER or DBA_DESEQ.}
 }
 }
   \item{caller}{

@@ -46,6 +46,10 @@ DBA_CONTROL   = PV_CONTROL
 DBA_READS     = PV_READS
 DBA_REPLICATE = PV_REPLICATE
 
+DBA_EDGER = 'edgeR'
+DBA_DESEQ = 'DESeq'
+DBA_EDGER_BLOCK = 'edgeRlm'
+
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE, reportInit="DBA"),
@@ -65,6 +69,18 @@ dba = function(DBA,mask, minOverlap=2,
       res$config$RangedData=T
    }
 
+   if(is.null(res$parallelPackage)){
+      res$config$parallelPackage=DBA_PARALLEL_MULTICORE
+   }
+   if(is.null(res$RunParallel)){
+      res$config$RunParallel=T
+   }
+   if(is.null(res$reportInit)){
+      res$config$reportInit="DBA"
+   }
+   if(is.null(res$AnalysisMethod)){
+      res$config$AnalysisMethod=DBA_EDGER
+   }
    
    if(class(res)!="DBA") {
       class(res) = "DBA"
@@ -130,19 +146,22 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
          class(res) = "DBA"
       }
     
-      if(is.null(DBA$config$RangedData)) {
+      if(is.null(res$config$RangedData)) {
          res$config$RangedData=T
       }
-      if(is.null(DBA$parallelPackage)){
+      if(is.null(res$parallelPackage)){
          res$config$parallelPackage=DBA_PARALLEL_MULTICORE
       }
-      if(is.null(DBA$RunParallel)){
+      if(is.null(res$RunParallel)){
          res$config$RunParallel=T
       }
-      if(is.null(DBA$reportInit)){
+      if(is.null(res$reportInit)){
          res$config$reportInit="DBA"
       }
-      
+      if(is.null(res$AnalysisMethod)){
+         res$config$AnalysisMethod=DBA_EDGER
+      }
+            
       if(bMerge) {
          res = pv.check(res)
       }
@@ -165,7 +184,7 @@ DBA_COR   = PV_COR
 DBA_INALL = PV_INALL
 
 dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+                       contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        bRangedData=DBA$config$RangedData)
 {                      
@@ -284,11 +303,7 @@ dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="grou
 ## dba.analyze -- perform differential binding affinity analysis ##
 ###################################################################
 
-DBA_EDGER = 'edgeR'
-DBA_DESEQ = 'DESeq'
-DBA_EDGER_BLOCK = 'edgeRlm'
-
-dba.analyze = function(DBA, method=DBA_EDGER, 
+dba.analyze = function(DBA, method=DBA$config$AnalysisMethod, 
                        bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
                        bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
 {
@@ -315,7 +330,8 @@ dba.analyze = function(DBA, method=DBA_EDGER,
 ## dba.report -- generate report for a contrast analysis ##
 ###########################################################
 
-dba.report = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, fold=0, bNormalized=TRUE,
+dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
+                      fold=0, bNormalized=TRUE,
                       bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
                       file,initString=DBA$config$reportInit,ext='csv',bRangedData=DBA$config$RangedData) 
                      
@@ -340,7 +356,7 @@ dba.report = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
 ################################################
 
 dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                           contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+                           contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
                            mask, sites, sortFun,
                            correlations=TRUE, olPlot=DBA_COR, 
                            margin=10, colScheme="Greens", distMethod="pearson",
@@ -407,7 +423,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 #######################################################
 
 dba.plotPCA = function(DBA, attributes, minval, maxval,
-                       contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE, report,
+                       contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
                        mask, sites, cor=FALSE,
                        b3D=FALSE, vColors, dotSize, ...)
                        
@@ -446,7 +462,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
 ## dba.plotBox --Boxplots  ##
 #############################
                                       
-dba.plotBox = function(DBA, contrast=1, method=DBA_EDGER, th=0.1, bUsePval=FALSE, bNormalized=TRUE,
+dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=0.1, bUsePval=FALSE, bNormalized=TRUE,
                        attribute=DBA_GROUP, 
                        bAll=FALSE, bAllIncreased=FALSE, bAllDecreased=FALSE, 
                        bDB=TRUE, bDBIncreased=TRUE, bDBDecreased=TRUE,
@@ -469,7 +485,7 @@ dba.plotBox = function(DBA, contrast=1, method=DBA_EDGER, th=0.1, bUsePval=FALSE
 ## dba.plotMA -- MA or XY scatter plot ##
 #########################################
                                       
-dba.plotMA = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, bNormalized=TRUE,
+dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, bNormalized=TRUE,
                       factor="", bXY=FALSE, dotSize=.33, ...)
 
 {
@@ -485,7 +501,7 @@ dba.plotMA = function(DBA, contrast=1, method=DBA_EDGER, th=.1, bUsePval=FALSE, 
 ###########################################################
 
 dba.plotClust = function(DBA, mask, sites, attributes=DBA$attributes, distMethod="pearson",
-                         contrast, method=DBA_EDGER, th=.1, bUsePval=FALSE)
+                         contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE)
 {
    
    if(!missing(contrast)) {
@@ -649,6 +665,9 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
 
    if(is.null(res$config$reportInit)) {
       res$config$saveDir = "reports/DBA"
+   }
+   if(is.null(res$AnalysisMethod)){
+      res$config$AnalysisMethod=DBA_EDGER
    }
          
    if(class(res)!="DBA") {
