@@ -75,14 +75,14 @@ when deriving a peak/site mask, scores greater than this value will be considere
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-MODES:
 
-Derive a a mask of peaksets/samples:
-dba.mask(DBA, attribute, value, combine='or',mask, merge='or',bApply=F)
+MODE: Derive a a mask of peaksets/samples:
 
-Derive a mask of peaks/sites:
-dba.mask(DBA,combine='or',mask,merge='or',bApply=F,
-                    peakset, minValue=-1)
+dba.mask(DBA, attribute, value, combine, mask, merge, bApply)
+
+MODE: Derive a mask of peaks/sites:
+
+dba.mask(DBA, combine, mask, merge,bApply, peakset, minValue)
 }
 \value{
 either a logical mask, or new DBA object if bApply is TRUE.
@@ -95,7 +95,7 @@ Rory Stark
 }
 \note{
 %%  ~~further notes~~
-dba automatically generates masks for each unique value of DBA_TISSUE, DBA_FACTOR, DBA_CONDITION, and DBA_CALLER. These are accessible using masks field of the DBA object (DBA$masks), and can be viewed using names(DBA$masks).
+dba automatically generates masks for each unique value of DBA_TISSUE, DBA_FACTOR, DBA_CONDITION, DBA_CALLER, and DBA_REPLICATE. These are accessible using masks field of the DBA object (DBA$masks), and can be viewed using names(DBA$masks).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

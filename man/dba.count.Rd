@@ -9,8 +9,8 @@ Counts reads in binding site intervals
 }
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=TRUE,
-                  insertLength, minMaxval=0, bCalledMasks=TRUE, 
-                   bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+          insertLength, minMaxval=0, bCalledMasks=TRUE, 
+          bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -87,7 +87,7 @@ data(tamoxifen_peaks)
 \dontrun{tamoxifen = dba.count(tamoxifen)}
 
 
-# Use a peakset made up of MCF7 peaks (in all replicates)  instead of computing one based on minOverlap
+# Count using a peakset made up of only peaks in all MCF7 replicates
 data(tamoxifen_peaks)
 mcf7Common = dba.overlap(tamoxifen,tamoxifen$masks$MCF7)
 \dontrun{tamoxifen = dba.count(tamoxifen,peaks=mcf7Common$inAll)}

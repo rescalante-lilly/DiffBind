@@ -3,21 +3,16 @@
 \alias{DiffBind}
 \docType{package}
 \title{
-DiffBind: Differential Binding Analysis
+Differential Binding Analysis of ChIP-seq peaksets
 }
 \description{
-DiffBind -  differential binding analysis of ChIP-seq peaksets
+Differential binding analysis of ChIP-seq peaksets
 
 }
 \details{
-\tabular{ll}{
-Package: \tab DiffBind\cr
-Type: \tab Package\cr
-Version: \tab 1.0.0\cr
-Date: \tab 2011-10-22\cr
-License: \tab Artistic-2.0\cr
-LazyLoad: \tab yes\cr
-}
+Computes differentially bound sites from multiple ChIP-seq experiments using affinity (quantitative) data.
+Also enables occupancy (overlap) analysis and plotting functions.
+
 
 Entry Points:
 \tabular{ll}{
@@ -50,7 +45,7 @@ dba.load:	\tab	Load dba object\cr
 }
 }
 \author{
-Rory Stark and Gordon Brown
+Rory Stark <rory.stark@cancer.org.uk> and Gordon Brown <gordon.brown@cancer.org.uk>
 }
 %\references{
 %}

@@ -9,8 +9,8 @@ Computes binding overlaps and co-occupancy statistics
 }
 \usage{
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
-            byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
+            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
+            report, byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
             bRangedData=DBA$config$RangedData)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -91,30 +91,29 @@ logical indicating whether, if mode==DBA_OLAP_PEAKS, the peaksets should be retu
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 
-MODES:
+MODE: Generate overlapping/unique peaksets:
 
-Generate overlapping/unique peaksets:
-dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0)
+dba.overlap(DBA, mask, mode, minVal)
 
-Compute correlation and co-occupancy statistics (e.g. for dba.plotHeatmap):
-dba.overlap(DBA, mask, mode=DBA_OLAP_ALL, byAttribute, minVal=0,
-            attributes = DBA$attributes, 
-            bCorOnly=T,  
-            CorMethod="pearson")
+MODE: Compute correlation and co-occupancy statistics (e.g. for dba.plotHeatmap):
 
-Compute correlation and co-occupancy statistics using significantly differentially bound sites (e.g. for dba.plotHeatmap):
-dba.overlap(DBA, mask=T, mode=DBA_OLAP_ALL, byAttribute, minVal=0,
-            contrast, method=DBA_EDGER, th=.1, bUsePval=F,
-            attributes = DBA$attributes, bCorOnly=T, 
-            CorMethod="pearson")
+dba.overlap(DBA, mask, mode, byAttribute, minVal,
+            attributes, bCorOnly, CorMethod)
 
-Compute overlap rates at different stringency thresholds:
-dba.overlap(DBA, mask, mode=DBA_OLAP_RATE, minVal=0)
+MODE: Compute correlation and co-occupancy statistics using significantly differentially bound sites (e.g. for dba.plotHeatmap):
+
+dba.overlap(DBA, mask, mode, byAttribute, minVal,
+            contrast, method, th=, bUsePval,
+            attributes, bCorOnly, CorMethod)
+
+MODE: Compute overlap rates at different stringency thresholds:
+
+dba.overlap(DBA, mask, mode, minVal)
 }
 \value{
 Value depends on the mode specified in the mode parameter.
 
-If mode = DBA_OLAP_PEAKS, Value is an overlap record, a list of three peaksets for an A-B overlap, and seven peaksets for a A-B-C overlap:
+If mode = DBA_OLAP_PEAKS, Value is an overlap record: a list of three peaksets for an A-B overlap, and seven peaksets for a A-B-C overlap:
 \item{inAll}{peaks in all peaksets}
 \item{onlyA}{peaks unique to peakset A}
 \item{onlyB}{peaks unique to peakset B}
@@ -124,7 +123,7 @@ If mode = DBA_OLAP_PEAKS, Value is an overlap record, a list of three peaksets f
 \item{notC}{peaks in both peaksets A and B but not peakset C}
 
 
-If mode = DBA_OLAP_ALL, Value is a correlation record, a matrix with a row for each pair of peaksets and the following columns:
+If mode = DBA_OLAP_ALL, Value is a correlation record: a matrix with a row for each pair of peaksets and the following columns:
 \item{A}{peakset number of first peakset in overlap}
 \item{B}{peakset number of second peakset in overlap}
 \item{onlyA}{number of sites unique to peakset A}
@@ -167,7 +166,8 @@ mcf7.corRec
 data(tamoxifen_peaks)
 rate = dba.overlap(tamoxifen, mode=DBA_OLAP_RATE)
 rate
-plot(rate,type='b',xlab="# peaksets",ylab="# common peaks",main="Tamoxifen dataset overlap rate")
+plot(rate,type='b',xlab="# peaksets",ylab="# common peaks",
+     main="Tamoxifen dataset overlap rate")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -33,7 +33,7 @@ When adding a consensus peakset: a sample mask or vector of peakset numbers. If 
 
 When adding all the peaks from one DBA object to another: a DBA object. In this case, the only other parameter to have an effect is minOverlap.
 
-When retrieving and/or writing a peakset: a peak matrix, or a peakset number; if NULL, retrieves/writes the full binding matrix.
+When retrieving and/or writing a peakset: a peak matrix or RangedData object, or a peakset number; if NULL, retrieves/writes the full binding matrix.
 }
 
 %\subsection{Optional/defaulted arguments}{}
@@ -59,13 +59,15 @@ control name for the peakset being added; if missing, one is assigned for a cons
 \item{peak.caller}{
 peak caller name string. If peaks is specified as a file, this will control how it is interpreted. Supported values:
 \itemize{
-\item "macs"
-\item "swembl"
-\item "raw"
-\item "peakset" (peakset written out using dba.peakset)
-\item "fp4"
+\item {\dQuote{raw}:}	{text file file; peak score is in fourth column}
+\item {\dQuote{bed}:}	{.bed file; peak score is in fifth column}
+\item {\dQuote{macs}:}	{MACS .xls file}
+\item {\dQuote{swembl}:}	{SWEMBL .peaks file}
+\item {\dQuote{bayes}:}	{bayesPeak file}
+\item {\dQuote{peakset}:}	{peakset written out using pv.writepeakset}
+\item {\dQuote{fp4}:}	{FindPeaks v4}
 }
-if missing, one is assigned for a consensus peakset (a concatenation of peak caller names).
+if missing, a name is assigned for a consensus peakset (a concatenation of peak caller names).
 }
 \item{reads}{
 total number of ChIPed library reads for the peakset being added.
@@ -80,7 +82,7 @@ file path of the BAM/SAM/BED file containing the aligned reads for the peakset b
 file path of the BAM/SAM/BED file containing the aligned reads for the control used for the peakset being added.
 }
   \item{normCol}{
-peak column to normalize to 0..1 scale when adding a peakset; 0 indicates no normalization
+peak column to normalize to 0...1 scale when adding a peakset; 0 indicates no normalization
 }
   \item{bRemoveM}{
 logical indicating whether to remove peaks on chrM when adding a peakset
@@ -109,25 +111,28 @@ logical indicating whether, if bRetrieve is TRUE, the peakset should be returned
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-MODES:
 
-Add a specified peakset:
+MODE: Add a specified peakset:
+
 dba.peakset(DBA=NULL, peaks, sampID, tissue, factor, condition, replicate,
                        control, peak.caller, reads, consensus, bamReads, bamControl,
                        normCol, bRemoveM, bRemoveRandom)
 
-Add a consensus peakset (derived from overlapping peaks in peaksets already present):
-dba.peakset(DBA,peaks,minOverlap)
+MODE: Add a consensus peakset (derived from overlapping peaks in peaksets already present):
 
-Retrieve a peakset:
+dba.peakset(DBA, peaks, minOverlap)
+
+MODE: Retrieve a peakset:
+
 dba.peakset(DBA, peaks, bRetrieve=T)
 
-Write a peakset out to a file:
+MODE: Write a peakset out to a file:
+
 dba.peakset(DBA, peaks, bRetrieve=T,  writeFile, numCols)
 }
 \value{
 DBA object when adding a peakset.
-Peakset matrix or RangedData when retrieving and/or writing a peakset.
+Peakset matrix or RangedData object when retrieving and/or writing a peakset.
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -147,11 +152,14 @@ Rory Stark
 \examples{
 
 # create a new DBA object by adding three peaksets
-mcf7 = dba.peakset(NULL,peaks=system.file("extra/peaks/MCF7_ER_1.bed.gz", package="DiffBind"),
+mcf7 = dba.peakset(NULL,
+                   peaks=system.file("extra/peaks/MCF7_ER_1.bed.gz", package="DiffBind"),
                    sampID="MCF7.1",tissue="MCF7",factor="ER",condition="Responsive",replicate=1)
-mcf7 = dba.peakset(mcf7,peaks=system.file("extra/peaks/MCF7_ER_2.bed.gz", package="DiffBind"),    
+mcf7 = dba.peakset(mcf7,
+                   peaks=system.file("extra/peaks/MCF7_ER_2.bed.gz", package="DiffBind"),    
                    sampID="MCF7.2",tissue="MCF7",factor="ER",condition="Responsive",replicate=2)
-mcf7 = dba.peakset(mcf7,peaks=system.file("extra/peaks/MCF7_ER_3.bed.gz", package="DiffBind"),      
+mcf7 = dba.peakset(mcf7,
+                   peaks=system.file("extra/peaks/MCF7_ER_3.bed.gz", package="DiffBind"),      
                    sampID="MCF7.3",tissue="MCF7",factor="ER",condition="Responsive",replicate=3)
 mcf7
 

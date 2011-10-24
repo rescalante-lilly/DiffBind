@@ -9,8 +9,8 @@ Sets up contrasts for differential binding affinity analysis
 }
 \usage{
 dba.contrast(DBA, group1, group2=!group1, name1="group1", name2="group2",
-                       minMembers=3, block ,
-                      categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION))
+             minMembers=3, block ,
+             categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION))
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -54,15 +54,13 @@ blocking attribute for multi-factor analysis. Only when adding a specific contra
 }
 }
 \details{
-Contrasts will only be set up for peaksets where DBA_CALLER == "counts".
-Contrasts can be cleared by DBA$contrasts=NULL.
 
-MODES:
+MODE: Set up all possible contrasts:
 
-Set up all possible contrasts:
 dba.contrast(DBA, minMembers, categories)
 
-Set up a specific contrast:
+MODE: Set up a specific contrast:
+
 dba.contrast(DBA, group1, group2, name1, name2, block)
 }
 \value{
@@ -74,8 +72,11 @@ DBA object with contrast(s) set as DBA$contrasts. Contrast list can be retrieved
 \author{
 Rory Stark
 }
-%\note{
-%}
+\note{
+Contrasts will only be set up for peaksets where DBA_CALLER == "counts".
+
+Contrasts can be cleared by DBA$contrasts=NULL.
+}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
@@ -89,7 +90,13 @@ tamoxifen
 
 # Another way to do the same thing
 tamoxifen$contrasts=NULL
-tamoxifen = dba.contrast(tamoxifen, tamoxifen$masks$Responsive, tamoxifen$masks$Resistant,"Responsive","Resistant")
+tamoxifen = dba.contrast(tamoxifen, tamoxifen$masks$Responsive, tamoxifen$masks$Resistant,
+                                              "Responsive", "Resistant")
+tamoxifen
+
+# Add add default contrasts
+tamoxifen$contrasts=NULL
+tamoxifen = dba.contrast(tamoxifen)
 tamoxifen
 
 }

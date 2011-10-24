@@ -9,7 +9,8 @@ Principal Component Analysis plot
 }
 \usage{
 dba.plotPCA(DBA, attributes, minval, maxval,
-            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
+            contrast, method=DBA$config$AnalysisMethod, 
+            th=.1, bUsePval=FALSE, report,
             mask, sites, cor=FALSE,
             b3D=FALSE, vColors, dotSize, ...)
 }
@@ -97,14 +98,14 @@ arguments passed to plot or plot3d (rgl).
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-MODES:
+MODE: PCA plot using significantly differentially bound sites:
 
-PCA plot using significantly differentially bound sites:
 dba.plotPCA(DBA, attributes, minval, maxval,
-                       contrast, method=DBA_EDGER, th=.1, bUsePval=F,
+                       contrast, method, th, bUsePval,
                        b3D=F, vColors, dotSize, ...)
 
-PCA plot using global binding matrix:
+MODE: PCA plot using global binding matrix:
+
 dba.plotPCA(DBA, attributes, minval, maxval,
                        mask, sites,
                        b3D=F, vColors, dotSize, ...)
@@ -119,7 +120,7 @@ matrix with color legend
 Rory Stark
 }
 \note{
-uses rgl package
+uses rgl package for 3D plots (if available)
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -133,11 +134,11 @@ data(tamoxifen_peaks)
 # peakcaller scores PCA
 dba.plotPCA(tamoxifen)
 
-# counts correlation heatmap
+# raw count correlation PCA
 data(tamoxifen_analysis)
 dba.plotPCA(tamoxifen)
 
-#PCA based on all normalized data
+#PCA based on normalized data for all sites
 dba.plotPCA(tamoxifen,contrast=1,th=1)
 
 #PCA based on DB sites only

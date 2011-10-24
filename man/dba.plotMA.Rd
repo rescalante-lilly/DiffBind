@@ -8,7 +8,8 @@ Generate MA and scatter plots of differential binding analysis results
 Generates MA and scatter plots of differential binding analysis results.
 }
 \usage{
-dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
+dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
+           th=.1, bUsePval=FALSE, 
            bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33, ...)
 }
 
@@ -23,7 +24,7 @@ DBA object, on which dba.analyze should have been successfully run.
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{contrast}{
-number of contrast to report on, or vector of contrasts for multiple plots. See dba.show(DBA, bContrast=T) to get contrast numbers.
+number of contrast to report on. See dba.show(DBA, bContrast=T) to get contrast numbers.
 }
 \item{method}{
  method or vector of methods to plot results for:
@@ -79,8 +80,6 @@ Rory Stark
 %}
 \examples{
 data(tamoxifen_analysis)
-tamoxifen = dba.contrast(tamoxifen,categories=DBA_CONDITION)
-tamoxifen = dba.analyze(tamoxifen)
 
 # default MA plot
 dba.plotMA(tamoxifen)

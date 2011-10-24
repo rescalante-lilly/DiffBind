@@ -8,8 +8,9 @@ Generate a report for a differential binding affinity analysis
 Generates a report for a differential binding affinity analysis
 }
 \usage{
-dba.report(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
-           fold=0,  bNormalized=TRUE,  bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
+dba.report(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
+           th=.1, bUsePval=FALSE, fold=0,  bNormalized=TRUE,  
+           bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
            file,initString=DBA$config$reportInit,ext='csv',
            bRangedData=DBA$config$RangedData)
 }
@@ -47,7 +48,7 @@ only sites with an absolute Fold value greater than equal to this will be includ
 logical indicating that normalized data (using normalization factors computed by differential analysis method) should be reported. FALSE uses raw count data.
 }
 \item{bCalled}{
-logical indicating that peak caller status should be included (if available from a previous call too dba.count(bCalledMasks=T)). This will add a column for each group, each indicating the number of sample in the group identified as a peak in the original peaksets.
+logical indicating that peak caller status should be included (if available from a previous call to dba.count(bCalledMasks=TRUE)). This will add a column for each group, each indicating the number of samples in the group identified as a peak in the original peaksets.
 }
 \item{bCounts}{
 logical indicating that count data for individual samples should be reported as well as group statistics. Columns are added for each sample in the first group, followed by columns for each sample in the second group.
@@ -71,7 +72,7 @@ logical indicating whether the report should be returned as a RangedData object.
 %\details{
 %}
 \value{
-A report dataframe, with a row for each binding site within the thresholding parameters, and the following columns:
+A report dataframe or RangedData object, with a row for each binding site within the thresholding parameters, and the following columns:
 \item{Chr}{Chromosome of binding site}
 \item{Start}{Starting base position of binding site}
 \item{End}{End base position of binding site}
@@ -117,7 +118,8 @@ tamoxifen.DB = dba.report(tamoxifen,th=.05,bUsePval=TRUE,fold=2)
 tamoxifen.DB
 
 #Retrieve all sites with confidence stats
-tamoxifen.DB = dba.report(tamoxifen,th=1)
+# and how many times each site was identified as a peak
+tamoxifen.DB = dba.report(tamoxifen, th=1, bCalled=TRUE)
 tamoxifen.DB
 
 #Retrieve all sites with confidence stats and normalized counts

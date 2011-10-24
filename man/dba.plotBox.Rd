@@ -47,7 +47,7 @@ logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding
 }
 
 \item{bNormalized}{
-logical indicating that normalized data (using normalization factors computed by differential analysis method) should be plotted. FALSE uses raw count data (possibly with control reads subtracted; see dba.count.)
+logical indicating that normalized data (using normalization factors computed by differential analysis method) should be plotted. FALSE uses raw count data.
 }
 
 
@@ -87,7 +87,7 @@ logical indicating if plot should include a set of boxplots using all counts  in
 }
 
 \item{pvalMethod}{
-method to use when computing matrix of p-values. If NULL, no matrix is computed, and NULL is returned; this may speed up processing is there are many boxplots.
+method to use when computing matrix of p-values. If NULL, no matrix is computed, and NULL is returned; this may speed up processing if there are many boxplots.
 }
 
 \item{bReversePos}{
@@ -101,7 +101,7 @@ If NULL, default order is used (group order for DBA_GROUP, and the order the att
 }
 
 \item{vColors}{
-vector of custom colors; is absent, default colors will be used.
+vector of custom colors; if absent, default colors will be used.
 }
 \item{varwidth}{
 passed to boxplot
@@ -120,7 +120,7 @@ In default mode, draws six boxes: one pair of boxes showing the distribution of 
 and a second pair of boxes showing the distribution of read counts for significantly differentially bound sites that have higher mean affinity in the first group. 
 }
 \value{
-if pvalMethod is not NULL, returns a matrix of p-values indicating whether the significance of the difference between each pair of distributions.
+if pvalMethod is not NULL, returns a matrix of p-values indicating the significance of the difference between each pair of distributions.
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -140,12 +140,14 @@ Rory Stark
 \examples{
 data(tamoxifen_analysis)
 
-#default boxplot include all DB sites, then divided into those increasing affinity in each group
+#default boxplot includes all DB sites, then divided into those increasing 
+# affinity in each group
 dba.plotBox(tamoxifen)
 
-# plot non-normalized data for DB sites by tissue (changing order to place Resistant samples last)
-dba.plotBox(tamoxifen,attribute=DBA_TISSUE,bDBIncreased=FALSE,bDBDecreased=FALSE,attribOrder=c(2,3,5,1,4),bNormalized=FALSE)
-
+# plot non-normalized data for DB sites by tissue
+# (changing order to place Resistant samples last)
+dba.plotBox(tamoxifen, attribute=DBA_TISSUE, bDBIncreased=FALSE,
+            bDBDecreased=FALSE, attribOrder=c(2,3,5,1,4), bNormalized=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

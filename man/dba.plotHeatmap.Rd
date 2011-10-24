@@ -9,7 +9,8 @@ Draws a binding site heatmap
 }
 \usage{
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
+                contrast, method=DBA$config$AnalysisMethod, 
+                th=.1, bUsePval=FALSE, report,
                 mask, sites, sortFun,
                 correlations=TRUE, olPlot=DBA_COR,
                 margin=10, colScheme="Greens", distMethod="pearson",
@@ -42,7 +43,7 @@ attribute or vector of attributes to use for column labels:
 }
 
 \item{maxSites}{
-maximum number of binding sites to use in heatmap. Only used when not drawing a correlation heatmap (correlations parameter is missing)
+maximum number of binding sites to use in heatmap. Only used when not drawing a correlation heatmap (correlations=FALSE)
 }
 
 \item{minval}{
@@ -71,7 +72,7 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding. Used in conjunction with contrast.
 }
 \item{report}{
-report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
+report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
 }
 
 \item{mask}{
@@ -85,9 +86,8 @@ logical vector indicating which sites to include; first maxSites of these. Only 
 function taking a vector of scores and returning a single value. Only relevant when using global binding matrix (contrast is missing). If present, the global binding matrix will be sorted (descending) on the results, and the first maxSites used in the heatmap. Recommended sort function options include sd, mean, median, min.
 }
 
-
 \item{correlations}{
-logical indicating that a correlation heatmap should be plotted (TRUE). If FALSE, a heatmap of scores is plotted. This parameter can also be set to a correlation record; see dba.overlap(mode=DBA_OLAP_ALL), in which case a correlation heatmap is plotted based on the specified correlation record, using the statistic specified in olPlot.
+logical indicating that a correlation heatmap should be plotted (TRUE). If FALSE, a binding heatmap of scores/reads is plotted. This parameter can also be set to a correlation record; see dba.overlap(mode=DBA_OLAP_ALL), in which case a correlation heatmap is plotted based on the specified correlation record, using the statistic specified in olPlot.
 }
 
  \item{olPlot}{
@@ -114,33 +114,35 @@ passed on to heatmap.2 (gplots), e.g. scale etc.
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-MODES:
+MODE: Correlation Heatmap plot using statistics for global binding matrix:
 
-Heatmap plot using significantly differentially bound sites:
-dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                      contrast, method=DBA_EDGER, th=.1, bUsePval=F,
-                      colScheme="Greens", distMethod="pearson", ...)
-
-
-Heatmap plot using the global binding matrix:
-dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                      mask, sites, sortFun,
-                      colScheme="Greens", distMethod="pearson", ...)
-
-Heatmap plot using correlation or overlap statistics for global binding matrix:
 dba.plotHeatmap(DBA, attributes=DBA$attributes, minval, maxval,
+                      correlations, olPlot,
+                      colScheme="Greens", distMethod="pearson", ...)
+                      
+MODE: Correlation Heatmap plot using statistics for significantly differentially bound sites:
+
+dba.plotHeatmap(DBA, attributes=DBA$attributes, minval, maxval,
+                      contrast, method=DBA_EDGER, th=.1, bUsePval=F,
                       overlaps, olPlot=DBA_COR,
                       colScheme="Greens", distMethod="pearson", ...)
                       
-Heatmap plot using correlation or overlap statistics for significantly differentially bound sites:
-dba.plotHeatmap(DBA, attributes=DBA$attributes, minval, maxval,
-                      contrast, method=DBA_EDGER, th=.1, bUsePval=F,
-                      overlaps, olPlot=DBA_COR,
-                      colScheme="Greens", distMethod="pearson", ...)
+MODE: Binding heatmap plot using significantly differentially bound sites:
+
+dba.plotHeatmap(DBA, attributes, maxSites, minval, maxval,
+                      contrast, method, th, bUsePval, correlations=FALSE,
+                      colScheme, distMethod, ...)
+
+
+MODE: Binding heatmap plot using the global binding matrix:
+
+dba.plotHeatmap(DBA, attributes, maxSites, minval, maxval,
+                      mask, sites, correlations=FALSE, sortFun,
+                      colScheme, distMethod, ...)
 }
 \value{
 %%  ~Describe the value returned
-if the correlations is not FALSE, the overlap/correlation matrix is returned.
+if  correlations is not FALSE, the overlap/correlation matrix is returned.
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -166,22 +168,18 @@ data(tamoxifen_counts)
 # counts correlation heatmap
 dba.plotHeatmap(tamoxifen)
 
-# prepare a DBA object with a completed analysis
-data(tamoxifen_counts)
-tamoxifen = dba.contrast(tamoxifen,categories=DBA_CONDITION)
-tamoxifen = dba.analyze(tamoxifen)
-
+data(tamoxifen_analysis)
 #correlation heatmap based on all normalized data
 dba.plotHeatmap(tamoxifen,contrast=1,th=1)
 
 #correlation heatmap based on DB sites only
 dba.plotHeatmap(tamoxifen,contrast=1)
 
-#affinity heatmap based on DB sites
+#binding heatmap based on DB sites
 dba.plotHeatmap(tamoxifen,contrast=1,correlations=FALSE)
 
-#affinity heatmap based on 1,000 sites with highest variance
-dba.plotHeatmap(tamoxifen,contrast=1,th=1,correlations=FALSE,sortFun=sd)
+#binding heatmap based on 1,000 sites with highest variance
+dba.plotHeatmap(tamoxifen,contrast=1,th=1,correlations=FALSE,sortFun=var)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

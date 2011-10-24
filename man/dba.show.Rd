@@ -49,13 +49,13 @@ logical indicating that p-values will be used (along with th) to determine how m
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-MODES:
+MODE: Return attributes of peaksets associated with a DBA object:
 
-Return attributes of peaksets associated with a DBA object:
 dba.show(DBA, mask, attributes)
 
-Return contrasts associated with a DBA object:
-dba.show(DBA,bContrasts=T, th=0.1, bUsePval=F)
+MODE: Return contrasts associated with a DBA object:
+
+dba.show(DBA,bContrasts=T, th, bUsePval)
 }
 \value{
 dataframe with peakset attributes. 
@@ -96,6 +96,9 @@ dba.show(tamoxifen,attributes=c(DBA_TISSUE,DBA_REPLICATE,DBA_CONDITION))
 data(tamoxifen_counts)
 tamoxifen = dba.contrast(tamoxifen)
 dba.show(tamoxifen,bContrasts=TRUE)
+
+#alternatively:
+tamoxifen
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

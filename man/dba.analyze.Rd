@@ -18,7 +18,7 @@ dba.analyze(DBA, method=DBA$config$AnalysisMethod,
 %\subsection{Required arguments}{}
 
   \item{DBA}{
-DBA object. If no contrasts are specified (DBA$contrast is NULL), all deault contrasts will be added via a call to dba.contrast(DBA).
+DBA object. If no contrasts are specified (DBA$contrast is NULL), default contrasts will be added via a call to dba.contrast(DBA).
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{method}{
@@ -66,7 +66,10 @@ If the "edgeR" method is specified, and there is a blocking factor for the contr
 data(tamoxifen_counts)
 
 tamoxifen = dba.analyze(tamoxifen)
+tamoxifen
 
+tamoxifen = dba.analyze(tamoxifen,method=c(DBA_EDGER,DBA_DESEQ))
+tamoxifen
 }
 
 
