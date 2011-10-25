@@ -14,7 +14,7 @@ bode::Reader::~Reader(void) {
 }
 
 bode::Reader *bode::Reader::open(std::string const &filename) {
-  Reader *r;
+  Reader *r = NULL;
   int flen;
 
   // Ugly.  Must fix.

@@ -119,6 +119,6 @@ dba.multicore.addjob = function(config,params,fn,...) {
 
 ### WAIT FOR JOBS TO COMPLETE AND GATHER RESULTS ###
 dba.multicore.wait4jobs = function(config,joblist) {
-   res = collect(joblist)
+   res = mccollect(joblist)
    return(res)
 }

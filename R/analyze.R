@@ -371,7 +371,7 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
    res$facs = sizeFactors(res$DEdata)
    #res$counts = t(t(res$counts)/res$facs) #scale(res$counts,FALSE,1/facs)
    if(sum(group1)+sum(group2)==2){
-      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='blind')
+      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='blind',sharingMode='fit-only')
    } else {
    	  if(bTagwise) {
    	  	 res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='per-condition')
