@@ -77,8 +77,8 @@ A report dataframe or RangedData object, with a row for each binding site within
 \item{Start}{Starting base position of binding site}
 \item{End}{End base position of binding site}
 \item{Conc}{Concentration -- mean (log) reads across all samples in both groups}
-\item{Conc1}{Group 1 Concentration -- mean (log) reads across all samples first group}
-\item{Conc2}{Group 2 Concentration -- mean (log) reads across all samples in second group}
+\item{Conc_group1}{Group 1 Concentration -- mean (log) reads across all samples first group}
+\item{Conc_group2}{Group 2 Concentration -- mean (log) reads across all samples in second group}
 \item{Fold}{Fold difference -- mean fold difference of binding affinity of group 1 over group 2 (Conc1 - Conc2). Absolute value indicates magnitude of the difference, and sign indicates which one is bound with higher affinity, with a positive value indicating higher affinity in the first group }
 \item{p-value}{p-value calculation -- statistic indicating significance of difference (likelihood difference is not attributable to chance)}
 \item{FDR}{adjusted p-value calculation -- p-value subjected to multiple-testing correction}

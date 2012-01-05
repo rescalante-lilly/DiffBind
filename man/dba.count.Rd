@@ -8,8 +8,8 @@ Count reads in binding site intervals
 Counts reads in binding site intervals
 }
 \usage{
-dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=TRUE,
-          insertLength, minMaxval=0, bCalledMasks=TRUE, 
+dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=FALSE,
+          insertLength, minMaxval, bCalledMasks=TRUE, 
           bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -39,7 +39,7 @@ DBA_SCORE_READS_MINUS \tab raw read count for interval from ChIP minus read coun
 }
 }
 \item{bLog}{
-logical indicating whether log2 of score should be used
+logical indicating whether log2 of score should be used (only applies to DBA_SCORE_RPKM_FOLD and DBA_SCORE_READS_FOLD).
 }
 \item{insertLength}{
 if present, this value will be used as the length of the reads. 
@@ -47,7 +47,10 @@ Each read will be extended from its endpoint along the appropriate strand by thi
 If missing, the read size indicated in the BAM/SAM/BED file will be used.
 }
 \item{minMaxval}{
-value to use for filtering intervals with low read counts. Only intervals where at least one sample has at least minMaxval reads will be included. Default value of zero includes all intervals.
+value to use for filtering intervals with low read counts. 
+Only intervals where at least one sample has at least minMaxval reads will be included. 
+If missing, includes all intervals.
+If peaks is NULL, will remove sites from existing DBA object without recounting.
 }
 \item{bCalledMasks}{
 logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks(used by dba.report). 
@@ -92,6 +95,13 @@ data(tamoxifen_peaks)
 mcf7Common = dba.overlap(tamoxifen,tamoxifen$masks$MCF7)
 \dontrun{tamoxifen = dba.count(tamoxifen,peaks=mcf7Common$inAll)}
 tamoxifen
+
+# Change binding affinity scores
+data(tamoxifen_counts)
+tamoxifen = dba.count(tamoxifen,peaks=NULL,score=DBA_SCORE_READS)
+head(tamoxifen$vectors)
+tamoxifen = dba.count(tamoxifen,peaks=NULL,score=DBA_SCORE_RPKM_FOLD)
+head(tamoxifen$vectors)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

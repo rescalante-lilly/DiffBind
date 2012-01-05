@@ -35,7 +35,7 @@ Gordon Brown \\ \texttt{gordon.brown@cancer.org.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{22 October 2011}
+\date{14 December 2011}
 \maketitle
 
 \section{Introduction}
@@ -252,7 +252,7 @@ tamoxifen
 
 
 By default, \texttt{dba.analyze} plots a correlation heatmap if it finds any significantly differentially bound sites, shown in \refsf{tamox-sdb-corhm}. 
-Using only the differentially bound sites, we now see two major clusters: one containing the four tamoxifen resistant samples (representing two cell lines), and one containing the seven responsive samples (representing three cell lines), with the responsive cluster further divided between the MCF7 replicates and the other two cell lines. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 176 differentially bound sites, demonstrates how the differential binding analysis isolates those sites that distinguish between the Resistant and Responsive sample groups.
+Using only the differentially bound sites, we now see that the four tamoxifen resistant samples (representing two cell lines) cluster together, although the MCF7 replicates cluster closer to them than to the other tamoxifen responsive samples. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 176 differentially bound sites, demonstrates how the differential binding analysis isolates  sites that help distinguish between the Resistant and Responsive sample groups.
 \subsection{Retrieving the differentially bound sites}
 The final step is to retrieve the differentially bound sites as follows:
 
@@ -289,7 +289,7 @@ tamoxifen.DB
 %181    chr18 [10569384, 10570571]   |  6.461755  7.379404  5.438426  1.940978   0.01046787  0.09565665
 %182    chr18 [52191999, 52193072]   |  4.708795  5.602390  3.736879  1.865511   0.01057757  0.09612806
 
-The value columns show the mean read concentration over all the samples (the default calculation uses log2 normalized ChIP read counts with control read counts subtracted) and the mean concentration over the first (Resistant) group and second (Responsive) group. The Fold column shows the difference in mean concentrations between the two groups (Conc1 - Conc2), with a positive value indicating increased binding affinity in the Resistant group and a negative value indicating increased binding affinity in the Responsive group. The final two columns give confidence measures for identifying these sites as differentially bound, with a raw p-value and a multiple testing corrected FDR in the final column.
+The value columns show the mean read concentration over all the samples (the default calculation uses log2 normalized ChIP read counts with control read counts subtracted) and the mean concentration over the first (Resistant) group and second (Responsive) group. The Fold column shows the difference in mean concentrations between the two groups (Conc\_Resistant - Conc\_Responsive), with a positive value indicating increased binding affinity in the Resistant group and a negative value indicating increased binding affinity in the Responsive group. The final two columns give confidence measures for identifying these sites as differentially bound, with a raw p-value and a multiple testing corrected FDR in the final column.
 
 \section{Example: plotting}
 
@@ -702,6 +702,23 @@ The final steps are to perform testing to determine the significance measure of 
 
 When data are retrieved for plotting or reporting, \texttt{topTags} is called on the \texttt{DGEExact} object, using the default FDR method \texttt{BH}.
 
+\subsection{\edgeR analysis with blocking factor}
+When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_EDGER}, and a blocking factor has been added to the contrast, and additional \edgeR analysis is carried out using a generalized linear model. The analysis mostly follows the matched tumor-normal example in the \edgeR User's Guide. If samples are not perfectly matched (every sample in the first group has exactly one matching sample in the second group) a warning is generated (from \texttt{dba.contrast}) but the analysis should still complete successfully. A design matrix is constructed via a call to \texttt{model.matrix}; the first columns is the Intercept column, the last column represents the second group, and there will be one fewer middle columns than the number of unique replicates.
+
+For each contrast, a separate analysis is performed. First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted (with a minimum final read count of 1). Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. The default setting is appropriate for situations when the overall signal is expected to be directly comparable between the samples; using the full library size may be preferable if samples are expected to have dramatically different signals (e.g., if some are expected to have very low binding rates compared to others). The first step concludes with a call to \edgeR's \texttt{DGEList} function.
+
+The \texttt{DGEList} object that results is next passed to \texttt{calcNormFactors} with all other parameters retained as defaults, returning an updated \texttt{DGEList} object. This is passed to \texttt{estimateGLMCommonDisp} along with the design matrix. If bTagwise is TRUE (most useful when there are at least three members in each group of a contrast), the resulting \texttt{DGEList} object is then passed to \texttt{estimateGLMTagwiseDisp}, along with the design matrix. This final \texttt{DGEList} for contrast n is stored in the \texttt{DBA object} as 
+
+\texttt{DBA\$contrasts[[n]]\$edgeR\$block} 
+
+and may be examined and manipulated directly for further customization.
+
+Next \texttt{glmFit} is called with the design matrix, and the result stored. Finally, \texttt{glmLRT} is called based on the highest number coefficient (number of replicates plus one), returning a \texttt{DGEGLM} object, stored in 
+
+\texttt{DBA\$contrasts[[n]]\$edgeR\$block\$LRT} 
+
+When data are retrieved for plotting or reporting, \texttt{topTags} is called on the \texttt{DGEGLM} object, using the default FDR method \texttt{BH}.
+
 \subsection{\DESeq analysis}
 When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_DESEQ}\footnote{Note that \DESeq can be made the default analysis method for a DBA object by setting \texttt{DBA\$config\$AnalysisMethod=DBA\_DESEQ}.}, a standardized differential analysis is performed using the \DESeq package (\cite{Anders:2010p792}). This section details the precise steps in that analysis.
 
@@ -713,7 +730,7 @@ Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} obje
 
 \section{Acknowledgements}
 
-This package was developed at Cancer Research UK's Cambridge Research Institute with the help and support of many people there. We wish to acknowledge everyone the Bioinformatics Core under the leadership of Matthew Eldridge, as well as the Nuclear Receptor Transcription Laboratory under the leadership of Jason Carroll. Researchers who contributed ideas and/or pushed us in the right direction include Vasiliki Theodorou, Caryn-Ross Innes, and Tamir Chandra among many others. We also thank  members of the Gordon Smyth laboratory at the WEHI, Melbourne, particularly Mark Robinson and Davis McCarthy, for helpful discussions.
+This package was developed at Cancer Research UK's Cambridge Research Institute with the help and support of many people there. We wish to acknowledge everyone the Bioinformatics Core under the leadership of Matthew Eldridge, as well as the Nuclear Receptor Transcription Laboratory under the leadership of Jason Carroll. Researchers who contributed ideas and/or pushed us in the right direction include Caryn-Ross Innes, Vasiliki Theodorou, and Tamir Chandra among many others. We also thank  members of the Gordon Smyth laboratory at the WEHI, Melbourne, particularly Mark Robinson and Davis McCarthy, for helpful discussions.
 
 \section{Setup}
 

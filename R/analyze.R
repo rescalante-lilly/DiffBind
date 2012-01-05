@@ -9,6 +9,10 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
       }
    }
    
+   if(is.null(pv$contrasts)) {
+      stop('Unable to perform analysis: no contrasts specified.')	
+   }
+   
    noreps = FALSE
    for(contrast in pv$contrasts) {
       if(sum(contrast$group1)<2) {
@@ -19,7 +23,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
       }
    }
    if(noreps) {
-      warning('>> Some groups have no replicates. Results may be unreliable!!')	
+      warning("Some groups have no replicates. Results may be unreliable.")	
    }
      
   if(bParallel) {
@@ -35,7 +39,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
      if(bParallel && (pv$config$parallelPackage > 0)) {
      	numjobs = numjobs + 1
         params = dba.parallel.params(pv$config,c('pv.allDEedgeR','pv.DEedgeR','pv.contrast','pv.listadd'))
-        fdebug('submit job: pv.allDEedgeR')
+        fdebug('submit job: pv.all')
      	jobs = pv.listadd(jobs,dba.parallel.addjob(pv$config,params,
      	                                          pv.allDEedgeR,pv,
      	                                          bFullLibrarySize=bFullLibrarySize,bParallel=T,
@@ -46,24 +50,24 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
                                                     bParallel=F,bTagwise=bTagwise))
      }
   }
-  if('DESeq' %in% method) {
-  	if (length(find.package(package='DESeq',quiet=T))>0) {
-       require(DESeq)
-    } else {
-       stop("Package DESeq not installed")
-    }
-  	if(bParallel && (pv$config$parallelPackage > 0)) {
-  	   numjobs = numjobs + 1
-  	   params = dba.parallel.params(pv$config,c('pv.DESeq'))
-       jobs = pv.listadd(jobs,dba.parallel.addjob(pv$config,params,pv.allDESeq,pv,
-                                                  bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
-                                                  bTagwise=bTagwise,
-                                                  bParallel=T))
-       } else {
-       results = pv.listadd(results,pv.allDESeq(pv,bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
-                            bTagwise=bTagwise,bParallel=F))
-    }
-  }
+   if('DESeq' %in% method) {
+      if (length(find.package(package='DESeq',quiet=T))>0) {
+        require(DESeq)
+      } else {
+        stop("Package DESeq not installed")
+      }
+      if(bParallel && (pv$config$parallelPackage > 0)) {
+         numjobs = numjobs + 1
+         params = dba.parallel.params(pv$config,c('pv.DESeq'))
+         jobs = pv.listadd(jobs,dba.parallel.addjob(pv$config,params,pv.allDESeq,pv,
+                                                    bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
+                                                    bTagwise=bTagwise,
+                                                    bParallel=T))
+      } else {
+         results = pv.listadd(results,pv.allDESeq(pv,bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
+                              bTagwise=bTagwise,bParallel=F))
+      }
+   }     
   if('t-test' %in% method) {
      if(bParallel && (pv$config$parallelPackage > 0)) {
        numjobs = numjobs + 1
@@ -151,21 +155,21 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
               abline(h=0,col='dodgerblue')
            }
            if(bXY){
-              xmin  = floor(min(res$Conc1))
-              xmax  = ceiling(max(res$Conc1))
-              ymin  = floor(min(res$Conc2))
-              ymax  = ceiling(max(res$Conc2))
+              xmin  = floor(min(res[,5]))
+              xmax  = ceiling(max(res[,5]))
+              ymin  = floor(min(res[,6]))
+              ymax  = ceiling(max(res[,6]))
               xymin = min(xmin,ymin)
               xymin = max(xymin,0)
               xymax = max(xmax,ymax)
-              plotfun(res$Conc2[!idx],res$Conc1[!idx],pch=20,cex=cex,col=1,
+              plotfun(res[!idx,6],res[!idx,5],pch=20,cex=cex,col=1,
                       xaxp=c(xymin,xymax,xymax-xymin),xlim=c(xymin,xymax),
                       xlab=sprintf('log concentration :%s',conrec$name2),
                       yaxp=c(xymin,xymax,(xymax-xymin)),ylim=c(xymin,xymax),
                       ylab=sprintf('log concentration :%s',conrec$name1),
                       main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
                                    facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)
-              points(res$Conc2[idx],res$Conc1[idx],pch=20,cex=cex,col=2)
+              points(res[idx,6],res[idx,5],pch=20,cex=cex,col=2)
               abline(0,1,col='dodgerblue')
             }
          }
@@ -330,6 +334,26 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
   	    rownames(block) = IDs
   	    targets = rbind(targets,block)
   	 }
+  	 
+  	 snames = rownames(res$samples)
+  	 if(length(unique(snames))!=nrow(res$samples)){
+  	    warning('Error: all samples must have unique IDs for blocking analysis')
+  	    return(res)	
+  	 }
+  	 tnames = rownames(targets)
+  	 if(length(snames)!=length(tnames)){
+  	    warning('Error: all samples must be matched for blocking analysis')
+  	    return(res)	
+  	 }  	 
+  	 
+  	 newt = targets
+  	 for(i in 1:nrow(targets)) {
+  	    idx = match(tnames[i],snames)
+  	    newt[idx,] = targets[i,]	
+  	 }
+  	 targets = newt
+  	 rownames(targets) = snames
+  	 
   	 colnames(targets) = c("group",blockList[[1]]$attribute)
      res$samples = data.frame(cbind(targets,res$samples[,2:3]))
      targets = data.frame(targets)
@@ -337,16 +361,21 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
      targets[[2]] = factor(targets[[2]])
      attr =  blockList[[1]]$attribute
      if(attr=='Replicate') {
-        res$design = model.matrix(~ Replicate + group,data = targets)
+        res$designmatrix = model.matrix(~ Replicate + group,data = targets)
      } else {
        warning('Unsupported blocking attribute: ',attr)
        return(NULL)	
      }
-     message('edgeR multi-factor analysis.')	 
-     res     = estimateTagwiseDisp(res,res$design)
-     res$GLM = glmFit(res,res$design,dispersion=res$CR.common.dispersion)
-     res$LRT = glmLRT(res,res$GLM)
-     res$fdr = topTags(res$LRT,nrow(res$counts))
+     message('edgeR multi-factor analysis.')
+     res = calcNormFactors(res)
+     res = estimateGLMCommonDisp(res,res$designmatrix)
+     if(bTagwise) {
+      res = estimateGLMTagwiseDisp(res,res$designmatrix)
+     }
+     res$GLM = glmFit(res,res$designmatrix)
+     res$LRT = glmLRT(res,res$GLM,ncol(res$designmatrix))
+     res$counts=NULL	 
+     #res$fdr = topTags(res$LRT,nrow(res$counts))
   }
   
   return(res)	
@@ -422,7 +451,9 @@ fdebug('ENTER pv.allDEedgeR')
   
    if(bParallel && (pv$config$parallelPackage > 0)) {
       params = dba.parallel.params(pv$config,c('pv.DEedgeR_parallel','pv.DEedgeR','pv.DEinit','calcNormFactors',
-                                              'estimateCommonDisp','estimateTagwiseDisp','exactTest','topTags',
+                                              'estimateCommonDisp','estimateTagwiseDisp',
+                                              'estimateGLMCommonDisp','estimateGLMTagwiseDisp',
+                                              'exactTest','topTags',
    	                                          'glmFit','glmLRT'))
       reslist = dba.parallel.lapply(pv$config,params,1:length(pv$contrasts),pv.DEedgeR_parallel,pv,
                                     NULL,bSubControl,bFullLibrarySize,bTagwise)
@@ -910,11 +941,12 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
          return(NULL)
       }
       data = topTags(con$edgeR$db,nrow(con$edgeR$db$counts))$table
+      counts = con$edgeR$counts
       if(bNormalized){
-         counts = con$edgeR$pseudo.alt
-      } else {
-         counts = con$edgeR$counts
-      }
+      	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
+      	 counts = t(t(counts)/sizes)
+      	 counts = counts * con$edgeR$common.lib.size
+      } 
    } else if (method=='DESeq') {
    	if (length(find.package(package='DESeq',quiet=T))>0) {
        require(DESeq)
@@ -943,15 +975,16 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       }   
    } else if(method=='edgeRlm'){
       siteCol = 1
-      pvCol   = 4  
-      fdrCol  = 5
+      pvCol   = 5  
+      fdrCol  = 6
       #data = con$edgeR$block$fdr$table
-      data = topTags(con$edgeR$block,nrow(con$edgeR$block$counts))$table
+      data = topTags(con$edgeR$block$LRT,nrow(con$edgeR$counts))$table
+      counts = con$edgeR$counts
       if(bNormalized){
-         counts = con$edgeR$pseudo.alt
-      } else {
-         counts = con$edgeR$counts
-      }
+      	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
+      	 counts = t(t(counts)/sizes)
+      	 counts = counts * con$edgeR$common.lib.size
+      } 
    } else {
       warning('Unknown DE method: ',method)
       return(NULL)
@@ -964,7 +997,15 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
 
    keep =  data[,thCol]<=th
    sites = as.numeric(data[keep,siteCol])
-   counts = counts[sites,]
+   if(sum(keep)==0) {
+      stop('No sites above threshold')
+   } else if(sum(keep)==1) {
+      cnames = colnames(counts)
+      counts = matrix(counts[sites,],nrow=1,ncol=ncol(counts))
+      colnames(counts) = cnames
+   } else {
+      counts = counts[sites,]
+   }
    
    if(length(sites)==1) {
       conc = log2(mean(counts))
@@ -997,7 +1038,10 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
    
    data = cbind(pv.getsites(pv,sites),conc,con1,con2,fold,data[keep,c(pvCol,fdrCol)])
    
-   colnames(data) = c('Chr','Start','End','Conc','Conc1','Conc2','Fold','p-value','FDR')
+   conc1 = sprintf('Conc_%s',con$name1)
+   conc2 = sprintf('Conc_%s',con$name2)
+   
+   colnames(data) = c('Chr','Start','End','Conc',conc1,conc2,'Fold','p-value','FDR')
    
    if(bCalled & !is.null(pv$sites)) {
    	  called1 = rep(F,length(pv$sites[[1]]))
@@ -1017,11 +1061,14 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
    
    
    if(bCounts) {
-   	  colnames(counts) = c(pv$class[PV_ID,con$group1],pv$class[PV_ID,con$group2])
+      colnames(counts) = c(pv$class[PV_ID,con$group1],pv$class[PV_ID,con$group2])
       if(length(sites)>1){
          data = cbind(data,counts)
       } else {
+         dnames = colnames(data)
+         cnames = colnames(counts)
          data = cbind(data,matrix(counts,1,ncol(counts)))
+         colnames(data) = c(dnames,cnames)
       }
    }
 

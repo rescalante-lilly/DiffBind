@@ -1,8 +1,8 @@
 Package: DiffBind
 Type: Package
-Version: 1.1.0
+Version: 1.1.1
 Title: Differential Binding Analysis of ChIP-Seq peak data
-Date: 2011-10-25
+Date: 2012-01-05
 Author: Rory Stark<rory.stark@cancer.org.uk>, Gordon Brown <gordon.brown@cancer.org.uk>
 Maintainer: Rory Stark<rory.stark@cancer.org.uk>
 Description: Compute differentially bound sites from multiple ChIP-seq experiments using affinity (quantitative) data. Also enables occupancy (overlap) analysis and plotting functions.
@@ -17,4 +17,3 @@ Enhances: rgl, parallel
 LinkingTo: Rsamtools
 Collate: core.R parallel.R counts.R contrast.R analyze.R io.R helper.R
         utils.R DBA.R
-Packaged: 2011-10-12 05:34:18 UTC; biocbuild

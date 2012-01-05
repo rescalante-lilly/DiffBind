@@ -1,1 +1,46 @@
-9-Sep-2011: Initial submission...
+version 1.0.7: (2012-01-03)
+
+- added warnings to dba.contrast and dba.analyze when no contrasts are added
+
+version 1.0.6: (2011-12-14)
+
+- fixed bugs related to blocking factor (method=DBA_EDGER_BLOCK)
+
+version 1.0.5: (2011-12-13)
+
+- more descriptive warnings and minor bug fixes
+
+version 1.0.4: (2011-12-02)
+
+- change Conc1 and Conc2 columns in dba.report to include group names
+
+- add some more informative warnings
+
+version 1.0.3: (2011-11-21)
+
+- added warning to dba.plotHeatmap if labels are non-unique -- matrix is returned unordered
+
+- fixed bug in dba.overlap: can send in report w/o contrast as indicated in doc
+
+- added change score option to dba.count when peaks is NULL; change bLog default to FALSE.
+
+version 1.0.2: (2011-11-17)
+
+- dba.plotHeatmap now used noramlized data if a contrast is specified
+
+version 1.0.1: (2011-11-14) 
+
+- improved method for obtaining nomalized read counts for edgeR-based analysis
+
+- fix use of distMethod in dba.plotHeatmap
+
+- ensure $config parameters are inherited by new DBA object created by dba and dba.count
+
+- fix bug in use of minMaxval parameter to dba.count
+
+- In vignette, fixed figure 7
+
+version 1.0.0: (2011-09-09)
+
+- Initial submission...
+

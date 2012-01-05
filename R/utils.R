@@ -360,7 +360,10 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
    }
    first = 10
    if(repcols[10]=="Called1") {
-     first = 12	
+      if(length(repcols) < (numsamps+11)) {
+         stop('Report does not have count data, re-run dba.report with bCounts=T')
+      }
+      first = 12	 
    }
    
    domap = report[,first:(first+numsamps-1)]
@@ -400,6 +403,26 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
    return(pv)     
 }
 
-
-
-
+pv.getOverlapData = function(pv,contrast,report) {
+   con = pv$contrasts[[contrast]]                       	
+   repcols = colnames(report)
+   numsamps = sum(con$group1)+sum(con$group2)
+   if(length(repcols) < (numsamps+9)) {
+      return(pv)
+   }
+   first = 10
+   if(repcols[10]=="Called1") {
+      if(length(repcols) < (numsamps+11)) {
+         return(pv)
+      }
+      first = 12	 
+   }
+   
+   domap = report[,first:(first+numsamps-1)]
+   
+   pv$vectors    = cbind(report[,1:3],domap)
+   pv$allvectors = pv$vectors
+   pv$class      = cbind(pv$class[,con$group1],pv$class[,con$group2])
+   
+   return(pv)     
+}

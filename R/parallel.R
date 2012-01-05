@@ -52,7 +52,16 @@ dba.parallel.wait4jobs = function(config,joblist) {
 }
 
 dba.Rlsf.init = function(config){
-   warning('Rlsf interface not supported in this version')
+   if (length(find.package(package="DiffBindCRI",quiet=T))>0) {
+      #library(DiffBindCRI)
+      #if(!exists("dba.Rlsf.init","package:DiffBindCRI")) {
+      #   warning('Rlsf interface not supported in this version')
+      #} else {
+         config = dba.CRI.Rlsf.init(config)
+      #}     
+  } else {
+    warning('Rlsf interface not supported in this version')
+  }
    return(config)
 }
 

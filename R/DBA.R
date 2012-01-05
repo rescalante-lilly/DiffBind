@@ -69,19 +69,24 @@ dba = function(DBA,mask, minOverlap=2,
       res$config$RangedData=T
    }
 
-   if(is.null(res$parallelPackage)){
+   if(is.null(res$config$parallelPackage)){
       res$config$parallelPackage=DBA_PARALLEL_MULTICORE
    }
-   if(is.null(res$RunParallel)){
+   if(is.null(res$config$RunParallel)){
       res$config$RunParallel=T
    }
-   if(is.null(res$reportInit)){
-      res$config$reportInit="DBA"
-   }
-   if(is.null(res$AnalysisMethod)){
+   if(is.null(res$config$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
    }
-   
+
+   if(missing(DBA)){
+      DBA=NULL
+   } 
+   if(is.null(DBA$config$reportInit)){
+      res$config$reportInit="DBA"
+   } else {
+      res$config$reportInit=DBA$config$reportInit
+   }
    if(class(res)!="DBA") {
       class(res) = "DBA"
    }
@@ -149,16 +154,18 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
       if(is.null(res$config$RangedData)) {
          res$config$RangedData=T
       }
-      if(is.null(res$parallelPackage)){
+      if(is.null(res$config$parallelPackage)){
          res$config$parallelPackage=DBA_PARALLEL_MULTICORE
       }
-      if(is.null(res$RunParallel)){
+      if(is.null(res$config$RunParallel)){
          res$config$RunParallel=T
       }
-      if(is.null(res$reportInit)){
+      if(is.null(DBA$config$reportInit)){
          res$config$reportInit="DBA"
+      } else {
+         res$config$reportInit=DBA$config$reportInit
       }
-      if(is.null(res$AnalysisMethod)){
+      if(is.null(res$config$AnalysisMethod)){
          res$config$AnalysisMethod=DBA_EDGER
       }
             
@@ -188,21 +195,29 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        bRangedData=DBA$config$RangedData)
 {                      
-   if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) ) {
+   if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) | (!missing(report)) ) {
    	
-      if(!missing(contrast)) {
+      if( (!missing(contrast)) | (!missing(report)) ) {
          
          if(missing(report)) {
             report   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,bRangedData=F)
          } else {
          	if(class(report)=="RangedData") {
-         	   stop('RandgedData class not supported for report parameter. Call dba.report with RangedData=FALSE.')	
+         	   stop('RangedData class not supported for report parameter. Call dba.report with RangedData=FALSE.')	
+         	}
+         	if(!missing(contrast)) {
+         	   DBA = pv.getOverlapData(DBA,contrast,report)
          	}
          }
+         
          sites = as.numeric(rownames(report))
          
          if(missing(mask)) {
-         	mask  = DBA$contrasts[[contrast]]$group1 | DBA$contrasts[[contrast]]$group2   
+         	if(missing(contrast)) {
+         	   mask = 1:length(DBA$peaks)
+         	} else {
+         	   mask  = DBA$contrasts[[contrast]]$group1 | DBA$contrasts[[contrast]]$group2
+            }   
          }  else if (length(mask)==1) {
             mask = 1:length(DBA$peaks)         
          }
@@ -217,6 +232,7 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                             Sort='cor', CorMethod=CorMethod,
                             minVal=minVal, bCorOnly=bCorOnly)
       } 
+      
    }  else if(mode == DBA_OLAP_RATE) {
    
       res = pv.consensus(DBA,sampvec=mask,minOverlap=NULL)
@@ -245,15 +261,24 @@ DBA_SCORE_READS       = PV_SCORE_READS
 DBA_SCORE_READS_FOLD  = PV_SCORE_READS_FOLD
 DBA_SCORE_READS_MINUS = PV_SCORE_READS_MINUS
 
-dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=TRUE,
-                     insertLength, minMaxval=0,
+dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=FALSE,
+                     insertLength, minMaxval,
                      bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 {
                    
    bUseLast = F
   
    if(!missing(peaks)) {
-      peaks = pv.RangedData2Peaks(peaks)
+      if(is.null(peaks)) {
+         callers = unique(DBA$class[DBA_CALLER,])
+         if((length(callers)==1) & (callers=='counts')) {
+            DBA = pv.check(DBA)
+            res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=minMaxval)
+            return(res)	
+         }	
+      } else {
+         peaks = pv.RangedData2Peaks(peaks)
+      }
    }
    
    if(missing(insertLength)) {
@@ -363,15 +388,19 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
                            ...)
 {
    DBA = pv.check(DBA)
-   	  
-   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
-      if(missing(contrast)) {
-   	     correlations = pv.occupancy(DBA, mask=mask, sites=sites, 
-                                     Sort='cor', bCorOnly=T) 
-   	   } else {
-   	      correlations = dba.overlap(DBA,mask=mask,mode=DBA_OLAP_ALL,bCorOnly=T, report=report,
-   	                               contrast=contrast,method=method,th=th,bUsePval=bUsePval)
-   	   }
+   
+   
+   if(!missing(contrast)) {
+   	 if(!missing(report)) {
+         report = pv.RangedData2Peaks(report)
+      }   	
+      DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
+   	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
+   	                       bPCA=F,bLog=T,minval=minval,maxval=maxval)
+   }
+   	                          	  
+   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  { 	
+   	  correlations = pv.occupancy(DBA, mask=mask, sites=sites, Sort='cor', bCorOnly=T,CorMethod=distMethod) 
    }
    	  
    if(correlations[1]!=FALSE) {
@@ -383,14 +412,6 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    }
       
    if(!missing(contrast)) {
-   	
-      if(!missing(report)) {
-         report = pv.RangedData2Peaks(report)
-      }
-       	
-      DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
-   	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
-   	                       bPCA=F,bLog=T,minval=minval,maxval=maxval)
       res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, 
                            ColScheme=colScheme, distMeth=distMethod, 
                            margins=c(margin,margin),...)
@@ -403,11 +424,9 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 		 DBA = pv.sort(DBA, sortFun, mask=mask)
       }
       
-	 
       res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, mask=mask, sites=sites,
                            minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, 
                            margins=c(margin,margin),...)
-      
       res = NULL
          
 	  if(!missing(sortFun)) {
@@ -471,6 +490,10 @@ dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=0.1
 
 {
    DBA = pv.check(DBA)
+   
+   if(contrast > length(DBA$contrasts)) {
+      stop('Supplied contrast greater than number of contrasts')	
+   }
    
    res = pv.plotBoxplot(DBA, contrast=contrast, method=method, th=th, bUsePval=bUsePval, bNormalized=bNormalized,
                         attribute=attribute,bAll=bAll, bAllIncreased=bAllIncreased, bAllDecreased=bAllDecreased, 
@@ -609,6 +632,15 @@ dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize
    DBA$values  = NULL
    DBA$hc      = NULL
    DBA$pc      = NULL
+
+   DBA$config$lsfInit      = NULL
+   DBA$config$initFun      = NULL
+   DBA$config$paramFun     = NULL
+   DBA$config$addjobFun    = NULL
+   DBA$config$lapplyFun    = NULL
+   DBA$config$wait4jobsFun = NULL
+   DBA$config$parallelInit = NULL
+
    res = pv.save(DBA,file=file ,
                  dir=dir, pre=pre, ext=ext,
                  compress=TRUE)

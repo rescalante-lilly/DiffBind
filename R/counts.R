@@ -22,8 +22,10 @@ pv.model = function(model,mask,minOverlap=2,
             attributes = model$attributes
          }
       }
+      config = model$config
       model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                           bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes)
+      model$config = config
       return(model)
    }
    
@@ -121,7 +123,7 @@ PV_SCORE_READS_FOLD     = PV_RES_READS_FOLD
 PV_SCORE_READS_MINUS    = PV_RES_READS_MINUS
 
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=T,insertLength=0,
-                     bOnlyCounts=T,bCalledMasks=T,minMaxval=0,
+                     bOnlyCounts=T,bCalledMasks=T,minMaxval,
                      bParallel=F,bUseLast=F) {
    
    pv = pv.check(pv)
@@ -131,6 +133,8 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
          tmp = pv.peakset(NULL,peaks)
          pv$chrmap = tmp$chrmap
          peaks = tmp$peaks[[1]]
+      } else {
+         pv$chrmap = unique(as.character(peaks[,1]))
       }
       colnames(peaks)[1:3] = c("CHR","START","END")
       bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
@@ -248,15 +252,17 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
    if(bOnlyCounts) {
    	  numpeaks = length(pv$peaks)
       res = pv.vectors(pv,(numpeaks-numAdded+1):numpeaks,minOverlap=1,bAnalysis=F,bAllSame=T)
-      if(minMaxval>0) {
+      if(!missing(minMaxval)) {
          data = res$allvectors[,4:ncol(res$allvectors)]
          maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,max)
          tokeep = maxs>=minMaxval
          if(sum(tokeep)>1) {
             res$allvectors = res$allvectors[tokeep,]
+            rownames(res$allvectors) = 1:sum(tokeep)
             res$vectors    = res$allvectors
             for(i in 1:length(res$peaks)) {
                res$peaks[[i]] = res$peaks[[i]][tokeep,]
+               rownames(res$peaks[[i]]) = 1:sum(tokeep)
             }
             res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
          } else {

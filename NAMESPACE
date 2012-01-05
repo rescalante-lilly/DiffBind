@@ -57,9 +57,12 @@ importFrom(amap, Dist)
 #           estimateVarianceFunctions, nbinomTest, newCountDataSet,
 #           sizeFactors, "sizeFactors<-")
 
-importFrom(edgeR, calcNormFactors, DGEList, estimateCommonDisp,
-           estimateTagwiseDisp, exactTest, glmFit,
-           glmLRT, topTags)
+#importFrom(edgeR, calcNormFactors, DGEList, estimateCommonDisp,
+#           estimateTagwiseDisp, exactTest, estimateGLMCommonDisp, estimateGLMTagwiseDisp,
+#           glmFit, glmLRT, topTags)
+
+
+import(edgeR)
 
 importFrom(gplots, heatmap.2)
 

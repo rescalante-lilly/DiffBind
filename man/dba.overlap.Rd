@@ -59,7 +59,7 @@ if contrast is specified and mode=DBA_OLAP_ALL, significance threshold; all site
 if contrast is specified and mode=DBA_OLAP_ALL, logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding.
 }
 \item{report}{
-if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
+if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from dba.report) specifying the data to be used. If counts are included in the report (and a contrast is specified), the count data from the report will be used to compute correlations, rather than the scores in the global binding affinity matrix.  If report is present, the method, th, and bUsePval parameters are ignored.
 }
 \item{byAttribute}{
 when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peaksets with the same value for a specific attribute, one of:
@@ -93,22 +93,24 @@ logical indicating whether, if mode==DBA_OLAP_PEAKS, the peaksets should be retu
 
 MODE: Generate overlapping/unique peaksets:
 
-dba.overlap(DBA, mask, mode, minVal)
+dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal)
 
 MODE: Compute correlation and co-occupancy statistics (e.g. for dba.plotHeatmap):
 
-dba.overlap(DBA, mask, mode, byAttribute, minVal,
+dba.overlap(DBA, mask, mode=DBA_OLAP_ALL, byAttribute, minVal,
             attributes, bCorOnly, CorMethod)
 
 MODE: Compute correlation and co-occupancy statistics using significantly differentially bound sites (e.g. for dba.plotHeatmap):
 
-dba.overlap(DBA, mask, mode, byAttribute, minVal,
+dba.overlap(DBA, mask, mode=DBA_OLAP_ALL, byAttribute, minVal,
             contrast, method, th=, bUsePval,
             attributes, bCorOnly, CorMethod)
+       
+Note that the scores from the global binding affinity matrix will be used for correlations unless a report containing count data is specified.
 
 MODE: Compute overlap rates at different stringency thresholds:
 
-dba.overlap(DBA, mask, mode, minVal)
+dba.overlap(DBA, mask, mode=DBA_OLAP_RATE, minVal)
 }
 \value{
 Value depends on the mode specified in the mode parameter.

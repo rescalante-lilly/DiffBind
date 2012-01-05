@@ -821,11 +821,17 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,
       heatmap.2(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
                 distfun=function(x) Dist(x,method=distMeth),...)
    } else {
+
       res = heatmap.2(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
                 distfun=function(x) Dist(x,method=distMeth),symm=T,revC=T,Colv=T,...)         
       if(bReorder) {
-         ocm = pv.reorderM(ocm,res$rowDendrogram)
+      	 if(length(unique(rownames(ocm)))==nrow(ocm)) {
+            ocm = pv.reorderM(ocm,res$rowDendrogram)
+         } else {
+            warning("Unable to re-order returned correlation matrix as labels are non-unique")	
+         }
       }
+
       return(ocm)
    }
 
