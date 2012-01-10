@@ -310,29 +310,60 @@ pv.getoneorNA = function(vec) {
  }
 }
 
-pv.peaks2RangedData = function(peaks) {
-
-   if(class(peaks)!="RangedData") {
-      #require(IRanges)
-      cnames = colnames(peaks)
-      cnames[1:3] = c("space","start","end")
-      colnames(peaks) = cnames
+pv.peaks2DataType = function(peaks,datatype=DBA_DATA_DEFAULT) {
+   
+   if(datatype==DBA_DATA_FRAME) {
+      return(peaks)	
    }
    
-   res = as(peaks,"RangedData")
+   if(datatype==DBA_DATA_RANGEDDATA) {
+      if(class(peaks)!="RangedData") {
+         #require(IRanges)
+         cnames = colnames(peaks)
+         cnames[1:3] = c("space","start","end")
+         colnames(peaks) = cnames
+      }
+      res = as(peaks,"RangedData")
+   }
+
+   if(datatype==DBA_DATA_GRANGES) {
+      #require(GenomicRanges)
+      if(class(peaks)=="RangedData") {
+         res = suppressWarnings(as(peaks,"GRanges"))
+      } else if (class(peaks) != "GRanges") {
+         res = GRanges(Rle(peaks[,1]),IRanges(peaks[,2],width=peaks[,3]-peaks[,2]+1,names=rownames(peaks)),
+                       strand = Rle("*", length(seqnames)))
+         if(ncol(peaks)>3) {
+         	mdata = data.frame(peaks[,4:ncol(peaks)])
+         	colnames(mdata)  = colnames(peaks)[4:ncol(peaks)]
+         	elementMetadata(res) = mdata
+         }   	
+      }
+   }   
    
    return(res)
    
 }
 
-pv.RangedData2Peaks = function(RDpeaks){
-
-   if(class(RDpeaks)=="RangedData") {
+pv.DataType2Peaks = function(RDpeaks){
+   if(class(RDpeaks)=='logical') {
+     return(RDpeaks)
+   }
+   if(class(RDpeaks)=='integer') {
+     return(RDpeaks)
+   }
+   if(class(RDpeaks)=='character') {
+     return(RDpeaks)
+   }
+   if(class(RDpeaks)!="data.frame") {
       #require(IRanges)
       res = as.data.frame(RDpeaks)[,-4]
       cnames = colnames(res)
       cnames[1:3] = c("CHR","START","END")
       colnames(res) = cnames
+      if(class(RDpeaks)=="GRanges") {
+         res = res[,-4]	
+      }
    } else {
       res = RDpeaks
    }

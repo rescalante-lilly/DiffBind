@@ -14,7 +14,7 @@ dba.peakset(DBA=NULL, peaks, sampID, tissue, factor, condition, replicate,
             normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
             minOverlap=2, bMerge=TRUE,
             bRetrieve=FALSE, writeFile, numCols=4,
-            bRangedData=DBA$config$RangedData)
+            DataType=DBA$config$DataType)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,13 +27,13 @@ DBA object. Required unless creating a new DBA object by adding an initial peaks
 }
 
 \item{peaks}{
-When adding a specified peakset: set of peaks, either a RangedData object, a peak matrix (chr,start,end,score), or a filename where the peaks are stored.
+When adding a specified peakset: set of peaks, either a GRanges or RangedData object, or a peak dataframe or matrix (chr,start,end,score), or a filename where the peaks are stored.
 
 When adding a consensus peakset: a sample mask or vector of peakset numbers. If missing or NULL, a consensus is derived from all peaksets present in the model. See dba.mask, or dba.show to get peakset numbers.
 
 When adding all the peaks from one DBA object to another: a DBA object. In this case, the only other parameter to have an effect is minOverlap.
 
-When retrieving and/or writing a peakset: a peak matrix or RangedData object, or a peakset number; if NULL, retrieves/writes the full binding matrix.
+When retrieving and/or writing a peakset: either a GRanges or RangedData object, or a peak dataframe or matrix (chr,start,end,score), or a peakset number; if NULL, retrieves/writes the full binding matrix.
 }
 
 %\subsection{Optional/defaulted arguments}{}
@@ -105,8 +105,14 @@ file to write retrieved peakset.
  \item{numCols}{
 number of columns to include when writing out peakset. First four columns are chr, start, end, score; the remainder are maintained from the original peakset. Ignored when writing out complete binding matrix.
 }
- \item{bRangedData}{
-logical indicating whether, if bRetrieve is TRUE, the peakset should be returned as a RangedData object. Can be set as default behavior by setting DBA$config$RangedData=TRUE.
+\item{DataType}{
+The class of object for returned peaksets:
+\itemize{
+\item DBA_DATA_GRANGES
+\item DBA_DATA_RANGEDDATA
+\item DBA_DATA_FRAME
+}
+Can be set as default behavior by setting DBA$config$DataType.
 }
 }
 \details{

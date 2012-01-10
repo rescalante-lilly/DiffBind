@@ -57,7 +57,7 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 data frame containing sample sheet, or file name of config file to load when constructing a new DBA object from a sample sheet. NULL indicates no config file. Relevant fields include:
 \itemize{
 \item {RunParallel:}	{logical indicating if counting and analysis operations should be run in parallel using multicore by default.}
-\item {RangedData:}	{logical indicating if peaks should be RangedData objects by default.}
+\item {DataType:}	{default class for peaks and reports (DBA_DATA_GRANGES, DBA_DATA_RANGEDDATA, or DBA_DATA_FRAME).}
 \item {AnalysisMethod:}	{either DBA_EDGER or DBA_DESEQ.}
 }
 }

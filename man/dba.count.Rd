@@ -23,7 +23,7 @@ DBA object
 }
 %\subsection{Optional/defaulted arguments}{}
  \item{peaks}{
-RangedData or matrix containing intervals to use. If missing, generates a consensus peakset using minOverlap parameter.
+GRanges, RangedData, dataframe, or matrix containing intervals to use. If missing, generates a consensus peakset using minOverlap parameter.
 }
 \item{minOverlap}{
 only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).

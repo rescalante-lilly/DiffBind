@@ -50,6 +50,11 @@ DBA_EDGER = 'edgeR'
 DBA_DESEQ = 'DESeq'
 DBA_EDGER_BLOCK = 'edgeRlm'
 
+DBA_DATA_FRAME      = 0
+DBA_DATA_RANGEDDATA = 1
+DBA_DATA_GRANGES    = 2
+DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
+
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE, reportInit="DBA"),
@@ -65,8 +70,8 @@ dba = function(DBA,mask, minOverlap=2,
                     
    res$contrasts=NULL
    
-   if(is.null(res$config$RangedData)) {
-      res$config$RangedData=T
+   if(is.null(res$config$DataType)) {
+      res$config$DataType=DBA_DATA_DEFAULT
    }
 
    if(is.null(res$config$parallelPackage)){
@@ -107,13 +112,13 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
                        normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
                        minOverlap=2, bMerge=TRUE,
                        bRetrieve=FALSE, writeFile, numCols=4,
-                       bRangedData=DBA$config$RangedData)
+                       DataType=DBA$config$DataType)
 {
    res = NULL
    
    if(!missing(peaks)){
    	 if(class(peaks) != "DBA") {
-        peaks = pv.RangedData2Peaks(peaks)
+        peaks = pv.DataType2Peaks(peaks)
      }
    }
    
@@ -123,10 +128,14 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
          writeFile = NULL
       }
       
+      if(missing(peaks)) {
+         DBA = pv.check(DBA)	
+      }
+      
       res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
       
-      if(bRangedData) {
-         res = pv.peaks2RangedData(res)
+      if(DataType!=DBA_DATA_FRAME) {
+         res = pv.peaks2DataType(res,DataType)
       }    
    
    } else {
@@ -151,8 +160,8 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
          class(res) = "DBA"
       }
     
-      if(is.null(res$config$RangedData)) {
-         res$config$RangedData=T
+      if(is.null(res$config$DataType)) {
+         res$config$DataType=DBA_DATA_DEFAULT
       }
       if(is.null(res$config$parallelPackage)){
          res$config$parallelPackage=DBA_PARALLEL_MULTICORE
@@ -179,8 +188,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
 }                      
 
 ##################################################
-## dba.overlap -- compute binding site overlaps ##
-##################################################
+## dba.overlap -- compute binding site overlaps ####################################################
 
 DBA_OLAP_PEAKS = 1 # Return list of peaksets (common/unique peaks) 
 DBA_OLAP_ALL   = 2 # Return overlap report with statstics for peakset pairs
@@ -193,17 +201,17 @@ DBA_INALL = PV_INALL
 dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                        contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
-                       bRangedData=DBA$config$RangedData)
+                       DataType=DBA$config$DataType)
 {                      
    if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) | (!missing(report)) ) {
    	
       if( (!missing(contrast)) | (!missing(report)) ) {
          
          if(missing(report)) {
-            report   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,bRangedData=F)
+            report   = dba.report(DBA,method=method, contrast=contrast,th=th,bUsePval=bUsePval,DataType=DBA_DATA_FRAME)
          } else {
-         	if(class(report)=="RangedData") {
-         	   stop('RangedData class not supported for report parameter. Call dba.report with RangedData=FALSE.')	
+         	if(class(report)!="data.frame") {
+         	   stop('Class not supported for report parameter. Call dba.report with DataType=DBA_DATA_FRAME.')	
          	}
          	if(!missing(contrast)) {
          	   DBA = pv.getOverlapData(DBA,contrast,report)
@@ -241,9 +249,9 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
    
       res = pv.overlap(DBA,mask=mask,minVal=minVal)
       
-      if(bRangedData) {
+      if(DataType!=DBA_DATA_FRAME) {
          for(i in 1:length(res)) {
-            res[[i]] = pv.peaks2RangedData(res[[i]])
+            res[[i]] = pv.peaks2DataType(res[[i]],DataType)
          }
       }   
    }                       
@@ -277,7 +285,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog
             return(res)	
          }	
       } else {
-         peaks = pv.RangedData2Peaks(peaks)
+         peaks = pv.DataType2Peaks(peaks)
       }
    }
    
@@ -338,7 +346,7 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
    res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
     
    if(bCorPlot){
-   	  if(nrow(dba.report(res,method=method[1],bRangedData=F))>1) {
+   	  if(nrow(dba.report(res,method=method[1],DataType=DBA_DATA_FRAME))>1) {
          x = dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T)
       }
    }
@@ -358,7 +366,7 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
 dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
                       fold=0, bNormalized=TRUE,
                       bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
-                      file,initString=DBA$config$reportInit,ext='csv',bRangedData=DBA$config$RangedData) 
+                      file,initString=DBA$config$reportInit,ext='csv',DataType=DBA$config$DataType) 
                      
 {
 
@@ -368,8 +376,8 @@ dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, 
                       bCalled=bCalled,bCounts=bCounts,bCalledDetail=bCalledDetail,
                       file=file,initString=initString,bNormalized=bNormalized,ext=ext,minFold=fold) 
 
-   if(bRangedData) {
-      res = pv.peaks2RangedData(res)
+   if(DataType!=DBA_DATA_FRAME) {
+      res = pv.peaks2DataType(res,DataType)
    }
    
    return(res)	
@@ -392,7 +400,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    
    if(!missing(contrast)) {
    	 if(!missing(report)) {
-         report = pv.RangedData2Peaks(report)
+         report = pv.DataType2Peaks(report)
       }   	
       DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
    	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
@@ -457,7 +465,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    	     dotSize=NULL
    	  }
       if(!missing(report)) {
-         report = pv.RangedData2Peaks(report)
+         report = pv.DataType2Peaks(report)
       }  	  
    	  DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,method=method,th=th,
    	                       bUsePval=bUsePval,report=report,bPCA=T,minval=minval,maxval=maxval)
@@ -549,7 +557,7 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
 {
 
    if(!missing(mask)) {
-      overlaps = dba.overlap(DBA,mask,mode=DBA_OLAP_PEAKS,bRangedData=F)
+      overlaps = dba.overlap(DBA,mask,mode=DBA_OLAP_PEAKS,DataType=DBA_DATA_FRAME)
       
       res = pv.whichPeaksets(DBA,mask)
       if(missing(label1)) {
@@ -574,7 +582,7 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
          label3 = "C"
       }
       for(i in 1:length(overlaps)) {
-         overlaps[[i]] = pv.RangedData2Peaks(overlaps[[i]])
+         overlaps[[i]] = pv.DataType2Peaks(overlaps[[i]])
       }
    }
          
@@ -679,8 +687,13 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
       }
    }
    
-   if(is.null(res$config$RangedData)) {
-      res$config$RangedData=F
+   if(is.null(res$config$DataType)) {
+   	  res$config$DataType=DBA_DATA_DEFAULT
+      if(!is.null(res$config$RangedData)) {
+         if(res$config$RangedData==F) {
+            res$config$DataType=DBA_DATA_FRAME   	
+         } 
+      }
    }
    
    if(is.null(res$config$saveDir)) {

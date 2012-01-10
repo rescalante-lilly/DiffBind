@@ -358,8 +358,12 @@ pv.contrast2 = function(vectors,n1,n2,minVal=0){
       if(is.null(nrow(res[[i]]))){
          res[[i]] = as.matrix(t(res[[i]]))
       }
-   }	
-
+   }
+   
+   colnames(res[[1]]) = c("chr","start","end","score")	
+   colnames(res[[2]]) = c("chr","start","end","score")	
+   colnames(res[[3]]) = c("chr","start","end","scoreA","scoreB")	
+   
    return(res)   	
 }
 
@@ -390,12 +394,12 @@ pv.contrast3 = function(vectors,n1,n2,n3,minVal=0){
    v3 = v3 & !notB
    notC   = !v3 &  (v1 | v3)       
 	    
-   res = list(onlyA = vectors[onlyA,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          onlyB = vectors[onlyB,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          onlyC = vectors[onlyC,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          notA  = vectors[notA,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          notB  = vectors[notB,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          notC  = vectors[notC,c(1:3,(n1+3),(n2+3),(n3+3))],
+   res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
+   	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
+   	          onlyC = vectors[onlyC,c(1:3,(n3+3))],
+   	          notA  = vectors[notA,c(1:3,(n2+3),(n3+3))],
+   	          notB  = vectors[notB,c(1:3,(n1+3),(n3+3))],
+   	          notC  = vectors[notC,c(1:3,(n1+3),(n2+3))],
    	          inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3))])      
    
    for(i in 1:7){
@@ -403,6 +407,14 @@ pv.contrast3 = function(vectors,n1,n2,n3,minVal=0){
          res[[i]] = as.matrix(t(res[[i]]))
       }
    }	
+
+   colnames(res[[1]]) = c("chr","start","end","score")	
+   colnames(res[[2]]) = c("chr","start","end","score")	
+   colnames(res[[3]]) = c("chr","start","end","score")	
+   colnames(res[[4]]) = c("chr","start","end","scoreB","scoreC")
+   colnames(res[[5]]) = c("chr","start","end","scoreA","scoreC")
+   colnames(res[[6]]) = c("chr","start","end","scoreA","scoreB")
+   colnames(res[[7]]) = c("chr","start","end","scoreA","scoreB","scoreC")
            
    return(res)
 }
@@ -957,6 +969,14 @@ pv.check = function(pv) {
    	     minOverlap = pv$minOverlap
    	  }
       pv = pv.vectors(pv,minOverlap=minOverlap)
+   }
+   if(is.null(pv$config$DataType)) {
+   	  pv$config$DataType=DBA_DATA_DEFAULT
+      if(!is.null(pv$config$RangedData)) {
+         if(pv$config$RangedData==F) {
+            pv$config$DataType=DBA_DATA_FRAME   	
+         } 
+      }
    }
    return(pv)
 }

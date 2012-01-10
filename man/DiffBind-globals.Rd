@@ -20,6 +20,10 @@
 \alias{DBA_EDGER}
 \alias{DBA_DESEQ}
 \alias{DBA_EDGER_BLOCK}
+\alias{DBA_DATA_FRAME}
+\alias{DBA_DATA_GRANGES}
+\alias{DBA_DATA_RANGEDDATA}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Constant variables used in DiffBind package
@@ -48,9 +52,14 @@ DBA_SCORE_RPKM
 DBA_SCORE_READS_FOLD
 DBA_SCORE_READS_MINUS
 DBA_SCORE_RPKM_FOLD
+
 DBA_EDGER
 DBA_DESEQ
 DBA_EDGER_BLOCK
+
+DBA_DATA_FRAME
+DBA_DATA_GRANGES
+DBA_DATA_RANGEDDATA
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -116,6 +125,16 @@ differential analysis method: DESeq
 }
 \item{DBA_EDGER_BLOCK}{
 differential analysis method: edgeR with blocking factor
+}
+
+\item{DBA_DATA_GRANGES}{
+Use GRanges class for peaksets and reports. This is the  default (DBA$config$DataType = DBA_DATA_GRANGES).
+}
+\item{DBA_DATA_RANGEDDATA}{
+Use RangedData class for peaksets and reports. Can be set as default (DBA$config$DataType = DBA_DATA_RANGEDDATA).
+}
+\item{DBA_DATA_FRAME}{
+Use data.frame class for peaksets and reports. Can be set as default (DBA$config$DataType = DBA_DATA_FRAME).
 }
 }
 %\details{

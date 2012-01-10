@@ -38,7 +38,10 @@ export(dba,
        DBA_SCORE_READS_MINUS,
        DBA_EDGER,
        DBA_EDGER_BLOCK,
-       DBA_DESEQ)
+       DBA_DESEQ,
+       DBA_DATA_FRAME,
+       DBA_DATA_RANGEDDATA,
+       DBA_DATA_GRANGES)
 
 exportClasses("DBA")
 
@@ -67,6 +70,8 @@ import(edgeR)
 importFrom(gplots, heatmap.2)
 
 import(IRanges)
+
+import(GenomicRanges)
 
 importFrom(graphics, abline, boxplot, plot, points, smoothScatter)
 

@@ -12,7 +12,7 @@ dba.report(DBA, contrast=1, method=DBA$config$AnalysisMethod,
            th=.1, bUsePval=FALSE, fold=0,  bNormalized=TRUE,  
            bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
            file,initString=DBA$config$reportInit,ext='csv',
-           bRangedData=DBA$config$RangedData)
+           DataType=DBA$config$DataType)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,8 +65,14 @@ if saving to a file, pre-pend this string to the filename.
   \item{ext}{
 if saving to a file, append this extension to the filename.
 }
- \item{bRangedData}{
-logical indicating whether the report should be returned as a RangedData object. Can be set as default behavior by setting DBA$config$RangedData=TRUE.
+\item{DataType}{
+The class of object for returned report:
+\itemize{
+\item DBA_DATA_GRANGES
+\item DBA_DATA_RANGEDDATA
+\item DBA_DATA_FRAME
+}
+Can be set as default behavior by setting DBA$config$DataType.
 }
 }
 %\details{

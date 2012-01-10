@@ -46,7 +46,7 @@ pv.writePeakset = function(pv,fname,peaks,numCols=4){
          bed = pv.do_peaks2bed(peaks,pv$chrmap,fname,numCols=numCols)
       }
    } else {
-      bed = pv.do_peaks2bed(pv$vectors,pv$chrmap,fname,numCols=length(pv$peaks))
+      bed = pv.do_peaks2bed(pv$vectors,pv$chrmap,fname,numCols=ncol(pv$vectors))
    }
 
    return(bed)

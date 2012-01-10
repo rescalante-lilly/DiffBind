@@ -11,7 +11,7 @@ Computes binding overlaps and co-occupancy statistics
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
             contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
             report, byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
-            bRangedData=DBA$config$RangedData)
+            DataType=DBA$config$DataType)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -83,8 +83,14 @@ when computing co-occupancy statistics (DBA_OLAP_ALL), logical indicating that o
 when computing co-occupancy statistics (DBA_OLAP_ALL), method to use when computing correlations.
 }
 
-\item{bRangedData}{
-logical indicating whether, if mode==DBA_OLAP_PEAKS, the peaksets should be returned as RangedData objects. Can be set as default behavior by setting DBA$config$RangedData=TRUE.
+\item{DataType}{
+if mode==DBA_OLAP_PEAKS, the class of object that peaksets should be returned as:
+\itemize{
+\item DBA_DATA_GRANGES
+\item DBA_DATA_RANGEDDATA
+\item DBA_DATA_FRAME
+}
+Can be set as default behavior by setting DBA$config$DataType.
 }
 
 }
