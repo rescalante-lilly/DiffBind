@@ -331,7 +331,7 @@ pv.listaddto = function(a,b){
 }
 
 fdebug = function(str,file='debug.txt'){
-   
+
    if(PV_DEBUG == FALSE){
       return
    }

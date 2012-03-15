@@ -57,7 +57,7 @@ DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
-               config=data.frame(RunParallel=TRUE, reportInit="DBA"),
+               config=data.frame(RunParallel=FALSE, reportInit="DBA"),
                caller="raw", skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
@@ -78,7 +78,7 @@ dba = function(DBA,mask, minOverlap=2,
       res$config$parallelPackage=DBA_PARALLEL_MULTICORE
    }
    if(is.null(res$config$RunParallel)){
-      res$config$RunParallel=T
+      res$config$RunParallel=F # Turn off parallel by default until issue is resolved
    }
    if(is.null(res$config$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER

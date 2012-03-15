@@ -1,6 +1,13 @@
 pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
                   minMembers=3,bParallel=F, block) {
   
+   if(bParallel) {
+      setParallel = TRUE
+      bParallel   = FALSE
+   } else {
+      setParallel = FALSE
+   }
+   
    if(is.null(pv$contrasts)) {
    	  if(missing(block)) {
    	  	 pv = pv.contrast(pv,minMembers=minMembers)
@@ -47,7 +54,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
      } else {
         results = pv.listadd(results, pv.allDEedgeR(pv,block=block,
                                                     bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
-                                                    bParallel=F,bTagwise=bTagwise))
+                                                    bParallel=setParallel,bTagwise=bTagwise))
      }
   }
    if('DESeq' %in% method) {
@@ -65,7 +72,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
                                                     bParallel=T))
       } else {
          results = pv.listadd(results,pv.allDESeq(pv,bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
-                              bTagwise=bTagwise,bParallel=F))
+                              bTagwise=bTagwise,bParallel=setParallel))
       }
    }     
   if('t-test' %in% method) {
@@ -74,7 +81,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
        params = dba.parallel.params(pv$config,c('pv.Ttests'))
        jobs =  pv.listadd(jobs,dba.parallel.addjob(pv$config,params,pv.Ttests,pv,bParallel=T))
      } else {
-       results = pv.listadd(results,pv.Ttests(pv,bParallel=F))
+       results = pv.listadd(results,pv.Ttests(pv,bParallel=setParallel))
      }
   }
   
