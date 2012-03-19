@@ -3,6 +3,7 @@
 \alias{DBA_FACTOR}
 \alias{DBA_TISSUE}
 \alias{DBA_CONDITION}
+\alias{DBA_TREATMENT}
 \alias{DBA_REPLICATE}
 \alias{DBA_CALLER}
 \alias{DBA_CONSENSUS}
@@ -13,13 +14,21 @@
 \alias{DBA_OLAP_RATE}
 \alias{DBA_SCORE_READS}
 \alias{DBA_SCORE_READS_MINUS}
-\alias{DBA_SCORE_RPKM}
 \alias{DBA_SCORE_READS_FOLD}
+\alias{DBA_SCORE_RPKM}
 \alias{DBA_SCORE_RPKM_FOLD}
-\alias{DBA_SCORE_RPKM_MINUS}
+\alias{DBA_SCORE_TMM_READS_FULL}
+\alias{DBA_SCORE_TMM_READS_EFFECTIVE}
+\alias{DBA_SCORE_TMM_MINUS_FULL}
+\alias{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 \alias{DBA_EDGER}
 \alias{DBA_DESEQ}
 \alias{DBA_EDGER_BLOCK}
+\alias{DBA_DESEQ_BLOCK}
+\alias{DBA_EDGER_CLASSIC}
+\alias{DBA_DESEQ_CLASSIC}
+\alias{DBA_EDGER_GLM}
+\alias{DBA_DESEQ_GLM}
 \alias{DBA_DATA_FRAME}
 \alias{DBA_DATA_GRANGES}
 \alias{DBA_DATA_RANGEDDATA}
@@ -36,6 +45,7 @@ DBA_ID
 DBA_FACTOR
 DBA_TISSUE
 DBA_CONDITION
+DBA_TREATMENT
 DBA_REPLICATE
 DBA_CALLER
 DBA_CONSENSUS
@@ -48,14 +58,23 @@ DBA_OLAP_ALL
 DBA_OLAP_RATE
 
 DBA_SCORE_READS
-DBA_SCORE_RPKM
-DBA_SCORE_READS_FOLD
 DBA_SCORE_READS_MINUS
+DBA_SCORE_READS_FOLD
+DBA_SCORE_RPKM
 DBA_SCORE_RPKM_FOLD
+DBA_SCORE_TMM_READS_FULL
+DBA_SCORE_TMM_READS_EFFECTIVE
+DBA_SCORE_TMM_MINUS_FULL
+DBA_SCORE_TMM_MINUS_EFFECTIVE
 
 DBA_EDGER
 DBA_DESEQ
 DBA_EDGER_BLOCK
+DBA_DESEQ_BLOCK
+DBA_EDGER_CLASSIC
+DBA_DESEQ_CLASSIC
+DBA_EDGER_GLM
+DBA_DESEQ_GLM
 
 DBA_DATA_FRAME
 DBA_DATA_GRANGES
@@ -76,23 +95,25 @@ DBA peakset metadata: Tissue
 \item{DBA_CONDITION}{
 DBA peakset metadata: Condition
 }
+\item{DBA_TREATMENT}{
+DBA peakset metadata: Treatment
+}
 \item{DBA_REPLICATE}{
 DBA peakset metadata: Replicate
 }
 \item{DBA_CALLER}{
 DBA peakset metadata: Peak Caller
 }
-
 \item{DBA_CONSENSUS}{
 DBA peakset metadata: Is this a consensus peakset?
 }
-
 \item{DBA_CONTROL}{
 DBA peakset metadata: ID of Control sample
 }
 \item{DBA_GROUP}{
 DBA peakset metadata: color PCA plot using contras groups
 }
+
 \item{DBA_OLAP_PEAKS}{
 dba.overlap mode: return overlapping/unique peaksets
 }
@@ -102,29 +123,59 @@ dba.overlap mode: return report of correlations/overlaps for each pair of sample
 \item{DBA_OLAP_RATE}{
 dba.overlap mode: return overlap rates
 }
+
 \item{DBA_SCORE_READS}{
-dba.count score should be number of reads
-}
-\item{DBA_SCORE_RPKM}{
-dba.count score should be RPKM
+dba.count score is number of reads in ChIP
 }
 \item{DBA_SCORE_READS_FOLD}{
-dba.count score should be number of reads divided by number of reads in control
+dba.count score is number of reads in ChIP divided by number of reads in Control
 }
 \item{DBA_SCORE_READS_MINUS}{
-dba.count score should be number of reads minus  number of reads in control
+dba.count score is number of reads in ChIP minus  number of reads in Control
+}
+\item{DBA_SCORE_RPKM}{
+dba.count score is RPKM of ChIP 
 }
 \item{DBA_SCORE_RPKM_FOLD}{
-dba.count score should be RPKM divided by RPKM of control
+dba.count score is RPKM of ChIP divided by RPKM of Control
 }
+\item{DBA_SCORE_TMM_READS_FULL}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts and Full Library size
+}
+\item{DBA_SCORE_TMM_READS_EFFECTIVE}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts and Effective Library size
+}
+\item{DBA_SCORE_TMM_MINUS_FULL}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Full Library size
+}
+\item{DBA_SCORE_TMM_MINUS_EFFECTIVE}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Effective Library size
+}
+
 \item{DBA_EDGER}{
-differential analysis method: edgeR
+differential analysis method: edgeR (default: DBA_EDGER_GLM)
 }
 \item{DBA_DESEQ}{
-differential analysis method: DESeq
+differential analysis method: DESeq (default: DBA_DESEQ_CLASSIC)
+}
+
+\item{DBA_EDGER_CLASSIC}{
+differential analysis method: "classic" edgeR for two-group comparisons
+}
+\item{DBA_DESEQ_CLASSIC}{
+differential analysis method: "classic" DESeq for two-group comparisons
+}
+\item{DBA_EDGER_GLM}{
+differential analysis method: use GLM in edgeR for two-group comparisons
+}
+\item{DBA_DESEQ_GLM}{
+differential analysis method: use GLM in DESeq for two-group comparisons
 }
 \item{DBA_EDGER_BLOCK}{
-differential analysis method: edgeR with blocking factor
+differential analysis method: edgeR with blocking factors (GLM)
+}
+\item{DBA_DESEQ_BLOCK}{
+differential analysis method: DESeq with blocking factors (GLM)
 }
 
 \item{DBA_DATA_GRANGES}{

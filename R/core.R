@@ -1,4 +1,4 @@
-##########€€€€€######################
+#####################################
 ## pv_core.R -- Peak Vectorization ##
 ## 20 October 2009                 ##
 ## 3 February 2011 -- packaged     ##
@@ -44,12 +44,14 @@ PV_READS      = 8
 PV_REPLICATE  = 9
 PV_BAMREADS   = 10
 PV_BAMCONTROL = 11
+PV_TREATMENT  = 12
 
 PV_DEBUG = FALSE
 
 ###########################################
+
 ## pv.peakset -- add a peakset to the model
-pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate,
+pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment, replicate,
                       control, peak.caller,reads=0, consensus=F, readBam, controlBam,
                       bNormCol=4, bRemoveM=T, bRemoveRandom=T,
                       minOverlap=2,bFast=F,bMakeMasks=T,skipLines=1){
@@ -74,6 +76,7 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
       if(!missing(tissue))      pv$class[PV_TISSUE,nset]=tissue
       if(!missing(factor))      pv$class[PV_FACTOR,nset]=factor
       if(!missing(condition))   pv$class[PV_CONDITION,nset]=condition
+      if(!missing(treatment))   pv$class[PV_TREATMENT,nset]=treatment
       if(!missing(replicate))   pv$class[PV_REPLICATE,nset]=replicate
       if(!missing(control))     pv$class[PV_CONTROL,nset]=control
       if(!missing(peak.caller)) pv$class[PV_CALLER,nset]=peak.caller
@@ -85,6 +88,7 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
    if(missing(tissue))       tissue=''
    if(missing(factor))       factor=''
    if(missing(condition))    condition=''
+   if(missing(treatment))    treatment=''
    if(missing(replicate))    replicate=''
    if(missing(control))      control=''
    if(missing(peak.caller))  peak.caller=''
@@ -92,7 +96,8 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
    if(length(readBam)==0)    readBam=NA
    if(missing(controlBam))   controlBam=NA
    if(length(controlBam)==0) controlBam=NA
-                        
+   
+   bNormCol=0                     
    if(is.character(peaks)){
       pcaller = strtrim(peak.caller,6)
       if        (pcaller == 'macs') {
@@ -127,8 +132,8 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
       }
    }
    
-   if(ncol(peaks)==3) {
-      peaks = cbind(peaks,1)
+   if(ncol(peaks)< bNormCol) {
+      peaks = cbind(peaks[,1:3],1)
       bNormCol = 0
    }
       
@@ -171,11 +176,12 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, replicate
       }
    }
    clascol = cbind(NULL,c(sampID,tissue,factor,condition,consensus,peak.caller,control,
-                          reads,replicate,readBam,controlBam))
+                          reads,replicate,readBam,controlBam,treatment))
    colnames(clascol) = sampID
    pv$class = cbind(pv$class,clascol)
-   rownames(pv$class) = c("ID","Tissue","Factor","Condition",
-                              "Consensus","Peak caller","Control","Reads","Replicate","bamRead","bamControl")
+   rownames(pv$class) = c("ID","Tissue","Factor","Condition", "Consensus",
+                          "Peak caller","Control","Reads","Replicate","bamRead",
+                          "bamControl","Treatment")
    pv$vectors = pv$allvectors = NULL                            
    if(bMakeMasks) {
       pv$masks = pv.mask(pv)
@@ -332,7 +338,7 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
 }
 
 ## pv.list -- list attributes of samples in model
-pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_CALLER,PV_REPLICATE)
+pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_REPLICATE,PV_CALLER)
 pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F){
  
    if(!missing(mask)){
@@ -374,6 +380,23 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    }
    res = cbind(res,intervals)
    colnames(res)[ncol(res)]='Intervals'
+   
+   j = ncol(res)
+   for(i in j:1) {
+      x = unique(res[,i])
+      if(colnames(res)[i]=='Peak caller') {
+         if(all.equal(attributes,pv.deflist) == TRUE) {
+            if(length(x)==1) {
+               res = res[,-i]	
+            }
+         }
+      } else {
+         if(length(x)==1 && x[1]=="") {
+            res = res[,-i]	
+         }    	
+      }
+   }
+   
    return(data.frame(res))
 }
 
@@ -460,6 +483,7 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F){
                    tissue      = pv.catstr(pv$class[PV_TISSUE, sampvec]),
                    factor      = pv.catstr(pv$class[PV_FACTOR, sampvec]),
                    condition   = pv.catstr(pv$class[PV_CONDITION, sampvec]),
+                   treatment   = pv.catstr(pv$class[PV_TREATMENT, sampvec]),
                    peak.caller = pv.catstr(pv$class[PV_CALLER, sampvec]),
                    control     = pv.catstr(pv$class[PV_CONTROL, sampvec]),
                    reads       = mean(as.numeric(pv$class[PV_READS, sampvec])),
@@ -494,7 +518,7 @@ pv.mask = function(pv,attribute,value,combine='or',mask,merge='or',bApply=F){
    
    if(missing(attribute)) {
       masks = NULL
-      for(att in c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_CALLER)) {
+      for(att in c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_CALLER)) {
          vals = unique(pv$class[att,])
          for (v in vals) {
          	res = list(x=pv.mask(pv,att,v))
@@ -983,16 +1007,39 @@ pv.occupancy = function(pv,mask,sites,byAttribute,Sort='inall',CorMethod="pearso
    return(res)	
 }
 
-#dba.reset <- function(){
-#detach(package:DBA)
-#system("R CMD INSTALL ~/packages/dba/")
-#library(DBA)
-#}
 
 ## pv.plotBoxplot -- Boxplots
-pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=F, bNormalized=T, attribute=DBA_GROUP, 
-                                     bAll=F, bAllIncreased=F, bAllDecreased=F, bDB=F, bDBIncreased=T, bDBDecreased=T,
-                                     pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, vColors, varwidth=T, notch=T, ...) {
+pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F, bNormalized=T, attribute=DBA_GROUP, 
+                          bAll, bAllIncreased, bAllDecreased, bDB, bDBIncreased, bDBDecreased,
+                          pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, vColors, varwidth=T, notch=T, ...) {
+
+   if(missing(bAll) && missing(bAllIncreased) && missing(bAllDecreased)) {
+     bMissingAll = T	
+   } else bMissingAll = F
+
+   if(missing(bDB) && missing(bDBIncreased) && missing(bDBDecreased)) {
+     bMissingDB = T	
+   } else bMissingDB = F
+   
+   if(missing(contrast)) {
+      if(bMissingAll) {
+         bAll          = T
+         bAllIncreased = F
+         bAllDecreased = F
+         bDB           = F
+         bDBIncreased  = F
+         bDBDecreased  = F         	
+      }	
+   } else {
+      if(bMissingAll && bMissingDB) {
+         bAll          = F
+         bAllIncreased = F
+         bAllDecreased = F
+         bDB           = T
+         bDBIncreased  = F
+         bDBDecreased  = F   
+      }	
+   }
 
    if(missing(vColors)) {
       vColors = pv.colsv
@@ -1029,6 +1076,8 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
          groups = pv.listadd(groups,classes[PV_ID, classes[attribute,]==name])   
       }
    }
+   
+   subtitle = FALSE
    
    if(bAll | bAllIncreased | bAllDecreased) {
       report = pv.DBAreport(DBA, contrast=contrast, method = method,th=1,bNormalized=bNormalized,bCounts=T)
@@ -1071,7 +1120,8 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
       }      
       toplot   = c(toplot,res)
       vnames = c(vnames,rep("+",numPlots))
-      vcols    = c(vcols,cols)   
+      vcols    = c(vcols,cols)
+      subtitle = TRUE   
    }
    
    if(bAllDecreased) {
@@ -1081,7 +1131,8 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
       }          
       toplot   = c(toplot,res)
       vnames = c(vnames,rep("-",numPlots))
-      vcols    = c(vcols,cols)   
+      vcols    = c(vcols,cols)
+      subtitle = TRUE      
    }
    
    
@@ -1122,7 +1173,8 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
       }
       toplot = c(toplot,res)
       vnames = c(vnames,rep("+",numPlots))
-      vcols = c(vcols,cols)   
+      vcols = c(vcols,cols) 
+      subtitle = TRUE     
    }
    
    if(bDBDecreased) {
@@ -1132,7 +1184,8 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
       }     
       toplot = c(toplot,res)
       vnames = c(vnames,rep("-",numPlots))
-      vcols = c(vcols,cols)   
+      vcols = c(vcols,cols) 
+      subtitle = TRUE     
    }
    
    if(bNormalized==T) {
@@ -1141,11 +1194,15 @@ pv.plotBoxplot = function(DBA, contrast=1, method = DBA_EDGER, th=0.1, bUsePval=
      ystr = "log2 reads in binding sites"   
    }
    
+   if(subtitle == T) {
+     subt = sprintf("+ indicates sites with increased affinity in %s\n- indicates sites with increased affinity in %s",
+                    posgroup,neggroup)	
+   } else {
+     subt = ""	
+   }
    boxplot(toplot,notch=notch, varwidth=varwidth,
-              col=vcols,names=vnames,main="Binding affinity",        
-        sub=sprintf("+ indicates sites with increased affinity in %s\n- indicates sites with increased affinity in %s",
-                    posgroup,neggroup),
-               ylab=ystr)
+           col=vcols,names=vnames,main="Binding affinity",        
+           sub=subt,ylab=ystr)
 
    if(!is.null(pvalMethod)){
       pvals = matrix(1,length(toplot),length(toplot))
@@ -1168,6 +1225,4 @@ pv.box = function(ids,report) {
    res = log2(apply(report[,idx],1,mean))
    return(res)
 }
-
-
 

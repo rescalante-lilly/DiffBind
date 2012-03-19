@@ -8,7 +8,7 @@ Add a peakset to, or retrieve a peakset from, a DBA object
 Adds a peakset to, or retrieves a peakset from, a DBA object
 }
 \usage{
-dba.peakset(DBA=NULL, peaks, sampID, tissue, factor, condition, replicate,
+dba.peakset(DBA=NULL, peaks, sampID, tissue, factor, condition, treatment, replicate,
             control, peak.caller, reads=0, consensus=FALSE, 
             bamReads, bamControl,
             normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
@@ -49,6 +49,9 @@ factor name for the peakset being added; if missing, one is assigned for a conse
 }
   \item{condition}{
 condition name for the peakset being added; if missing, one is assigned for a consensus peakset (a concatenation of conditions).
+}
+  \item{treatment}{
+treatment name for the peakset being added; if missing, one is assigned for a consensus peakset (a concatenation of treatment).
 }
   \item{replicate}{
 replicate number for the peakset being added; if missing, one is assigned for a consensus peakset (a concatenation of replicate numbers).

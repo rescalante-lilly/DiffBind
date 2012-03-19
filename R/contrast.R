@@ -8,14 +8,14 @@ pv.contrast = function(pv,group1,group2=!group1,name1="group1",name2="group2",
    	  
       if( (sum(pv.mask(pv,PV_CALLER,'source'))==0) &
           (sum(pv.mask(pv,PV_CALLER,'counts'))==0) ) {
-         warning('Model must include count data for contrasts.')
+         warning('Model must include count data for contrasts.',call.=F)
          return(pv)
       }
       
       pv$contrasts = NULL # clear existing contrasts
       
    	  if(missing(categories)) {
-   	     attributes = c(PV_TISSUE,PV_FACTOR,PV_CONDITION)
+   	     attributes = c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT)
    	  } else {
    	     attributes=categories
    	  }
@@ -33,14 +33,26 @@ pv.contrast = function(pv,group1,group2=!group1,name1="group1",name2="group2",
       if(!is.null(res)) {
          res = pv.contrastDups(res)
       } else {
-         warning("No contrasts added. Perhaps try with lower value for minMembers?")	
+         warning("No contrasts added. Perhaps try more categories, or lower value for minMembers.",call.=F)	
       }
       if(!missing(block)){
+         problem = NULL
+      	 issues = 0
          for(i in 1:length(res)){
-            if(!pv.checkBlock(res[[i]])){
-               warning("Blocking factor has unmatched sample(s).")
-               #res[[i]]$blocklist = NULL   		
+            if(!pv.checkBlock(res[[i]],bWarning=F)){
+               #warning("Blocking factor has unmatched sample(s).")
+               issues = issues+1
+               problem = res[[i]]
+               res[[i]]$blocklist = NULL   		
             }
+         }
+         if(issues > 0) {
+            if(issues < length(res)) {
+               warning('Blocking factor not used for some contrasts:',call.=F)	
+            } else {
+               warning('Blocking factor invalid for all contrasts:',call.=F)
+            }
+            x = pv.checkBlock(problem)		
          }      	
       }
    } else {
@@ -48,15 +60,15 @@ pv.contrast = function(pv,group1,group2=!group1,name1="group1",name2="group2",
       if(!missing(block)) {
          res$contrasts[[length(res$contrasts)]]$blocklist = pv.BlockList(pv,block)
          if(!pv.checkBlock(res$contrasts[[length(res$contrasts)]])) {
-            warning("Blocking factor has unmatched sample(s).")
-            #res$contrasts[[length(res$contrasts)]]$blocklist = NULL   	
+            #warning("Blocking factor has unmatched sample(s).")
+            res$contrasts[[length(res$contrasts)]]$blocklist = NULL   	
          }
       }
       if(!is.null(res$contrasts)) {
          res$contrasts = pv.contrastDups(res$contrasts)	
       }
       if(length(res$contrasts) == numStart) {
-         warning('Unable to add redundant contrast.')  	
+         warning('Unable to add redundant contrast.',call.=F)  	
       }
       return(res)
    }
@@ -67,15 +79,15 @@ pv.contrast = function(pv,group1,group2=!group1,name1="group1",name2="group2",
 
 }
 
-pv.getContrasts = function(pv,minMembers=3,attributes=c(PV_TISSUE,PV_FACTOR,PV_CONDITION),block){
+pv.getContrasts = function(pv,minMembers=3,attributes=c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT),block){
 
    srcidx =  pv.mask(pv,PV_CALLER,"source") | pv.mask(pv,PV_CALLER,"counts")
    mdata = pv$class[,srcidx]
    
    if(!missing(block)) {
-   	  if(block != PV_REPLICATE) {
-   	     warning('Unsupported blocking attribute')
-   	  }
+   	  #if(block != PV_REPLICATE) {
+   	  #   warning('Unsupported blocking attribute')
+   	  #}
       block = pv.BlockList(pv,block)
    } else block = NULL
    
@@ -119,7 +131,7 @@ pv.getContrasts = function(pv,minMembers=3,attributes=c(PV_TISSUE,PV_FACTOR,PV_C
    return(jobs)   
 }
 
-pv.contrastPairs = function(pv,minMembers=3,attributes=c(PV_TISSUE,PV_FACTOR,PV_CONDITION),block=NULL,conlist=NULL) {
+pv.contrastPairs = function(pv,minMembers=3,attributes=c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT),block=NULL,conlist=NULL) {
    
    if(length(attributes)==1) {
       return(pv$contrasts)
@@ -267,28 +279,105 @@ pv.contrastDups = function(clist) {
 
 pv.BlockList = function(pv,attribute=PV_REPLICATE) {
 
-   vals    = sort(unique(pv$class[attribute,]))
-   attname = rownames(pv$class)[attribute]
-   res = NULL
-   for(val in vals) {
-   	  newmask = pv.mask(pv,attribute,val)
-      res = pv.listadd(res,list(attribute=attname,label=val,samples=newmask))   
+   if(is.numeric(attribute)) {
+      if(length(attribute)>1) {
+         vec = rep(F,length(pv$peaks))
+         vec[attribute]=T
+         attribute=vec	
+      }
    }
+   if(class(attribute)=='numeric') {   
+      vals    = sort(unique(pv$class[attribute,]))
+      attname = rownames(pv$class)[attribute]
+      if(attname == 'Peak caller') {
+         attname = 'Caller'
+      }
+      res = NULL
+      for(val in vals) {
+   	     newmask = pv.mask(pv,attribute,val)
+         res = pv.listadd(res,list(attribute=attname,label=val,samples=newmask))   
+      }
+   } else { #logical vector(s)
+      if(class(attribute)=='logical') {
+      	 if(length(attribute)!=length(pv$peaks)) {
+      	    stop('Length of attribute vector must equal total number of peaksets.')	
+      	 }
+         attribute = list(true=attribute,false=!attribute)	
+      }
+      if(class(attribute)!='list') {
+         stop('attribute must be a DBA_ attribute, a logical vector, or a list of logical vectors.')	
+      }
+      attname = 'Block'
+      if(is.null(names(attribute))) {
+         names(attribute) = 1:length(attribute)
+      }
+      res = NULL
+      hasatt = rep(F,length(pv$peaks))
+      for (i in 1:length(attribute)) {
+      	 att = attribute[[i]]
+      	 if(is.numeric(att)) {
+      	 	att = rep(F,length(pv$peaks))
+      	 	att[attribute[[i]]]=T
+      	 }
+      	 hasatt = hasatt | att
+         res = pv.listadd(res,list(attribute=attname,label=names(attribute)[i],samples=att))	
+      }
+      if(sum(!hasatt)>0) {
+         res = pv.listadd(res,list(attribute=attname,label="other",samples=!hasatt))	
+      }
+   }
+   
    return(res)	
 }
 
-pv.checkBlock = function(contrast) {
+pv.checkBlock = function(contrast,bCheckBalanced=F,bCheckMultiple=T,bCheckCross=T,bCheckUnique=T,bWarning=T) {
    
-   if(sum(contrast$group1)!=sum(contrast$group2)) {
-      return(FALSE)	
+   if(bCheckBalanced){
+      if(sum(contrast$group1)!=sum(contrast$group2)) {
+         if(bWarning) warning("Blocking factor has unmatched sample(s).",call.=F)
+         return(FALSE)	
+      }
+   
+      for(att in contrast$blocklist) {
+         if(sum(contrast$group1 & att$samples) != sum(contrast$group2 & att$samples)) {
+            if(bWarning) warning("Blocking factor has unmatched sample(s).",call.=F)
+            return(FALSE)
+         }
+      }
    }
    
-   for(att in contrast$blocklist) {
-      if(sum(contrast$group1 & att$samples) != sum(contrast$group2 & att$samples)) {
+   if(bCheckMultiple) {
+      if(length(contrast$blocklist)<2) {
+         if(bWarning) warning('Blocking factor has only one value',call.=F)
+         return(FALSE)	
+      }	
+   }
+   
+   if(bCheckCross) {
+   	  cross = FALSE
+      for(att in contrast$blocklist) {
+         if(sum(contrast$group1 & att$samples) & sum(contrast$group2 & att$samples)) {
+            cross = TRUE
+         }
+      }
+      if(!cross) {
+         if(bWarning) warning('No blocking values are present in both groups',call.=F)	
          return(FALSE)
       }
    }
-
+   
+   if(bCheckUnique) {
+      unique = rep(0,sum(contrast$group1)+sum(contrast$group2)) 	
+      for(att in contrast$blocklist) {
+         unique = unique + (contrast$group1 & att$samples)
+         unique = unique + (contrast$group2 & att$samples)	
+      }
+      if(sum(unique>1)>0) {
+         if(bWarning) warning('Some sample(s) have more than one value for blocking factor',call.=F)	
+         return(FALSE)
+      }
+   }
+   
    return(TRUE)
 }
 
@@ -308,6 +397,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
    edger   = F
    deseq   = F
    edgerlm = F
+   deseqlm = F
    for(crec in clist) {
       newrec = c(crec$name1,sum(crec$group1),crec$name2,sum(crec$group2))
       bvals = 0
@@ -326,6 +416,9 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       if(!is.null(crec$DESeq)) {
          deseq = T
       }
+      if(!is.null(crec$DESeq$block)) {
+         deseqlm = T
+      }
       
       res = rbind(res,newrec)
    }
@@ -339,14 +432,22 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
    if(edger) {
       for(crec in clist) {
          if(!is.null(names(crec$edgeR))){
-            if(bUsePval) {
-               #eres = c(eres,sum(crec$edgeR$db$fdr$table[,EDGER_COL_PVAL]<=th,na.rm=T))
-               eres = c(eres,sum(topTags(crec$edgeR$db,
-                                 nrow(crec$edgeR$db$counts))$table[,EDGER_COL_PVAL]<=th,na.rm=T))
+         	if(is.null(crec$edgeR$LRT)) {  
+               if(bUsePval) {
+                  eres = c(eres,sum(topTags(crec$edgeR$db,
+                                            nrow(crec$edgeR$db$counts))$table[,EDGER_COL_PVAL]<=th,na.rm=T))
+               } else {
+                  eres = c(eres,sum(topTags(crec$edgeR$db,
+                                            nrow(crec$edgeR$db$counts))$table[,EDGER_COL_FDR]<=th,na.rm=T))
+               } 
             } else {
-               #eres = c(eres,sum(crec$edgeR$db$fdr$table[,EDGER_COL_FDR]<=th,na.rm=T))
-               eres = c(eres,sum(topTags(crec$edgeR$db,
-                             nrow(crec$edgeR$db$counts))$table[,EDGER_COL_FDR]<=th,na.rm=T))
+               if(bUsePval) {
+                  eres = c(eres,sum(topTags(crec$edgeR$LRT,
+                                            nrow(crec$edgeR$db$counts))$table[,EDGER_COL_PVAL+1]<=th,na.rm=T))
+               } else {
+                  eres = c(eres,sum(topTags(crec$edgeR$LRT,
+                                            nrow(crec$edgeR$db$counts))$table[,EDGER_COL_FDR+1]<=th,na.rm=T))
+               } 
             }
          } else {
             eres = c(eres,"?")   
@@ -361,11 +462,9 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       for(crec in clist) {
          if(!is.null(names(crec$edgeR$block))){
             if(bUsePval) {
-               #eres = c(eres,sum(crec$edgeR$block$fdr$table[,EDGER_COL_PVAL]<=th,na.rm=T))
                eres = c(eres,sum(topTags(crec$edgeR$block$LRT,
                                  nrow(crec$edgeR$block$counts))$table[,EDGER_COL_PVAL+1]<=th,na.rm=T))
             } else {
-               #eres = c(eres,sum(crec$edgeR$block$fdr$table[,EDGER_COL_FDR]<=th,na.rm=T))
                eres = c(eres,sum(topTags(crec$edgeR$block$LRT,
                                  nrow(crec$edgeR$block$counts))$table[,EDGER_COL_FDR+1]<=th,na.rm=T))
             }
@@ -393,8 +492,69 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       res = cbind(res,eres)
       cvec = c(cvec,'DB DESeq')
    }
-      
+   
+   eres = NULL
+   if(deseqlm) {
+      for(crec in clist) {
+         if(!is.null(names(crec$DESeq$block)) && (class(crec$DESeq) != "try-error") ){
+            if(bUsePval) {
+               eres = c(eres,sum(crec$DESeq$block$de$pval<=th,na.rm=T))
+            } else {
+               eres = c(eres,sum(crec$DESeq$block$de$padj<=th,na.rm=T))
+            }
+         } else {
+            eres = c(eres,NA)   
+         }
+      }
+      res = cbind(res,eres)
+      cvec = c(cvec,'DB DESeq-block')
+   }      
    colnames(res) = cvec
    rownames(res) = 1:nrow(res)
    return(data.frame(res))
+}
+
+pv.design = function(DBA,categories=c(DBA_CONDITION,DBA_TREATMENT,DBA_TISSUE,DBA_FACTOR,DBA_REPLICATE)) {
+
+   facs = NULL
+   for(cond in categories) {
+      if(length(unique(DBA$class[cond,]))>1) {
+         facs = c(facs,cond)
+      } else {
+      	 catname = "UNKNOWN"
+         if(cond == DBA_CONDITION) {
+         	catname = "DBA_CONDITION"
+         }	
+         if(cond == DBA_TREATMENT) {
+         	catname = "DBA_TREATMENT"
+         }	
+         if(cond == DBA_TISSUE) {
+         	catname = "DBA_TISSUE"
+         }	
+         if(cond == DBA_FACTOR) {
+         	catname = "DBA_FACTOR"
+         }	
+         if(cond == DBA_REPLICATE) {
+         	catname = "DBA_REPLICATE"
+         }
+         warning(sprintf("Category %s lacks multiple unique values, ignored in design",catname),call.=F)	
+      }	
+   }
+   
+   red = DBA$class[facs,]
+   if(is.null(nrow(red))) {
+      red = matrix(red,1,length(red))
+      rownames(red) = rownames(DBA$class)[facs]
+      colnames(red) = colnames(DBA$class)
+   }
+   dmatrix = data.frame(t(red))
+   terms = colnames(dmatrix)
+   form = "~"
+   for(term in terms) {
+      form = sprintf("%s+%s",form,term)	
+   }
+   
+   design = model.matrix(as.formula(form),data=dmatrix)
+   
+   return(design)   	
 }

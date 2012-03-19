@@ -332,6 +332,8 @@ pv.listaddto = function(a,b){
 
 fdebug = function(str,file='debug.txt'){
 
+PV_DEBUG=FALSE
+   
    if(PV_DEBUG == FALSE){
       return
    }
@@ -907,11 +909,11 @@ pv.CalledMasks = function(pv,newpv,master) {
    master = cbind(master[,1:3],1)
    spare = pv.peakset(pv,master,peak.caller='raw')
    spare = pv.model(spare)
-   res = pv.list(spare,spare$masks$source)
+   res = pv.list(spare,spare$masks$counts)
    masternum = length(spare$peaks)
    resl = NULL
    for(i in 1:nrow(res)) {
-      sampl = pv.matchingSamples(res[i,],spare$class)
+      sampl = pv.matchingSamples(res[i,1],spare$class)
       sampvec = rep(F,nrow(master))
       for(samp in sampl) {
          sampvec = sampvec | pv.whichCalled(spare,samp,masternum)
@@ -922,8 +924,8 @@ pv.CalledMasks = function(pv,newpv,master) {
    return(resl)
 }
 
-pv.matchingSamples = function(sprops,classes) {
-   res = which(!classes[PV_CALLER,] %in% "source" & classes[PV_ID,] %in% sprops$ID)
+pv.matchingSamples = function(id,classes) {
+   res = which(!classes[PV_CALLER,] %in% "counts" & classes[PV_ID,] %in% id)
    return(res)  
 }
 
@@ -938,27 +940,6 @@ pv.getMatching = function(one,many) {
   z = apply(many,2,function(x,y){x==y},one)
   res = which(z[1,] & z[2,])
   return(res) 
-}
-
-pv.CalledMasks = function(pv,newpv,master){
-   numNew = length(newpv$peaks)
-   numOld = length(pv$peaks) - numNew
-   master = cbind(master[,1:3],1)
-   pv = pv.peakset(pv,master,readBam="",controlBam="")
-   pv = pv.vectors(pv,c(1:numOld,length(pv$peaks)),minOverlap=1)
-   masternum = length(pv$peaks)
-   classes = pv$class[c(PV_BAMREADS,PV_BAMCONTROL),]
-   resl = NULL
-   for(i in 1:numNew) {
-     peaksets = pv.getMatching(newpv$class[c(PV_BAMREADS,PV_BAMCONTROL),i],classes)
-     sampvec = rep(F,nrow(master))
-     for(samp in peaksets) {
-         sampvec = sampvec | pv.whichCalled(pv,samp,masternum)
-     }
-     resl = pv.listadd(resl,sampvec)
-   }
-   names(resl) = newpv$class[PV_ID,]
-   return(resl)
 }
 
 pv.check = function(pv) {
@@ -1002,29 +983,56 @@ pv.reorderM = function(ocm,dgram) {
 }
    
 pv.setScore = function(pv,score,bLog=F,minMaxval) {
-   for(i in 1:length(pv$peaks)) {
-      colnum = 3+i
-      if(score == PV_SCORE_RPKM) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
-      }   		
-      if(score == PV_SCORE_RPKM) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
-      } else if(score == PV_SCORE_RPKM_FOLD) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM/pv$peaks[[i]]$cRPKM
-         if(bLog) {
-           pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
-         }
-      } else if(score == PV_SCORE_READS) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads	
-      } else if(score == PV_SCORE_READS_FOLD) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads/pv$peaks[[i]]$cReads	
-         if(bLog) {
-           pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
-         }
-      } else if(score == PV_SCORE_READS_MINUS) {
-         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads-pv$peaks[[i]]$cReads	
-      }  
-   }   
+   
+   if(!is.null(pv$score)) {
+      if(pv$score == score) {
+         return(pv)	
+      }	
+   }
+   
+   g1mask = rep(F,length(pv$peaks))
+   g1mask[1] = T
+   g2mask = !g1mask
+   res = NULL
+   if(score == PV_SCORE_TMM_MINUS_EFFECTIVE) {
+      res   = pv.DEinit(pv,g1mask,g2mask,bSubControl=T,bFullLibrarySize=F)	
+   } else if(score == PV_SCORE_TMM_MINUS_FULL) {
+   	  res   = pv.DEinit(pv,g1mask,g2mask,bSubControl=T,bFullLibrarySize=T)	 
+   } else if(score == PV_SCORE_TMM_READS_EFFECTIVE) {
+   	  res   = pv.DEinit(pv,g1mask,g2mask,bSubControl=F,bFullLibrarySize=F)	 
+   } else if(score == PV_SCORE_TMM_READS_FULL) {
+   	  res   = pv.DEinit(pv,g1mask,g2mask,bSubControl=F,bFullLibrarySize=T)	 
+   }
+   if(!is.null(res)) {
+   	  res = calcNormFactors(res,method="TMM")
+   	  #res = estimateCommonDisp(res)
+      sizes      = res$samples$lib.size * res$samples$norm.factors
+      res$counts = t(t(res$counts)/sizes)
+      res$counts = res$counts * mean(res$samples$lib.size)
+      pv$allvectors[,4:ncol(pv$vectors)] = res$counts	
+   } else {
+      for(i in 1:length(pv$peaks)) {
+         colnum = 3+i
+         if(score == PV_SCORE_RPKM) {
+            pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
+         } else if(score == PV_SCORE_RPKM_FOLD) {
+            pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM/pv$peaks[[i]]$cRPKM
+            if(bLog) {
+              pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
+            }
+         } else if(score == PV_SCORE_READS) {
+            pv$allvectors[,colnum] = pv$peaks[[i]]$Reads	
+         } else if(score == PV_SCORE_READS_FOLD) {
+            pv$allvectors[,colnum] = pv$peaks[[i]]$Reads/pv$peaks[[i]]$cReads	
+            if(bLog) {
+              pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
+            }
+         } else if(score == PV_SCORE_READS_MINUS) {
+            pv$allvectors[,colnum] = pv$peaks[[i]]$Reads-pv$peaks[[i]]$cReads	
+         } 
+      }
+   }
+       
    pv$vectors = pv$allvectors
        
    if(!missing(minMaxval)) {
@@ -1041,9 +1049,19 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
          }
          pv = pv.vectors(pv,minOverlap=1,bAnalysis=F,bAllSame=T)
       } else {
-         stop('No sites have activity greater than minMaxval')
+         stop('No sites have activity greater than maxFilter')
       }
-   }   
+   }  
+   
+   pv$score = score
+    
+   return(pv)
+}
+
+pv.version = function(pv,V1,V2,V3) {
+   pv$config$Version1 = DBA_VERSION1
+   pv$config$Version2 = DBA_VERSION2
+   pv$config$Version3 = DBA_VERSION3
    return(pv)
 }
 

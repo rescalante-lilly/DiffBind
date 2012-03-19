@@ -10,7 +10,7 @@ Sets up contrasts for differential binding affinity analysis
 \usage{
 dba.contrast(DBA, group1, group2=!group1, name1="group1", name2="group2",
              minMembers=3, block ,
-             categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION))
+             categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION,DBA_TREATMENT))
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -45,12 +45,28 @@ when automatically generating contrasts, attribute or vector of attributes to ba
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CALLER
 }
 }
 \item{block}{
-blocking attribute for multi-factor analysis. Only when adding a specific contrast, and will only work with edgeR analysis; see dba.analysis. NOTE: only DBA_REPLICATE is supported in this release.
+blocking attribute for multi-factor analysis.  This may be specified as either a value, a vector, or a list. 
+
+If block is a value, the specified metadata field is used to derive the blocking factor. One of:
+\itemize{ 
+\item DBA_TISSUE
+\item DBA_FACTOR
+\item DBA_CONDITION
+\item DBA_TREATMENT
+\item DBA_REPLICATE
+\item DBA_CALLER
+}
+
+If block is a vector, it can either be a mask (logical vector) or a vector of peakset numbers. In this case, the peaksets indicated in the blocking vector are all given the same value (true), while any peaksets not included in the vector take the alternative value (false).
+
+If block is a list, it should be a list of vectors (either logical masks or vectors of peakset numbers), with each indicating a set of peaksets that should share the same value. Each peasket should appear at most once, and any peaksets not specified will be given an default value (other).
+
 }
 }
 \details{
@@ -97,6 +113,20 @@ tamoxifen
 # Add add default contrasts
 tamoxifen$contrasts=NULL
 tamoxifen = dba.contrast(tamoxifen)
+tamoxifen
+
+# Specify a blocking factor
+tamoxifen$contrasts=NULL
+tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION, block=DBA_TISSUE)
+tamoxifen
+
+tamoxifen$contrasts=NULL
+tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION, block=list(c(3,4,5,8,9),c(1,2,10,11)))
+tamoxifen
+
+tamoxifen$contrasts=NULL
+tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION, block=tamoxifen$masks$MCF7)
+tamoxifen = dba.analyze(tamoxifen)
 tamoxifen
 
 }

@@ -34,21 +34,33 @@
 #########################################################
 ## dba -- construct DBA object, e.g. from sample sheet ##
 #########################################################
+DBA_VERSION1  = 1
+DBA_VERSION2  = 1
+DBA_VERSION3  = 4
 
 DBA_GROUP     = PV_GROUP
 DBA_ID        = PV_ID 
 DBA_TISSUE    = PV_TISSUE 
 DBA_FACTOR    = PV_FACTOR
 DBA_CONDITION = PV_CONDITION
+DBA_TREATMENT = PV_TREATMENT
 DBA_CONSENSUS = PV_CONSENSUS
 DBA_CALLER    = PV_CALLER
 DBA_CONTROL   = PV_CONTROL
 DBA_READS     = PV_READS
 DBA_REPLICATE = PV_REPLICATE
 
-DBA_EDGER = 'edgeR'
-DBA_DESEQ = 'DESeq'
-DBA_EDGER_BLOCK = 'edgeRlm'
+
+
+DBA_EDGER_CLASSIC = 'edgeR'
+DBA_EDGER_BLOCK   = 'edgeRlm'
+DBA_EDGER_GLM     = 'edgeRGLM'
+DBA_EDGER         = DBA_EDGER_GLM
+
+DBA_DESEQ_CLASSIC = 'DESeq'
+DBA_DESEQ_BLOCK   = 'DESeqBlock'
+DBA_DESEQ_GLM     = 'DESeqGLM'
+DBA_DESEQ         = DBA_DESEQ_GLM
 
 DBA_DATA_FRAME      = 0
 DBA_DATA_RANGEDDATA = 1
@@ -62,6 +74,10 @@ dba = function(DBA,mask, minOverlap=2,
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
 {
+   if(!missing(DBA)){
+      DBA = pv.check(DBA)	
+   }
+   
    res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
                     caller=caller, skipLines=skipLines,bAddCallerConsensus=bAddCallerConsensus, 
                     bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
@@ -78,7 +94,7 @@ dba = function(DBA,mask, minOverlap=2,
       res$config$parallelPackage=DBA_PARALLEL_MULTICORE
    }
    if(is.null(res$config$RunParallel)){
-      res$config$RunParallel=F # Turn off parallel by default until issue is resolved
+      res$config$RunParallel=FALSE
    }
    if(is.null(res$config$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
@@ -107,7 +123,7 @@ dba = function(DBA,mask, minOverlap=2,
 ## dba.peakset -- add a peakset to the model ##
 ###############################################
 
-dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replicate,
+dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treatment, replicate,
                        control, peak.caller, reads=0, consensus=FALSE, bamReads, bamControl,
                        normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
                        minOverlap=2, bMerge=TRUE,
@@ -119,6 +135,8 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
    if(!missing(peaks)){
    	 if(class(peaks) != "DBA") {
         peaks = pv.DataType2Peaks(peaks)
+     } else {
+        peaks = pv.check(peaks)	
      }
    }
    
@@ -129,7 +147,9 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
       }
       
       if(missing(peaks)) {
-         DBA = pv.check(DBA)	
+      	 if(!is.null(DBA)) {
+           DBA = pv.check(DBA)
+         }	
       }
       
       res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
@@ -139,18 +159,20 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition,replic
       }    
    
    } else {
+   	  if(!is.null(DBA)) {
+   	     DBA = pv.check(DBA)
+   	  }
    	  if(!missing(peaks)) {
    	     if(class(peaks)=="DBA") {
-   	  
    	        res = pv.peakset_all(DBA, addpv=peaks, minOverlap=minOverlap)
-   	     
    	     }
    	   }
    	   if(is.null(res)) {
    
          res = pv.peakset(DBA, peaks=peaks, 
-                          sampID=sampID, tissue=tissue, factor=factor,condition=condition,replicate=replicate,
-                          control=control, peak.caller=peak.caller,reads=reads, consensus=consensus, 
+                          sampID=sampID, tissue=tissue, factor=factor,condition=condition,treatment=treatment,
+                          replicate=replicate,control=control,
+                          peak.caller=peak.caller,reads=reads, consensus=consensus, 
                           readBam=bamReads, controlBam=bamControl,
                           bNormCol=normCol, bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
                           minOverlap=minOverlap)
@@ -203,6 +225,8 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        DataType=DBA$config$DataType)
 {                      
+   DBA = pv.check(DBA)
+   
    if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) | (!missing(report)) ) {
    	
       if( (!missing(contrast)) | (!missing(report)) ) {
@@ -263,17 +287,22 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
 ## dba.count -- count reads in binding sites ##
 ###############################################   
 
-DBA_SCORE_RPKM        = PV_SCORE_RPKM
-DBA_SCORE_RPKM_FOLD   = PV_SCORE_RPKM_FOLD
-DBA_SCORE_READS       = PV_SCORE_READS
-DBA_SCORE_READS_FOLD  = PV_SCORE_READS_FOLD
-DBA_SCORE_READS_MINUS = PV_SCORE_READS_MINUS
+DBA_SCORE_RPKM                = PV_SCORE_RPKM
+DBA_SCORE_RPKM_FOLD           = PV_SCORE_RPKM_FOLD
+DBA_SCORE_READS               = PV_SCORE_READS
+DBA_SCORE_READS_FOLD          = PV_SCORE_READS_FOLD
+DBA_SCORE_READS_MINUS         = PV_SCORE_READS_MINUS
+DBA_SCORE_TMM_MINUS_FULL      = PV_SCORE_TMM_MINUS_FULL
+DBA_SCORE_TMM_MINUS_EFFECTIVE = PV_SCORE_TMM_MINUS_EFFECTIVE
+DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
+DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
-dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog=FALSE,
-                     insertLength, minMaxval,
+dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
+                     insertLength, maxFilter, bRemoveDuplicates=FALSE,
                      bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 {
-                   
+   DBA = pv.check(DBA)            
+   
    bUseLast = F
   
    if(!missing(peaks)) {
@@ -281,7 +310,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog
          callers = unique(DBA$class[DBA_CALLER,])
          if((length(callers)==1) & (callers=='counts')) {
             DBA = pv.check(DBA)
-            res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=minMaxval)
+            res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=maxFilter)
             return(res)	
          }	
       } else {
@@ -295,7 +324,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog
   
    res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
-                   bCalledMasks=bCalledMasks, minMaxval=minMaxval, bParallel=bParallel, bUseLast=bUseLast)
+                   bCalledMasks=bCalledMasks, minMaxval=maxFilter, bParallel=bParallel, bUseLast=bUseLast, bWithoutDupes=bRemoveDuplicates)
    
    if(bCorPlot){
       x = dba.plotHeatmap(res,correlations=T)
@@ -314,7 +343,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_READS_MINUS, bLog
 
 dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="group2",
                         minMembers=3, block,
-                        categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION))
+                        categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION,DBA_TREATMENT))
 {
    if(minMembers < 2) {
       stop('minMembers must be at least 2. Use of replicates strongly advised.')	
@@ -346,10 +375,21 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
    res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
     
    if(bCorPlot){
-   	  if(nrow(dba.report(res,method=method[1],DataType=DBA_DATA_FRAME))>1) {
-         x = dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T)
-      }
+   	  warn = T
+   	  rep = pv.DBAreport(res,contrast=1,method=method[1],th=.1,bSupressWarning=T)
+   	  if(!is.null(rep)) {
+   	     if(!is.null(dim(rep))) {
+   	        if(nrow(rep)>1) {
+   	           warn=F
+   	           x = dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T)
+   	        }	
+   	     }
+   	  }
+   	  if(warn) {
+   	     warning('No correlation heatmap plotted -- contrast 1 has no differentially bound sites.')	
+   	  }
    }
+
 
 
    if(class(res)!="DBA") {
@@ -389,7 +429,7 @@ dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, 
 ################################################
 
 dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
-                           contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
+                           contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report, score,
                            mask, sites, sortFun,
                            correlations=TRUE, olPlot=DBA_COR, 
                            margin=10, colScheme="Greens", distMethod="pearson",
@@ -397,6 +437,9 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 {
    DBA = pv.check(DBA)
    
+   if(missing(contrast) && !missing(score)) {
+      DBA = dba.count(DBA,peaks=NULL,score=score)	
+   }
    
    if(!missing(contrast)) {
    	 if(!missing(report)) {
@@ -450,12 +493,16 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 #######################################################
 
 dba.plotPCA = function(DBA, attributes, minval, maxval,
-                       contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report,
+                       contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report, score,
                        mask, sites, cor=FALSE,
                        b3D=FALSE, vColors, dotSize, ...)
                        
 {
    DBA = pv.check(DBA)
+   
+   if(missing(contrast) && !missing(score)) {
+      DBA = dba.count(DBA,peaks=NULL,score=score)	
+   }   
    
    if(!missing(contrast)){
    	  if(missing(attributes)) {
@@ -596,7 +643,8 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
 
 dba.show = function(DBA, mask, attributes, bContrasts=FALSE, th=0.1, bUsePval=FALSE) 
 {
-
+   DBA = pv.check(DBA)
+   
    res = pv.list(DBA, mask=mask, bContrasts=bContrasts, attributes=attributes, th=th, bUsePval=bUsePval)
    
    return(res)
@@ -610,6 +658,8 @@ dba.mask = function(DBA, attribute, value, combine='or', mask, merge='or', bAppl
                     peakset, minValue=-1)
                     
 {
+   DBA = pv.check(DBA)
+      
    if(missing(peakset)) {
       
       res = pv.mask(DBA, attribute=attribute, value=value, combine=combine,
@@ -636,12 +686,18 @@ dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize
       DBA$allvectors = NULL
    }
    
+   if(nrow(DBA$class)<DBA_TREATMENT) {
+     DBA$class = rbind(DBA$class,'')
+     rownames(DBA$class)[DBA_TREATMENT]='Treatment'	
+   }
+   
    DBA$vectors = NULL	
    DBA$values  = NULL
    DBA$hc      = NULL
    DBA$pc      = NULL
 
    DBA$config$lsfInit      = NULL
+   DBA$config$parallelInit = NULL
    DBA$config$initFun      = NULL
    DBA$config$paramFun     = NULL
    DBA$config$addjobFun    = NULL
@@ -649,6 +705,10 @@ dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize
    DBA$config$wait4jobsFun = NULL
    DBA$config$parallelInit = NULL
 
+   DBA$config$Version1 = DBA_VERSION1
+   DBA$config$Version2 = DBA_VERSION2
+   DBA$config$Version3 = DBA_VERSION3
+         
    res = pv.save(DBA,file=file ,
                  dir=dir, pre=pre, ext=ext,
                  compress=TRUE)
@@ -714,7 +774,18 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
    if(is.null(res$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
    }
-         
+   
+   res$config$lsfInit      = NULL
+   res$config$parallelInit = NULL
+   res$config$initFun      = NULL
+   res$config$paramFun     = NULL
+   res$config$addjobFun    = NULL
+   res$config$lapplyFun    = NULL
+   res$config$wait4jobsFun = NULL
+   res$config$parallelInit = NULL
+
+   res = pv.version(res,DBA_VERSION1,DBA_VERSION2, DBA_VERSION3)
+            
    if(class(res)!="DBA") {
       class(res) = "DBA"
    }

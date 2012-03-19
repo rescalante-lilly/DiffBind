@@ -26,6 +26,10 @@ method, or vector of methods, by which to analyze differential binding affinity.
 \itemize{ 
 \item DBA_EDGER
 \item DBA_DESEQ
+\item DBA_EDGER_CLASSIC
+\item DBA_DESEQ_CLASSIC
+\item DBA_EDGER_GLM
+\item DBA_DESEQ_GLM
 }
 }
 

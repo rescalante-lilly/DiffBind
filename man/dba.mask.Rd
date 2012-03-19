@@ -28,6 +28,7 @@ when deriving a peakset mask, attribute to base mask on:
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
@@ -95,7 +96,7 @@ Rory Stark
 }
 \note{
 %%  ~~further notes~~
-dba automatically generates masks for each unique value of DBA_TISSUE, DBA_FACTOR, DBA_CONDITION, DBA_CALLER, and DBA_REPLICATE. These are accessible using masks field of the DBA object (DBA$masks), and can be viewed using names(DBA$masks).
+dba automatically generates masks for each unique value of DBA_TISSUE, DBA_FACTOR, DBA_CONDITION, DBA_TREATMENT,  DBA_CALLER, and DBA_REPLICATE. These are accessible using masks field of the DBA object (DBA$masks), and can be viewed using names(DBA$masks).
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

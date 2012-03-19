@@ -114,7 +114,7 @@ dba.multicore.lapply = function(config,params,arglist,fn,...){
    savemccores = options("mc.cores")
    options(cores = config$cores)
    options(mc.cores = config$cores)
-   res = mclapply(arglist,fn,...,mc.preschedule=TRUE) #changed to TRUE because of bug in R 2.15
+   res = mclapply(arglist,fn,...,mc.preschedule=TRUE,mc.allow.recursive=TRUE)
    options(cores=savecores)
    options(mc.cores=savemccores)
    return(res)

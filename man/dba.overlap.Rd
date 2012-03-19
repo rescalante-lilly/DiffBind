@@ -50,6 +50,7 @@ if contrast is specified and mode=DBA_OLAP_ALL, use data from method used for an
 \item DBA_EDGER
 \item DBA_DESEQ
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
 }
 }
 \item{th}{
@@ -68,6 +69,7 @@ when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peak
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
@@ -161,7 +163,7 @@ Rory Stark
 \examples{
 data(tamoxifen_peaks)
 # default mode: DBA_OLAP_PEAKS -- get overlapping/non overlapping peaksets
-mcf7 = dba.overlap(tamoxifen,tamoxifen$masks$MCF7)
+mcf7 = dba.overlap(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsive)
 names(mcf7)
 mcf7$inAll
 

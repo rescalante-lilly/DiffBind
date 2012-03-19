@@ -10,7 +10,7 @@ Principal Component Analysis plot
 \usage{
 dba.plotPCA(DBA, attributes, minval, maxval,
             contrast, method=DBA$config$AnalysisMethod, 
-            th=.1, bUsePval=FALSE, report,
+            th=.1, bUsePval=FALSE, report, score,
             mask, sites, cor=FALSE,
             b3D=FALSE, vColors, dotSize, ...)
 }
@@ -35,6 +35,7 @@ attribute or vector of attributes to use to color plotted points. Each unique co
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
@@ -59,6 +60,7 @@ method used for analysis (used in conjunction with contrast):
 \item DBA_EDGER
 \item DBA_DESEQ
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
 }
 }
 
@@ -70,6 +72,21 @@ if TRUE, uses p-value instead of FDR for thresholding. Used in conjunction with 
 }
 \item{report}{
 report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
+}
+
+\item{score}{
+Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:
+\itemize{
+\item DBA_SCORE_READS
+\item DBA_SCORE_READS_MINUS
+\item DBA_SCORE_READS_FOLD
+\item DBA_SCORE_RPKM
+\item DBA_SCORE_RPKM_FOLD
+\item DBA_SCORE_TMM_READS_FULL
+\item DBA_SCORE_TMM_READS_EFFECTIVE
+\item DBA_SCORE_TMM_MINUS_FULL
+\item DBA_SCORE_TMM_MINUS_EFFECTIVE
+}
 }
 
 \item{mask}{

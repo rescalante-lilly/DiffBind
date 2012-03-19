@@ -10,7 +10,7 @@ Draws a binding site heatmap
 \usage{
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                 contrast, method=DBA$config$AnalysisMethod, 
-                th=.1, bUsePval=FALSE, report,
+                th=.1, bUsePval=FALSE, report, score,
                 mask, sites, sortFun,
                 correlations=TRUE, olPlot=DBA_COR,
                 margin=10, colScheme="Greens", distMethod="pearson",
@@ -35,6 +35,7 @@ attribute or vector of attributes to use for column labels:
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
@@ -62,6 +63,7 @@ analysis method (used in conjunction with contrast):
 \item DBA_EDGER
 \item DBA_DESEQ
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
 }
 }
 
@@ -73,6 +75,20 @@ logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding
 }
 \item{report}{
 report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
+}
+\item{score}{
+Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:
+\itemize{
+\item DBA_SCORE_READS
+\item DBA_SCORE_READS_MINUS
+\item DBA_SCORE_READS_FOLD
+\item DBA_SCORE_RPKM
+\item DBA_SCORE_RPKM_FOLD
+\item DBA_SCORE_TMM_READS_FULL
+\item DBA_SCORE_TMM_READS_EFFECTIVE
+\item DBA_SCORE_TMM_MINUS_FULL
+\item DBA_SCORE_TMM_MINUS_EFFECTIVE
+}
 }
 
 \item{mask}{

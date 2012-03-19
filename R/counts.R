@@ -35,10 +35,30 @@ pv.model = function(model,mask,minOverlap=2,
 
    if(is.character(samplesheet)) {
       samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
+      if(is.null(samples$SampleID)){
+         samples$SampleID = 1:nrow(samples)
+      }
+      if(is.null(samples$Tissue)){
+         samples$Tissue = ""
+      } 
+      if(is.null(samples$Factor)){
+         samples$Factor = ""
+      }
+      if(is.null(samples$Condition)){
+         samples$Condition = ""
+      }
+      if(is.null(samples$Treatment)){
+         samples$Treatment = ""
+      }
+      if(is.null(samples$Replicate)){
+         samples$Replicate = ""
+      }
+
       samples$SampleID[is.na(samples$SampleID)]=""
       samples$Tissue[is.na(samples$Tissue)]=""
       samples$Factor[is.na(samples$Factor)]=""
       samples$Condition[is.na(samples$Condition)]=""
+      samples$Treatment[is.na(samples$Treatment)]=""
       samples$Replicate[is.na(samples$Replicate)]=""
    } else samples = samplesheet
    
@@ -78,6 +98,7 @@ pv.model = function(model,mask,minOverlap=2,
          as.character(samples$Tissue[i]),' ',
          as.character(samples$Factor[i]),' ',
          as.character(samples$Condition[i]),' ',
+         as.character(samples$Treatment[i]),' ',
          as.integer(samples$Replicate[i]),' ',peakcaller)
          
      model = pv.peakset(model,
@@ -86,6 +107,7 @@ pv.model = function(model,mask,minOverlap=2,
                          tissue      = as.character(samples$Tissue[i]),
                          factor      = as.character(samples$Factor[i]),
                          condition   = as.character(samples$Condition[i]),
+                         treatment   = as.character(samples$Treatment[i]),
                          consensus   = F,
                          peak.caller = peakcaller,
                          control     = controlid,
@@ -121,10 +143,14 @@ PV_SCORE_RPKM_FOLD      = PV_RES_RPKM_FOLD
 PV_SCORE_READS          = PV_RES_READS
 PV_SCORE_READS_FOLD     = PV_RES_READS_FOLD
 PV_SCORE_READS_MINUS    = PV_RES_READS_MINUS
+PV_SCORE_TMM_MINUS_FULL       = 6
+PV_SCORE_TMM_MINUS_EFFECTIVE  = 7
+PV_SCORE_TMM_READS_FULL       = 8
+PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
-pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=T,insertLength=0,
+pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,
-                     bParallel=F,bUseLast=F) {
+                     bParallel=F,bUseLast=F,bWithoutDupes=F) {
    
    pv = pv.check(pv)
    
@@ -139,7 +165,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
       colnames(peaks)[1:3] = c("CHR","START","END")
       bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
    } else {
-     if(minOverlap == 2) {
+     if(minOverlap == pv$minOverlap) {
         bed = pv$vectors[,1:3]
      } else if (minOverlap == 1) {
         bed = pv$allvectors[,1:3]
@@ -167,12 +193,12 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
       if((pv$config$parallelPackage>0) && bParallel) {   	     
    	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug"))            
          results = dba.parallel.lapply(pv$config,params,todo,
-                                       pv.getCounts,bed,insertLength)
+                                       pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes)
       } else {
          results = NULL
          for(job in todo) {
       	    message('Sample: ',job)
-            results = pv.listadd(results,pv.getCounts(job,bed,insertLength))
+            results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes))
          }	
       }
       if(PV_DEBUG){
@@ -185,6 +211,11 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
          warning("Can't load last result: debug off")
       }
    }
+   
+   if ((defaultScore >= DBA_SCORE_TMM_MINUS_FULL) || (defaultScore <= DBA_SCORE_TMM_READS_EFFECTIVE) ) {
+      redoScore = defaultScore
+      defaultScore = PV_SCORE_READS_MINUS	
+   } else redoScore = 0
       
    allchips = unique(pv$class[c(PV_BAMREADS,PV_BAMCONTROL),])
    numAdded = 0
@@ -236,6 +267,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
                          tissue      = pv$class[PV_TISSUE,chipnum],
                          factor      = pv$class[PV_FACTOR,chipnum],
                          condition   = pv$class[PV_CONDITION,chipnum],
+                         treatment   = pv$class[PV_TREATMENT,chipnum],
                          consensus   = T,
                          peak.caller = 'counts',
                          control     = pv$class[PV_CONTROL,chipnum],
@@ -252,6 +284,9 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
    if(bOnlyCounts) {
    	  numpeaks = length(pv$peaks)
       res = pv.vectors(pv,(numpeaks-numAdded+1):numpeaks,minOverlap=1,bAnalysis=F,bAllSame=T)
+      if(redoScore > 0) {
+         res = pv.setScore(res,redoScore)	
+      }   
       if(!missing(minMaxval)) {
          data = res$allvectors[,4:ncol(res$allvectors)]
          maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,max)
@@ -263,7 +298,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
             for(i in 1:length(res$peaks)) {
                res$peaks[[i]] = res$peaks[[i]][tokeep,]
                rownames(res$peaks[[i]]) = 1:sum(tokeep)
-            }
+            } 
             res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
          } else {
             stop('No sites have activity greater than minMaxval')
@@ -273,184 +308,14 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_RES_READS_MINUS,bLog=
          res$sites = pv.CalledMasks(pv,res,bed)
       }
    } else {
+      if(redoScore > 0) {
+         res = pv.setScore(res,redoScore,minMaxval=minMaxval)	
+      } 
       res = pv.vectors(pv)   
-   }   
+   }
    
    return(res)	
 }
-
-
-## pv.plotScatter -- scatter plots of scores for XY pairs
-pv.plotScatter = function(pv,peaksets,overlaps,olmask,sites,attributes=pv$attributes,
-                            bSmooth=T,CorMethod="pearson",...) {
-  
-   if(!missing(overlaps)) cres  = overlaps
-   if(!missing(olmask))   crecs = olmask
-   
-   plotfun = plot
-   if(bSmooth) {
-      plotfun=smoothScatter
-   }
-   
-   if(missing(peaksets)) {
-      mask = rep(T,ncol(pv$class))
-   } else {
-      mask = rep(T,ncol(pv$class))
-      mask[peaksets] = T
-   }
-   
-   vals = pv.FixMin(pv$vectors)
-   
-   if(!missing(overlaps)){
-   	  if(!missing(olmask)) {
-   	     cres = cres[crecs,]
-   	  }
-   	  if(is.null(nrow(cres))){
-   	     cres = matrix(cres,1,length(cres))	
-   	  }
-      for(i in 1:nrow(cres)){
-         s1 = cres[i,1] + 3
-         first = pv$class[attributes,s1-3]
-         s2 = cres[i,2] + 3
-         second = pv$class[attributes,s2-3]
-   	     res = pv.namestrings(first,second)
-         corval = cres[i,6]
-         plotfun(vals[sites,s1],vals[sites,s2],pch=20,cex=.1,
-                 xlab=sprintf("%i:[%s]",s1-3,res$n1),
-                 ylab=sprintf("%i:[%s]",s2-3,res$n2),
-                 main=sprintf("CONTRAST:%s",res$tstring),
-                 sub=sprintf('R=%1.2f',corval),...)
-      }
-   } else {
-      numSets = sum(mask)
-      wmask = which(c(F,F,F,mask))
-      for(i in 1:(numSets-1)) {
-   	     s1 = wmask[i]
-   	     first = pv$class[attributes,s1-3]
-         for(j in (i+1):numSets){
-      	    s2=wmask[j]
-      	    second = pv$class[attributes,s2-3]
-      	    res = pv.namestrings(first,second)
-      	    corval = cor(vals[sites,s1],vals[sites,s2],method=CorMethod)
-            plotfun(vals[sites,s1],vals[sites,s2],pch=20,cex=.1,
-                 xlab=sprintf("%i:[%s]",s1,res$n1),
-                 ylab=sprintf("%i:[%s]",s2,res$n2),
-                 main=sprintf("CONTRAST:%s",res$tstring),
-                 sub=sprintf('R=%1.2f',corval),...)
-         }           
-      }
-   }   	
-} 
-
-
-## pv.compare -- differential binding affinity table
-PV_GENOME_HUMAN = "H_sapiens_Mar_2006"
-PV_GENOME_MOUSE = "M_musculus_Jul_2007"
-pv.compare = function(pv,X,Y,pX=X,pY=Y,Xlab="X",Ylab="Y",sites,minval=-1,bPeaks=F,bCounts=F,
-                      bNoControl=F,GenomeString=PV_GENOME_HUMAN,names,bPlot=F,
-                      IntervalList,Colors=c(1,3,2,4:10),...) {
-   	
-   	if(!bPeaks) {
-   	   if(missing(sites)) {
-   	      mask = rep(T,nrow(pv$vectors))
-       } else mask = sites
-   	
-   	   DB  = pv$vectors[mask,X+3] - pv$vectors[mask,Y+3]
-   	   DBX = pv$vectors[mask,pX+3] > minval
-   	   DBY = pv$vectors[mask,pY+3] > minval
-       DBmean = (pv$vectors[mask,X+3] + pv$vectors[mask,Y+3]) / 2
-
-       if(missing(GenomeString)) {
-   	      sites = apply(pv$vectors[mask,1:3],1,pv.dositename_map,pv$chrmap)
-   	   } else {
-   	      sites = apply(pv$vectors[mask,1:3],1,pv.dositename_map,pv$chrmap,GenomeString)    
-       } 
-       
-       o = order(abs(DB),decreasing=T)
-   	   res = cbind(sites,DB,abs(DB),DBmean,pv$vectors[mask,X+3],pv$vectors[mask,Y+3])    
-   	   ecor = cor(pv$vectors[mask,X+3],pv$vectors[mask,Y+3])
-   	   
-    } else { # bPeaks==1
-       
-       if(missing(mask)) {
-          mask = rep(T,nrow(pv$peaks[[X]]))
-       }
-   	   
-       if(missing(GenomeString)) {
-   	      sites = apply(pv$peaks[[X]][mask,1:3],1,pv.dositename)
-   	   } else {
-   	      sites = apply(pv$peaks[[X]][mask,1:3],1,pv.dositename,GenomeString)    
-       } 
-       
-       if(bCounts) {	
-   	      Xdata = pv$peaks[[X]][mask,]	
-   	      Ydata = pv$peaks[[Y]][mask,]
-   	      if(bNoControl) {
-   	         control = 1
-   	      } else {
-   	      	 control = (Xdata[,6] + Ydata[,6])/2
-   	         control[control==0]=1
-   	      }
-   	      Xreads = Xdata[,5]
-   	      Yreads = Ydata[,5]   	   
-   	      Xreads[Xreads==0]=1
-   	      Yreads[Yreads==0]=1
-   	      Xfold = log((Xreads / control),2)
-   	      Yfold = log((Yreads / control),2)
-   	      Xfold[Xfold<0]=0
-   	      Yfold[Yfold<0]=0
-   	      #cat("Correlations - ChiP:",cor(Xreads,Yreads),"Control:",cor(Xdata[,6], Ydata[,6]),"\n")
-   	      #cat(Xlab,"Reads in peaks/control:",sum(Xdata[,5]),"/",sum(Xdata[,6]),'\n')                  
-   	      #cat(Ylab,"Reads in peaks/control:",sum(Ydata[,5]),"/",sum(Ydata[,6]),'\n') 
-   	   } else {
-   	      Xfold = as.numeric(pv$peaks[[X]][mask,4])
-   	      Yfold = as.numeric(pv$peaks[[Y]][mask,4])
-   	   }
-   	   
-   	   if(pX==X) {
-   	      DBX = Xfold > minval
-   	   } else {
-   	      DBX = pv$vectors[mask,pX+3] > minval
-   	   }
-   	   if(pY==Y) {
-   	      DBY = Yfold > minval
-   	   } else {
-   	      DBY = pv$vectors[mask,pY+3] > minval	
-   	   }
-   	   Cdb = Xfold - Yfold
-   	   Cmean = (Xfold+Yfold)/2
-   	   res = cbind(sites,Cdb,abs(Cdb),Cmean,Xfold,Yfold)
-   	   o = order(abs(Cdb),decreasing=T)
-   	   ecor = cor(Xfold,Yfold)
-   	} 
-   	
-   	res = cbind(res,DBX,DBY,DBX & DBY) 	                             
-   	colnames(res) = c("Site_loc","log_fold_diff","abs(log_fold_diff)","Mean_log_fold",
-   	                  sprintf("%s_log_fold",Xlab),sprintf("%s_log_fold",Ylab),
-   	                  sprintf("%s_peak?",Xlab),sprintf("%s_peak?",Ylab),"Both_Peak?")
-   	
-   	#cat('Correlation:',ecor,'\n')
-   	   	   
-   	if(bPlot) {
-       if(missing(IntervalList)) {
-          IntervalList = list(DBX & DBY,DBX & (!DBY),DBY & (!DBX))
-       }
-       maxval = ceiling(as.numeric(max(res[,5:6])))
-       plot(res[IntervalList[[1]],5],res[IntervalList[[1]],6],xlim=c(0,maxval),ylim=c(0,maxval),
-            pch=20,cex=.1,col=Colors[1],sub=sprintf("R=%1.2f",ecor),xlab=Xlab,ylab=Ylab,...)
-       for(i in 2:length(IntervalList)) {
-          points(res[IntervalList[[i]],5],res[IntervalList[[i]],6],pch=20,cex=.1,col=Colors[i])
-       }
-    }
-   	
-   	if(!missing(names)) {
-   	   cnames= colnames(res)
-   	   res = cbind(res,names)
-   	   colnames(res) = c(cnames,"NAME")	
-   	}
-   	return(data.frame(res[o,]))   	 
-}
-
 
 pv.nodup = function(pv,chipnum) {
 
@@ -478,3 +343,33 @@ pv.checkExists = function(filelist){
    }
    return(sum(res)==0)
 }
+
+pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F) {
+
+   fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
+   
+   fdebug("Starting croi_load_reads...")
+   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength))
+   fdebug("Loaded...")
+   libsize.croi <- .Call("croi_tree_size",bamtree)
+   fdebug("Starting croi_count_reads...")
+   counts.croi <- .Call("croi_count_reads",bamtree,
+                                           as.character(intervals[[1]]),
+                                           as.integer(intervals[[2]]),
+                                           as.integer(intervals[[3]]),
+                                           as.integer(length(intervals[[1]])),
+                                           as.logical(bWithoutDupes))
+   fdebug("Done croi_count_reads...")
+   counts.croi[counts.croi==0]=1
+   fdebug(sprintf("Counted %d reads...",libsize.croi))
+
+   counts = counts.croi
+   libsize = libsize.croi
+
+   widths = intervals[,3] - intervals[,2]
+   rpkm = (counts/(widths/1000))/(libsize/1E6)
+   
+   return(list(counts=counts,rpkm=rpkm,libsize=libsize))
+}
+
+

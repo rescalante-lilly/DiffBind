@@ -73,10 +73,10 @@ dba.plotVenn(tamoxifen,6:7)
 dba.plotVenn(tamoxifen,tamoxifen$masks$ZR75)
 
 # 3-way Venn (done two different ways)
-dba.plotVenn(tamoxifen,tamoxifen$masks$MCF7)
-olaps = dba.overlap(tamoxifen,tamoxifen$masks$MCF7)
+dba.plotVenn(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsive)
+olaps = dba.overlap(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsive)
 dba.plotVenn(tamoxifen,overlaps=olaps,
-             label1="Rep 1",label2="Rep 2",label3="Rep 3",main="MCF7 Replicates")
+             label1="Rep 1",label2="Rep 2",label3="Rep 3",main="MCF7 (Responsive) Replicates")
 
 #Venn of overlaps
 Responsive=dba(tamoxifen,tamoxifen$masks$Responsive)

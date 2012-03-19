@@ -37,6 +37,7 @@ method used for analysis (used in conjunction with contrast):
 \item DBA_EDGER
 \item DBA_DESEQ
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
 }
 }
 \item{th}{
@@ -59,6 +60,7 @@ attribute to use for determining groups of samples. Default (DBA_GROUP) plots th
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_TREATMENT
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
@@ -146,8 +148,8 @@ dba.plotBox(tamoxifen)
 
 # plot non-normalized data for DB sites by tissue
 # (changing order to place Resistant samples last)
-dba.plotBox(tamoxifen, attribute=DBA_TISSUE, bDBIncreased=FALSE,
-            bDBDecreased=FALSE, attribOrder=c(2,3,5,1,4), bNormalized=FALSE)
+dba.plotBox(tamoxifen, attribute=DBA_CONDITION, bDBIncreased=FALSE,
+            bDBDecreased=FALSE, attribOrder=c(2,1), bNormalized=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

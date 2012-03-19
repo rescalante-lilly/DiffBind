@@ -30,6 +30,7 @@ attribute or vector of attributes to retrieve. Number of intervals is always sho
 \item DBA_TISSUE
 \item DBA_FACTOR
 \item DBA_CONDITION
+\item DBA_CONDITION
 \item DBA_REPLICATE
 \item DBA_CONSENSUS
 \item DBA_CALLER
