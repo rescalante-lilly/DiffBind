@@ -191,6 +191,11 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
 
   rownames(counts) = as.character(1:nrow(counts))
   colnames(counts) = c(pv$class[PV_ID,mask1],pv$class[PV_ID,mask2])
+  
+  if(bRawCounts) {
+     return(counts)	
+  }
+  
   groups = factor(c(rep(group1,length(g1)),rep(group2,length(g2))))
   if(bFullLibrarySize) {
      libsize = as.numeric(pv$class[PV_READS,c(g1,g2)])
@@ -309,6 +314,9 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
      #res$fdr = topTags(res$LRT,nrow(res$counts))
   }
   
+  res$bSubControl      = bSubControl
+  res$bFullLibrarySize = bFullLibrarySize
+  
   fdebug(sprintf('Exit pv.DEedgeR: %f',res$counts[7,1]))
   return(res)	
 
@@ -393,6 +401,9 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 	}
 	  
    res$de = res$de[order(res$de$padj),]
+
+   res$bSubControl      = bSubControl
+   res$bFullLibrarySize = bFullLibrarySize
 
    return(res)
 
@@ -618,18 +629,24 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
          stop('edgeR analysis has not been run for this contrast')
          return(NULL)
       }
+      if(is.null(con$edgeR$counts)) {
+      	 counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='edgeR',
+                            bSubControl=con$edgeR$bSubControl,bFullLibrarySize=con$edgeR$bFullLibrarySize,bRawCounts=TRUE)
+      } else {
+         counts = con$edgeR$counts	
+      }
       if(!is.null(con$edgeR$LRT)) {
          siteCol = 1
          pvCol   = 5
          fdrCol  = 6
-         data = topTags(con$edgeR$LRT,nrow(con$edgeR$db$counts))$table   	  	
+         data = topTags(con$edgeR$LRT,nrow(counts))$table   	  	
    	  } else {
          siteCol = 1
          pvCol   = 4
          fdrCol  = 5
-         data = topTags(con$edgeR$db,nrow(con$edgeR$db$counts))$table
+         data = topTags(con$edgeR$db,nrow(counts))$table
       }
-      counts = con$edgeR$counts
+
       if(bNormalized){
       	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
       	 counts = t(t(counts)/sizes)
@@ -648,26 +665,33 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       siteCol = 1
       pvCol   = 2
       fdrCol =  3
+      counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='DESeq',
+	                     bSubControl=con$DESeq$bSubControl,bFullLibrarySize=con$DESeq$bFullLibrarySize,bRawCounts=T)
       if(method=='DESeqBlock') {
          data = con$DESeq$block$de
-         counts = con$DESeq$block$counts
          if(bNormalized){
       	    counts = t(t(counts)/con$DESeq$block$facs)
          }      	
       } else {
          data = con$DESeq$de
-         counts = con$DESeq$counts
-
          if(bNormalized){
       	    counts = t(t(counts)/con$DESeq$facs)
          }
       }   
    } else if(method=='edgeRlm'){
+   	  if(is.null(con$edgeR$counts)) {
+         counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='edgeR',
+                            bSubControl=con$edgeR$block$bSubControl,bFullLibrarySize=con$edgeR$block$bFullLibrarySize,
+                            bRawCounts=TRUE)
+      } else {
+         counts = con$edgeR$counts	
+      }
+
       siteCol = 1
       pvCol   = 5  
       fdrCol  = 6
-      data = topTags(con$edgeR$block$LRT,nrow(con$edgeR$counts))$table
-      counts = con$edgeR$counts
+      data = topTags(con$edgeR$block$LRT,nrow(counts))$table
+
       if(bNormalized){
       	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
       	 counts = t(t(counts)/sizes)
@@ -884,6 +908,7 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
 }
 
 pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
+   
    if(length(pv$peaks)<2) {
       warning('Unable to TMM normalize -- not enough peaksets',call.=FALSE)
       return(pv)	
@@ -892,17 +917,85 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
    g1     = rep(F,length(pv$peaks))
    g1[1]  = T
    res    = pv.DEedgeR(pv,g1,!g1,"1","2",bSubControl=bMinus,bFullLibrarySize=bFullLib,bNormOnly=T)
-   res    = estimateCommonDisp(res)
+   #res    = estimateCommonDisp(res)
    counts = res$counts
    sizes  = res$samples$lib.size * res$samples$norm.factors
    counts = t(t(counts)/sizes)
-   counts = counts * res$common.lib.size
+   counts = counts * mean(res$samples$lib.size)
 
    return(counts)
                        
 }
 
+pv.stripDBA = function(conrec) {
+   conrec$edgeR = pv.stripEdgeR(conrec$edgeR)
+   conrec$DESeq = pv.stripDESeq(conrec$DESeq)
+   return(conrec)
+}
 
+pv.stripEdgeR = function(erec) {
+   if(!is.null(erec)) {
+   	  erec$counts     = NULL
+      erec$pseudo.alt = NULL
+      erec$conc       = NULL
+      #erec$genes      = NULL
+      erec$all.zeros  = NULL
+      erec$tagwise.dispersion = NULL
+
+      if(!is.null(erec$GLM)) {
+         erec$GLM = pv.stripEdgeRGLM(erec$GLM)
+      }
+      if(!is.null(erec$LRT)) {
+         erec$LRT = pv.stripEdgeRLRT(erec$LRT)
+      }
+      if(!is.null(erec$block)) {
+         erec$block = pv.stripEdgeR(erec$block)
+      }
+      if(!is.null(erec$db)) {
+         erec$db = pv.stripEdgeR(erec$db)
+      }      
+   }
+   return(erec)
+}
+
+pv.stripEdgeRGLM = function(grec) {
+   if(!is.null(grec)) {
+   	  grec$counts       = NULL
+      grec$fitted.values= NULL
+      grec$offset       = NULL
+      grec$coefficients = NULL
+      grec$deviance     = NULL
+      grec$df.residual  = NULL
+      grec$abundance    = NULL
+      #grec$genes        = NULL
+   }
+   return(grec)
+}
+
+pv.stripEdgeRLRT = function(lrec) {
+   if(!is.null(lrec)) {
+      lrec = pv.stripEdgeR(lrec)
+      lrec = pv.stripEdgeRGLM(lrec)
+      lrec$GLM = pv.stripEdgeRGLM(lrec$GLM)
+   
+      lrec$dispersion.used   = NULL
+   }
+   return(lrec)
+}      
+   
+pv.stripDESeq = function(drec) {
+	if(!is.null(drec)) {
+	   drec$counts     = NULL
+	   drec$DEdata     = NULL
+	   drec$fullFit    = NULL
+	   drec$reducedFit = NULL
+	   
+	   if(!is.null(drec$block)) {
+	      drec$block = pv.stripDESeq(drec$block)	
+	   }	
+	}
+	return(drec)
+}
 
 
 

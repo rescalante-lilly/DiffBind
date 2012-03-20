@@ -10,7 +10,7 @@ Performs differential binding affinity analysis
 \usage{
 dba.analyze(DBA, method=DBA$config$AnalysisMethod, 
             bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
-            bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
+            bCorPlot=TRUE,  bReduceObjects=T, bParallel=DBA$config$RunParallel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,6 +45,9 @@ logical indicating if dispersion should be calculated on a tagwise (or per-condi
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the analyzed data (first contrast only). 
 If no sites are significantly differentially bound using the default threholds, no heatmap will be plotted.
+}
+\item{bReduceObjects}{
+logical indicating whether strip the analysis objects of unnecessary fields to save memory. If it is desired to used the DBA$contrasts[[n]]$edgeR and/or DBA$contrasts[[n]]$DESeq objects directly in the edgeR and/or DESeq packages, this should be set to FALSE.
 }
 \item{bParallel}{
 logical indicating that the analyses is to be done in parallel using multicore (one process for each contrast for each method, plus an additional process per method).

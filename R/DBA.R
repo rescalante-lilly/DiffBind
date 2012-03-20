@@ -367,12 +367,20 @@ dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="grou
 
 dba.analyze = function(DBA, method=DBA$config$AnalysisMethod, 
                        bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
-                       bCorPlot=TRUE,  bParallel=DBA$config$RunParallel)
+                       bCorPlot=TRUE, bReduceObjects=T, bParallel=DBA$config$RunParallel)
 {
 	
    DBA = pv.check(DBA)
       
    res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
+   
+   if(bReduceObjects) {
+      if(!is.null(res$contrasts)) {
+         for(i in 1:length(res$contrasts)) {
+            res$contrasts[[i]] = pv.stripDBA(res$contrasts[[i]])   	
+         }
+      }      	
+   }
     
    if(bCorPlot){
    	  warn = T

@@ -770,45 +770,63 @@ First, as more peaksets are included in analysis, the average peak width tends t
 \subsection{\edgeR analysis}
 When \texttt{dba.analyze} is invoked using the default \texttt{method=DBA\_EDGER}, a standardized differential analysis is performed using the \edgeR package (\cite{Robinson:2010p249}). This section details the precise steps in that analysis.
 
-For each contrast, a separate analysis is performed. First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted (with a minimum final read count of 1). Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. The default setting is appropriate for situations when the overall signal is expected to be directly comparable between the samples; using the full library size may be preferable if samples are expected to have dramatically different signals (e.g., if some are expected to have very low binding rates compared to others). The first step concludes with a call to \edgeR's \texttt{DGEList} function.
+For each contrast, a separate analysis is performed. 
+First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. 
+The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted (with a minimum final read count of 1). 
+Next the library size is computed for each sample for use in subsequent normalization. 
+By default, this is the total number of reads in peaks (the sum of each column). 
+Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. 
+The default setting is appropriate for situations when the overall signal is expected to be directly comparable between the samples; using the full library size may be preferable if samples are expected to have dramatically different signals (e.g., if some are expected to have very low binding rates compared to others). 
+Next comes a call to \edgeR's \texttt{DGEList} function. The \texttt{DGEList} object that results is next passed to \texttt{calcNormFactors} with all other parameters retained as defaults  (\texttt{method="TMM"}), returning an updated \texttt{DGEList} object. 
+This is passed to \texttt{estimateCommonDisp} with default parameters. 
 
-The \texttt{DGEList} object that results is next passed to \texttt{calcNormFactors} with all other parameters retained as defaults, returning an updated \texttt{DGEList} object. This is passed to \texttt{estimateCommonDisp} with default parameters. If bTagwise is TRUE (most useful when there are at least three members in each group of a contrast), the resulting \texttt{DGEList} object is then passed to \texttt{estimateTagwiseDisp}, with the prior set to 50 divided by two less than the total number of samples in the contrast. This final  \texttt{DGEList} for contrast n is stored in the \texttt{DBA object} as 
+If the method is \texttt{DBA\_EDGER\_CLASSIC}, then if \texttt{ bTagwise} is TRUE (most useful when there are at least three members in each group of a contrast), the resulting \texttt{DGEList} object is then passed to \texttt{estimateTagwiseDisp}, with the prior set to 50 divided by two less than the total number of samples in the contrast, and \texttt{trend="none"}. 
+The final steps are to perform testing to determine the significance measure of the differences between the sample groups by calling \texttt{exactTest}  using the \texttt{DGEList} with the \texttt{dispersion} set based on the \texttt{bTagwise} parameter.
+
+If the method is \texttt{DBA\_EDGER\_GLM} (the default), then a a design matrix is generated with two coefficients (the Intercept and one of the groups).
+Next  \texttt{estimateGLMCommonDisp} is called; if \texttt{bTagwise=TRUE},  \texttt{estimateGLMTagwiseDisp} is called as well. 
+The model is fitted by calling \texttt{glmFit}, and the specific contrast fitted by calling \texttt{glmLRT}, specifying that the second coefficient be dropped.
+Finally, and \texttt{exactTest} is performed, using either common or tagwise dispersion depending on the value specified for \texttt{bTagwise}.
+
+This final  \texttt{DGEList} for contrast n is stored in the \texttt{DBA object} as 
 
 \texttt{DBA\$contrasts[[n]]\$edgeR} 
 
-and may be examined and manipulated directly for further customization.
+and may be examined and manipulated directly for further customization. Note however that if you wish to use this object directly with \edgeR functions, then the \texttt{bReduceObjects} parameter should be set to FALSE, otherwise the default value of TRUE will result in essential object fields being stripped.
 
-The final steps are to perform testing to determine the significance measure of the differences between the sample groups by calling \texttt{exactTest}  using the \texttt{DGEList} with the \texttt{dispersion} set based on the \texttt{bTagwise} parameter. The resulting \texttt{DGEExact} object is stored in the \DBA object as:
+If a blocking factor has been added to the contrast, an additional \edgeR analysis is carried out. 
+This follows the \texttt{DBA\_EDGER\_GLM} case detailed above, except a more complex design matrix is generated that includes all the unique values for the blocking factor. These coefficients are all included in the \texttt{glmLRT} call.  The resultant object is accessible as
 
- \texttt{DBA\$contrasts[[n]]\$edgeR\$db}.
+\texttt{DBA\$contrasts[[n]]\$edgeR\$block}. 
 
-When data are retrieved for plotting or reporting, \texttt{topTags} is called on the \texttt{DGEExact} object, using the default FDR method \texttt{BH}.
-
-\subsection{\edgeR analysis with blocking factor}
-When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_EDGER}, and a blocking factor has been added to the contrast, and additional \edgeR analysis is carried out using a generalized linear model. The analysis mostly follows the matched tumor-normal example in the \edgeR User's Guide. If samples are not perfectly matched (every sample in the first group has exactly one matching sample in the second group) a warning is generated (from \texttt{dba.contrast}) but the analysis should still complete successfully. A design matrix is constructed via a call to \texttt{model.matrix}; the first columns is the Intercept column, the last column represents the second group, and there will be one fewer middle columns than the number of unique replicates.
-
-For each contrast, a separate analysis is performed. First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted (with a minimum final read count of 1). Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. The default setting is appropriate for situations when the overall signal is expected to be directly comparable between the samples; using the full library size may be preferable if samples are expected to have dramatically different signals (e.g., if some are expected to have very low binding rates compared to others). The first step concludes with a call to \edgeR's \texttt{DGEList} function.
-
-The \texttt{DGEList} object that results is next passed to \texttt{calcNormFactors} with all other parameters retained as defaults, returning an updated \texttt{DGEList} object. This is passed to \texttt{estimateGLMCommonDisp} along with the design matrix. If bTagwise is TRUE (most useful when there are at least three members in each group of a contrast), the resulting \texttt{DGEList} object is then passed to \texttt{estimateGLMTagwiseDisp}, along with the design matrix. This final \texttt{DGEList} for contrast n is stored in the \texttt{DBA object} as 
-
-\texttt{DBA\$contrasts[[n]]\$edgeR\$block} 
-
-and may be examined and manipulated directly for further customization.
-
-Next \texttt{glmFit} is called with the design matrix, and the result stored. Finally, \texttt{glmLRT} is called based on the highest number coefficient (number of replicates plus one), returning a \texttt{DGEGLM} object, stored in 
-
-\texttt{DBA\$contrasts[[n]]\$edgeR\$block\$LRT} 
-
-When data are retrieved for plotting or reporting, \texttt{topTags} is called on the \texttt{DGEGLM} object, using the default FDR method \texttt{BH}.
 
 \subsection{\DESeq analysis}
 When \texttt{dba.analyze} is invoked using \texttt{method=DBA\_DESEQ}\footnote{Note that \DESeq can be made the default analysis method for a DBA object by setting \texttt{DBA\$config\$AnalysisMethod=DBA\_DESEQ}.}, a standardized differential analysis is performed using the \DESeq package (\cite{Anders:2010p792}). This section details the precise steps in that analysis.
 
-For each contrast, a separate analysis is performed. First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted. Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. The first step concludes with a call to DESeq's \texttt{newCountDataSet} function, which returns a \texttt{CountDataSet} object.  If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/SAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. Either way, the resulting \texttt{CountDataSet} object is accessible as 
+For each contrast, a separate analysis is performed. 
+First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. 
+The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted. 
+Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). 
+Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. 
+The first step concludes with a call to DESeq's \texttt{newCountDataSet} function, which returns a \texttt{CountDataSet} object. 
+If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/SAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. 
+Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} object and \texttt{fitType} set to \texttt{local}. If there are no replicates, (only one sample in each group), \texttt{method} is set to \texttt{blind}. 
+Otherwise, if \texttt{bTagwise} is TRUE, \texttt{method} is set to \texttt{per-condition}; if it is FALSE, \texttt{method} is set to \texttt{pooled}. 
+
+If the method is \texttt{DBA\_DESEQ\_CLASSIC}, \texttt{nbinomTest} is called, and the result (reordered by adjusted p-value) saved for reporting.
+
+If the method is \texttt{DBA\_DESEQ\_GLM} (the default), two models are fitted using \texttt{fitNbinomGLMs}: a full model is fitted with all the coefficients, and a second model is fitted with the second coefficient dropped. These are tested against each other using \texttt{nbinomGLMTest}, witht he resulting p values adjusted using \texttt{p.adjust} (with \texttt{method="BH"}).
+
+The final results are acessible within the \texttt{DBA object} as 
 
 \texttt{DBA\$contrasts[[n]]\$DESeq\$DEdata} 
 
-Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} object and \texttt{fitType} set to \texttt{local}. If there are no replicates, (only one sample in each group), \texttt{method} is set to \texttt{blind}. Otherwise, if \texttt{bTagwise} is TRUE, \texttt{method} is set to \texttt{per-condition}; if it is FALSE, \texttt{method} is set to \texttt{pooled}. Finally, \texttt{nbinomTest} is called, and the result (reordered by adjusted p-value) saved for reporting.
+and may be examined and manipulated directly for further customization. Note however that if you wish to use this object directly with \DESeq functions, then the \texttt{bReduceObjects} parameter should be set to FALSE, otherwise the default value of TRUE will result in essential object fields being stripped.
+
+If a blocking factor has been added to the contrast, an additional \DESeq analysis is carried out. 
+This follows the \texttt{DBA\_DESEQ\_GLM} case detailed above, except a more complex design is generated when \texttt{newCountDataSet} is called that includes all the unique values for the blocking factor. These coefficients are all included in the \texttt{fitNbinomGLMs} calls.  The resultant object is accessible as
+
+\texttt{DBA\$contrasts[[n]]\$DESeq\$block}. 
 
 \section{Acknowledgements}
 

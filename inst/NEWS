@@ -1,4 +1,8 @@
-version 1.1.4:(2012-03018)
+version 1.1.5:(2012-03-20)
+
+- added bReduceObjects parameter to dba.analyze; replaced tamoxifen data objects; updated vignette.
+
+version 1.1.4:(2012-03-18)
 
 - added scoring options
 - added options for specifying blocking factor
