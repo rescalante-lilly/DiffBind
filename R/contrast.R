@@ -1,4 +1,5 @@
 
+
 pv.contrast = function(pv,group1,group2=!group1,name1="group1",name2="group2",
                        minMembers=3,categories,bMulti=T,block) {
    
@@ -419,13 +420,19 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       if(!is.null(crec$DESeq$block)) {
          deseqlm = T
       }
-      
+      if(!is.null(res)) {
+         if(length(newrec)>ncol(res)) {
+            res = cbind(res,matrix("-",nrow(res),length(newrec)-ncol(res)))	
+         } else if (length(newrec)<ncol(res)) {
+            newrec = c(newrec,rep("-",ncol(res)-length(newrec)))	
+         }
+      }
       res = rbind(res,newrec)
    }
    cvec = c("Group1","Members1","Group2","Members2")
    if(bvals > 0) {
      for(i in 1:bvals) {
-        cvec = c(cvec,sprintf("Block%s",i),sprintf("InBlock%i",i))
+        cvec = c(cvec,sprintf("Block%sVal",i),sprintf("InBlock%i",i))
      }
    }
    eres = NULL
@@ -450,7 +457,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
                } 
             }
          } else {
-            eres = c(eres,"?")   
+            eres = c(eres,"-")   
          }
       }
       res = cbind(res,eres)
@@ -469,7 +476,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
                                  nrow(crec$edgeR$block$counts))$table[,EDGER_COL_FDR+1]<=th,na.rm=T))
             }
          } else {
-            eres = c(eres,"?")   
+            eres = c(eres,"-")   
          }
       }
       res = cbind(res,eres)
@@ -486,7 +493,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
                eres = c(eres,sum(crec$DESeq$de$padj<=th,na.rm=T))
             }
          } else {
-            eres = c(eres,NA)   
+            eres = c(eres,"-")   
          }
       }
       res = cbind(res,eres)
@@ -503,7 +510,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
                eres = c(eres,sum(crec$DESeq$block$de$padj<=th,na.rm=T))
             }
          } else {
-            eres = c(eres,NA)   
+            eres = c(eres,"-")   
          }
       }
       res = cbind(res,eres)

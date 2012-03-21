@@ -10,7 +10,7 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 \usage{
 dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
-    config=data.frame(RunParallel=FALSE, reportInit="DBA"),
+    config=data.frame(RunParallel=TRUE, reportInit="DBA"),
     caller='raw', skipLines=0, bAddCallerConsensus=FALSE, 
     bRemoveM=TRUE, bRemoveRandom=TRUE, 
     bCorPlot=FALSE, attributes) 

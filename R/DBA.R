@@ -69,7 +69,7 @@ DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
-               config=data.frame(RunParallel=FALSE, reportInit="DBA"),
+               config=data.frame(RunParallel=TRUE, reportInit="DBA"),
                caller="raw", skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
@@ -94,7 +94,7 @@ dba = function(DBA,mask, minOverlap=2,
       res$config$parallelPackage=DBA_PARALLEL_MULTICORE
    }
    if(is.null(res$config$RunParallel)){
-      res$config$RunParallel=FALSE
+      res$config$RunParallel=TRUE
    }
    if(is.null(res$config$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
@@ -189,7 +189,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
          res$config$parallelPackage=DBA_PARALLEL_MULTICORE
       }
       if(is.null(res$config$RunParallel)){
-         res$config$RunParallel=T
+         res$config$RunParallel=TRUE
       }
       if(is.null(DBA$config$reportInit)){
          res$config$reportInit="DBA"
@@ -369,7 +369,12 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
                        bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
                        bCorPlot=TRUE, bReduceObjects=T, bParallel=DBA$config$RunParallel)
 {
-	
+   
+   if(bParallel && DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
+      warning('Parallel operation currently unreliable. Executing serially.')#,immediate.=TRUE)
+      bParallel=F	
+   }
+   	
    DBA = pv.check(DBA)
       
    res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)

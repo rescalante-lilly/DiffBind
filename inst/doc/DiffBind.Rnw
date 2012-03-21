@@ -35,7 +35,7 @@ Gordon Brown \\ \texttt{gordon.brown@cancer.org.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{18 March 2012}
+\date{20 March 2012}
 \maketitle
 
 \section{Introduction}
