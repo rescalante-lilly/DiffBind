@@ -187,7 +187,7 @@ pv.listaddto = function(a,b){
 
 fdebug = function(str,file='debug.txt'){
 
-PV_DEBUG=FALSE
+   PV_DEBUG=FALSE
    
    if(PV_DEBUG == FALSE){
       return

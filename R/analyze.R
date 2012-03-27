@@ -187,8 +187,6 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
   }
   counts = cbind(s1,s2)
   
-  fdebug(sprintf('Generic counts: %f',counts[7,1]))
-
   rownames(counts) = as.character(1:nrow(counts))
   colnames(counts) = c(pv$class[PV_ID,mask1],pv$class[PV_ID,mask2])
   
@@ -396,6 +394,7 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 	  res$de           = cbind(1:length(res$de),res$de,p.adjust(res$de,method="BH"))
 	  colnames(res$de) = c('id','pval','padj')
 	  res$de           = data.frame(res$de)
+	  fdebug(sprintf('pv.DESeq blocking analysis: %d db (%s/%s)',sum(res$de$padj<.1),label1,label2))
     } else {
 	   res$de = nbinomTest(res$DEdata,label1,label2)[,c(1,7:8)]
 	}
@@ -536,9 +535,10 @@ pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bTagwise=T,bGLM
          }
       }
       if(length(blist > 0)) {
-         bres =  dba.parallel.lapply(pv$config,params,1:length(pv$contrasts),pv.DESeq_parallel,pv,TRUE, 
+         bres =  dba.parallel.lapply(pv$config,params,blist,pv.DESeq_parallel,pv,TRUE, 
                                      bSubControl,bFullLibrarySize,bTagwise=bTagwise,bGLM=bGLM)
          for(i in 1:length(blist)) {
+         	fdebug(sprintf('pv.allDESeq: contrast %d gets bres %d (%d db)',blist[i],i,sum(bres[[i]]$de$padj<.1)))
             reslist[[blist[i]]]$block = bres[[i]]
          }    
       }     

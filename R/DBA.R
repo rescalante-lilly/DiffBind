@@ -370,10 +370,10 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
                        bCorPlot=TRUE, bReduceObjects=T, bParallel=DBA$config$RunParallel)
 {
    
-   if(bParallel && DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
-      warning('Parallel operation currently unreliable. Executing serially.')#,immediate.=TRUE)
-      bParallel=F	
-   }
+   #if(bParallel && DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
+   #   warning('Parallel operation currently unreliable. Executing serially.')#,immediate.=TRUE)
+   #   bParallel=F	
+   #}
    	
    DBA = pv.check(DBA)
       
