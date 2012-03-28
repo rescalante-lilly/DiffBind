@@ -54,7 +54,7 @@ pv.version = function(pv,v1,v2,v3){
    }
    
    if(warn) {
-      warning('Loading DBA object from a previous version -- updating...')
+      warning('Loading DBA object from a previous version -- updating...',call.=F)
    }
    
    if(nrow(pv$class)<PV_TREATMENT) {
@@ -152,11 +152,11 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
 pv.whichPeaksets = function(pv,mask) {
 
    if(missing(mask)) {
-      warning('mask required')
+      warning('mask required',call.=F)
       return(NULL)
    }
    if(is.null(mask)) {
-      warning('mask required')
+      warning('mask required',call.=F)
       return(NULL)
    }
    if(class(mask)=='logical') {
@@ -525,7 +525,7 @@ pv.dovectors = function(allpeaks,classes,bKeepAll=F,maxgap=0,useExternal=TRUE,us
    }
 
    if(is.character(allpeaks[1,1])){
-      warning('chromosome names are strings in pv.dovectors')
+      warning('chromosome names are strings in pv.dovectors',call.=F)
    }  
 
    allpeaks = pv.peaksort(allpeaks)
@@ -578,7 +578,7 @@ pv.whichCalled = function(pv,called,master,minVal=-1) {
 
 ## pv.pairs -- compare all pairs of peaksets, rank by % overlap
 pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
-                    CorMethod="pearson",bCorOnly=F,bNonZeroCors=F,minVal=0) {
+                    CorMethod="pearson",bCorOnly=F,bNonZeroCors=F,minVal=0,bFixConstantVecs=T) {
 
    if(missing(mask)) {
       mask=rep(T,ncol(pv$class))
@@ -606,6 +606,7 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    numSets = sum(mask)
    resm = NULL
    resl = NULL
+   cvecs = NULL
    for(first in 1:(numSets-1)) {
    	  if(bCorOnly==F){
    	     #cat(".")
@@ -631,7 +632,23 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
            v1 = v1[!zeros]
            v2 = v2[!zeros]
          }
-         corval = cor(v1,v2,method=CorMethod)
+         if(bFixConstantVecs) {
+            if(sd(v1)==0) {
+               #fval = v1[1]
+               #v1[1] = fval+.000001
+               #v1[2] = fval-.000001
+               cvecs = c(cvecs,colnames(tmp$vectors)[first+3])	
+            }
+            if(sd(v2)==0) {
+               #fval = v2[1]
+               #v2[1] = fval+.000001
+               #v2[2] = fval-.000001
+               cvecs = c(cvecs,colnames(tmp$vectors)[second+3])	
+            }		
+         }
+         if(sd(v1) && sd(v2)) {
+            corval = cor(v1,v2,method=CorMethod)
+         } else corval = 0
          resm = rbind(resm,c(which(mask)[first],which(mask)[second],
                              onlya,onlyb,inall,corval,prop))
       }
@@ -639,12 +656,19 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    if(bCorOnly==F) {
       #cat("\n")
    }
+   cvecs = unique(cvecs)
+   if(!is.null(cvecs)) {
+      cvecs = sort(cvecs)
+      for(cv in cvecs) {
+         warning(sprintf('Scores for peakset %s are all the same -- correlations set to zero.',cv),call.=F)	
+      }	
+   }
    
    o = order(resm[,7],decreasing=T)
    colnames(resm) = c("A","B","onlyA","onlyB","inAll","Cor","Overlap")
    
    if(bPlot & !bCorOnly){
-      warning('Plotting in pv.occupancy unsupported')
+      warning('Plotting in pv.occupancy unsupported',call.=F)
       #for(i in 1:length(o)) {
       #	 recnum = o[i]
       #   pv.PlotContrast(pv,resl[[recnum]],resm[recnum,1],resm[recnum,2],attributes=attributes)
