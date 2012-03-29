@@ -94,7 +94,7 @@ logical indicating whether to remove peaks on chrM when adding a peakset
 logical indicating whether to remove peaks on chrN_random when adding a peakset
 }
   \item{minOverlap}{
-the minimum number of peaksets a peak must be in to be included when adding a consensus peakset.
+the minimum number of peaksets a peak must be in to be included when adding a consensus peakset. When retrieving, if the peaks parameter is a vector (logical mask or vector of peakset numbers), a binding matrix will be retrieved including all peaks in at least this many peaksets.
 }
   \item{bMerge}{
 logical indicating whether global binding matrix should be compiled after adding the peakset. When adding several peaksets via successive calls to dba.peakset, it may be more efficient to set this parameter to FALSE and call dba(DBA) after all the peaksets have been added.
@@ -171,6 +171,10 @@ mcf7 = dba.peakset(mcf7,
                    peaks=system.file("extra/peaks/MCF7_ER_3.bed.gz", package="DiffBind"),      
                    sampID="MCF7.3",tissue="MCF7",factor="ER",condition="Responsive",replicate=3)
 mcf7
+
+#retrieve peaks that are in all three peaksets
+mcf7.consensus = dba.peakset(mcf7, 1:3, minOverlap=3, bRetrieve=TRUE)
+mcf7.consensus
 
 #add a consensus peakset -- peaks in all three replicates
 mcf7 = dba.peakset(mcf7, 1:3, minOverlap=3,sampID="MCF7_3of3")

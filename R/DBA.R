@@ -145,10 +145,26 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
       if(missing(writeFile)) {
          writeFile = NULL
       }
-      
+     
       if(missing(peaks)) {
       	 if(!is.null(DBA)) {
            DBA = pv.check(DBA)
+         } else {
+            stop("DBA object is NULL; can't retrieve peakset.")	
+         }	
+      } else {
+         if(is.vector(peaks)) {
+      	    if(is.null(DBA)) {
+              stop("DBA object is NULL; can't retrieve peakset.")	
+            }	
+      	    if(length(peaks) > 1) {
+      	 	   if(minOverlap > length(peaks)) {
+      	 	      stop('minOverlap is greater than number of specified peaks.')	
+      	 	   } else {
+                  DBA = dba(DBA,mask=peaks,minOverlap=minOverlap,bCorPlot=FALSE)
+                  peaks = NULL
+               }
+            }      
          }	
       }
       

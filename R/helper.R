@@ -11,6 +11,9 @@
 #########################
 
 pv.check = function(pv) {
+   if(is.null(pv)) {
+      return(NULL)	
+   }
    if(is.null(pv$vectors)) {
    	  if(is.null(pv$minOverlap)) {
    	     minOverlap=2

@@ -1,3 +1,7 @@
+version 1.1.9:(2012-03-29)
+
+- Add option to dba.peakset to merge retrieved peaks
+
 version 1.1.8:(2012-03-28)
 
 - Check for correlations whwere one vector has sd=0; set cors to 0 and warn.
