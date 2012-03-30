@@ -1,82 +1,19 @@
-version 1.1.9:(2012-03-29)
+version 1.2.0:(2012-03-30)
 
-- Add option to dba.peakset to merge retrieved peaks
+- GRanges is default class for peaksets and reports instead of RangedData, controlled by DataType parameter.
 
-version 1.1.8:(2012-03-28)
+- Both analysis methods (edgeR and DESeq) use generalized linear models (GLMs) for two-group contrasts by default.
 
-- Check for correlations whwere one vector has sd=0; set cors to 0 and warn.
+- Blocking factors (for two-factor analysis) can be specified flexibly such that arbitrary blocking factors can be used. 
+  Section added to vignette showing an ananalysis using a blocking factor.
 
-version 1.1.7:(2012-03-27)
+- Added new metadata type, DBA_TREATMENT.
 
-- Fully restore parallel function, including bugfix in parallel DESeq.
+- New DBA_SCORE_ options for specifying scoring method, including TMM normalized counts, and ability to change scoring 
+  method on the fly in dba.plotHeatmap and dba.plotPCA when plotting global binding matrix.
 
-version 1.1.6:(2012-03-21)
+- bRemoveDuplicates parameter in dba.count allows duplicate reads to be discarded when computing counts
 
-- re-enabled parallel operation by default, with exception in dba.analyze; fix bug in dba.show.
+- More efficient use of memory when analyzing (controlled by bReduceObjects parameter in dba.analyze).
 
-version 1.1.5:(2012-03-20)
-
-- added bReduceObjects parameter to dba.analyze; replaced tamoxifen data objects; updated vignette.
-
-version 1.1.4:(2012-03-18)
-
-- added scoring options
-- added options for specifying blocking factor
-- added bRemoveDuplicates option to dba.count
-- updated man pages and vignette
-
-version 1.1.3: (2012-01-25)
-
-- added attribute DBA_TREATMENT
-- added EDGER_GLM and DESEQ_GLM to use GLMs when analyzing contrasts
-
-version 1.1.1: (2012-01-06)
-
-- added DBA_DATA_ options and made GRanges default class for peaksets and reports
-
-version 1.0.7: (2012-01-03)
-
-- added warnings to dba.contrast and dba.analyze when no contrasts are added
-
-version 1.0.6: (2011-12-14)
-
-- fixed bugs related to blocking factor (method=DBA_EDGER_BLOCK)
-
-version 1.0.5: (2011-12-13)
-
-- more descriptive warnings and minor bug fixes
-
-version 1.0.4: (2011-12-02)
-
-- change Conc1 and Conc2 columns in dba.report to include group names
-
-- add some more informative warnings
-
-version 1.0.3: (2011-11-21)
-
-- added warning to dba.plotHeatmap if labels are non-unique -- matrix is returned unordered
-
-- fixed bug in dba.overlap: can send in report w/o contrast as indicated in doc
-
-- added change score option to dba.count when peaks is NULL; change bLog default to FALSE.
-
-version 1.0.2: (2011-11-17)
-
-- dba.plotHeatmap now used noramlized data if a contrast is specified
-
-version 1.0.1: (2011-11-14) 
-
-- improved method for obtaining nomalized read counts for edgeR-based analysis
-
-- fix use of distMethod in dba.plotHeatmap
-
-- ensure $config parameters are inherited by new DBA object created by dba and dba.count
-
-- fix bug in use of minMaxval parameter to dba.count
-
-- In vignette, fixed figure 7
-
-version 1.0.0: (2011-09-09)
-
-- Initial submission...
-
+- various bugs fixed, man pages updated, and warning messages added.
