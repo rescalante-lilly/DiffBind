@@ -650,7 +650,7 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       if(bNormalized){
       	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
       	 counts = t(t(counts)/sizes)
-      	 counts = counts * con$edgeR$common.lib.size
+      	 counts = counts * con$edgeR$pseudo.lib.size
       } 
    } else if (method=='DESeq' || method=='DESeqGLM' || method=='DESeqBlock') {
       if (length(find.package(package='DESeq',quiet=T))>0) {
@@ -695,7 +695,7 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       if(bNormalized){
       	 sizes = con$edgeR$samples$lib.size * con$edgeR$samples$norm.factors
       	 counts = t(t(counts)/sizes)
-      	 counts = counts * con$edgeR$common.lib.size
+      	 counts = counts * con$edgeR$pseudo.lib.size
       } 
    } else {
       stop('Unknown DE method: ',method)
