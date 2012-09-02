@@ -364,6 +364,18 @@ pv.bayes = function(fn){
  return(res)
 }
 
+pv.tpic = function(fn){
+ data = read.table(fn)
+ res  = pv.peaksort(data)
+ return(cbind(res,.5))
+}
+
+pv.sicer = function(fn){
+ data = read.table(fn)
+ res  = pv.peaksort(data)
+ return(res[,c(1:3,7)]) 
+}
+
 pv.sourcedata = function(fn,maxval){
  data = read.table(fn)
  vals = data[,6]

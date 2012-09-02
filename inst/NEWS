@@ -1,3 +1,15 @@
+version 1.3.3:(2012-09-02)
+
+- side colorbars added to dba.plotHeatmap
+
+- fold added to dba.plotMA
+
+- fixes for edgeR changes
+
+version 1.2.3:(2012-09-01)
+
+- more informative warnings and minor bug fixes.
+
 version 1.2.0:(2012-03-30)
 
 - GRanges is default class for peaksets and reports instead of RangedData, controlled by DataType parameter.

@@ -460,7 +460,7 @@ dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, 
 dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, report, score,
                            mask, sites, sortFun,
-                           correlations=TRUE, olPlot=DBA_COR, 
+                           correlations=TRUE, olPlot=DBA_COR, ColAttributes,RowAttributes, colSideCols, rowSideCols=colSideCols,
                            margin=10, colScheme="Greens", distMethod="pearson",
                            ...)
 {
@@ -477,6 +477,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
       DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
    	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
    	                       bPCA=F,bLog=T,minval=minval,maxval=maxval)
+   	  contrast = 1                     
    }
    	                          	  
    if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  { 	
@@ -485,14 +486,16 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    	  
    if(correlations[1]!=FALSE) {
       res = pv.plotHeatmap(DBA, attributes=attributes, overlaps=correlations, olPlot=olPlot,
-                           ColScheme=colScheme, distMeth=distMethod, bReorder=TRUE,
+                           ColScheme=colScheme, distMeth=distMethod, bReorder=TRUE, contrast=contrast,
+                           RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                            minval=minval, maxval=maxval, margins=c(margin,margin),
                            ...)
       return(res)
    }
       
    if(!missing(contrast)) {
-      res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, 
+      res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, contrast=contrast,
+                           RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                            ColScheme=colScheme, distMeth=distMethod, 
                            margins=c(margin,margin),...)
       res = NULL
@@ -505,6 +508,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
       }
       
       res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, mask=mask, sites=sites,
+                           RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                            minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, 
                            margins=c(margin,margin),...)
       res = NULL
@@ -551,7 +555,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    	  res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,b3D=b3D,vColors=vColors,...)
    } else {
    	  if(missing(attributes)) {
-   	     attributes = DBA_CONDITION
+   	     attributes = pv.attributePCA(DBA)
    	  }
    
       res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, 
@@ -592,12 +596,12 @@ dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=0.1
 ## dba.plotMA -- MA or XY scatter plot ##
 #########################################
                                       
-dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, bNormalized=TRUE,
+dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, fold=0, bNormalized=TRUE,
                       factor="", bXY=FALSE, dotSize=.33, ...)
 
 {
    DBA = pv.check(DBA)
-   res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval,
+   res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval, fold=fold,
                       facname=factor, bNormalized=bNormalized, cex=dotSize, ...)
  
    return(res)	

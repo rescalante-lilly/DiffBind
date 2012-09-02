@@ -1,0 +1,21 @@
+
+citEntry(
+   entry="Manual",
+   title = "DiffBind: differential binding analysis of ChIP-Seq peak data",
+   author = "Rory Stark and Gordon Brown",
+   year = 2011,
+   url = "http://bioconductor.org/packages/2.9/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf",
+   textVersion = "Stark R and Brown G (2011). DiffBind: differential binding analysis of ChIP-Seq peak data. Bioconductor http://bioconductor.org/packages/2.9/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf"
+)
+
+citEntry(
+   entry="article",
+   title = "Differential oestrogen receptor binding is associated with clinical outcome in breast cancer",
+   author="Caryn S. Ross-Innes and Rory Stark and Andrew E. Teschendorff and Kelly A. Holmes and H. Raza Ali and Mark J. Dunning and Gordon D. Brown and Ondrej Gojis and Ian O. Ellis and Andrew R. Green and Simak Ali and Suet-Feung Chin and Carlo Palmieri and Carlos Caldas and Jason S. Carroll",
+   journal="Nature",
+   year="2012",
+   volume = 481,
+   pages = 389-393,
+   textVersion = "Ross-Innes, C. S., Stark, R., Teschendorff, A. E., Holmes, K. A., Ali, H. R., Dunning, M. J., Brown, G. D., Gojis, O., Ellis, I. O., Green, A. R., Ali, S., Chin, S.-F., Palmieri, C., Caldas, C., and Carroll, J. S. (2012). Differential oestrogen receptor binding is associated with clinical outcome in breast cancer. Nature 481, 389-393.",
+   url = "http://www.nature.com/nature/journal/v481/n7381/full/nature10730.html"
+)

@@ -127,6 +127,12 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
       } else if (pcaller == 'raw') {
         peaks   = pv.readbed(peaks,skipLines)
         bNormCol = 4
+      } else if (pcaller == 'tpic') {
+        peaks   = pv.tpic(peaks)
+        bNormCol = 4
+      } else if (pcaller == 'sicer') {
+        peaks   = pv.sicer(peaks)
+        bNormCol = 4
       } else {
      	peaks = pv.readbed(peaks,skipLines)
       }
@@ -770,8 +776,8 @@ PV_INALL = 5
 PV_COR   = 6
 PV_OLAP  = 7
 PV_TOTAL = 0
-pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites, 
-                          overlaps, olmask, olPlot=PV_COR,divVal,
+pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,contrast,
+                          overlaps, olmask, olPlot=PV_COR,divVal,RowAttributes,ColAttributes,rowSideCols,colSideCols,
                           bTop=T,minval,maxval,bReorder=F,ColScheme="Greens",distMeth="pearson",...) {
 #require(gplots)
 #require(RColorBrewer)
@@ -841,13 +847,50 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,
       domap[domap>maxval]=maxval
    }
    cols = colorRampPalette(brewer.pal(9,ColScheme))(256)
+   
+   if(missing(rowSideCols)) {
+      rowSideCols = pv.colsv	
+   }
+   rowatts = NULL
+   rowcols = 0
+   if(missing(RowAttributes)){
+      if(!missing(contrast)) {
+         rowatts = pv.attributematrix(pv,mask,contrast=contrast,PV_GROUP,rowSideCols)	
+         rowcols = length(unique(as.vector(rowatts)))
+      }
+   } else if(!is.null(RowAttributes)) {
+      rowatts = pv.attributematrix(pv,mask,contrast=contrast,RowAttributes,rowSideCols,bReverse=T)
+      rowcols = length(unique(as.vector(rowatts)))
+   } 
+
+   if(missing(colSideCols)) {
+      colSideCols = pv.colsv	
+   }
+   if(missing(ColAttributes)){
+      colatts = pv.attributematrix(pv,mask,contrast=contrast,NULL,colSideCols,bAddGroup=is.null(ocm))	
+      colcols = length(unique(as.vector(colatts)))
+   } else if(!is.null(ColAttributes)) {
+      colatts = pv.attributematrix(pv,mask,contrast=contrast,ColAttributes,colSideCols)
+      colcols = length(unique(as.vector(colatts)))
+   } else {
+      colatts = NULL
+      colcols = 0
+   }
+   
    if(is.null(ocm)){
-      heatmap.2(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
-                distfun=function(x) Dist(x,method=distMeth),...)
+   	  if(!missing(RowAttributes)) {
+   	     warning("Row color bars not permitted for peak score heatmaps.",call.=F)	
+   	  }
+      heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
+                distfun=function(x) Dist(x,method=distMeth),
+                ColSideColors=colatts,NumColSideColors=colcols,
+                ...)
    } else {
 
-      res = heatmap.2(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
-                distfun=function(x) Dist(x,method=distMeth),symm=T,revC=T,Colv=T,...)         
+      res = heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
+                      distfun=function(x) Dist(x,method=distMeth),symm=T,revC=T,Colv=T,
+                      RowSideColors=rowatts,ColSideColors=colatts,NumRowSideColors=rowcols,NumColSideColors=colcols,
+                      ...)         
       if(bReorder) {
       	 if(length(unique(rownames(ocm)))==nrow(ocm)) {
             ocm = pv.reorderM(ocm,res$rowDendrogram)

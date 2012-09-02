@@ -9,7 +9,7 @@ Generates MA and scatter plots of differential binding analysis results.
 }
 \usage{
 dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
-           th=.1, bUsePval=FALSE, 
+           th=.1, bUsePval=FALSE,  fold=0,
            bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33, ...)
 }
 
@@ -41,6 +41,9 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 }
   \item{bUsePval}{
 logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding.
+}
+  \item{fold}{
+will only include sites with fold change greater than this as significant (colored red).
 }
   \item{bNormalized}{
 logical indicating whether to plot normalized data using normalization factors computed by differential analysis method (TRUE) or raw read counts (FALSE).

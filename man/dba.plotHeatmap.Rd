@@ -12,7 +12,7 @@ dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                 contrast, method=DBA$config$AnalysisMethod, 
                 th=.1, bUsePval=FALSE, report, score,
                 mask, sites, sortFun,
-                correlations=TRUE, olPlot=DBA_COR,
+                correlations=TRUE, olPlot=DBA_COR, ColAttributes,RowAttributes, colSideCols, rowSideCols = colSideCols,
                 margin=10, colScheme="Greens", distMethod="pearson",
                 ...)
 }
@@ -113,6 +113,27 @@ if correlations is specified as a dataframe returned by dba.overlap, indicates w
 \item{DBA_OLAP}  {Percentage overlap}
 \item{DBA_INALL}  {number of peaks common to both samples}
 }
+}
+\item{ColAttributes}{
+Attribute or vector of attributes to plot for column color bars. If missing, all attributes with two or more unique non-NA values will be plotted. (For correlation heatmaps, DBA_GROUP will be plotted in the column color bar by default when a  contrast is specified). A value of NULL indicates that no column color bar should be drawn. Allowable attribute values include:
+\itemize{ 
+\item DBA_GROUP
+\item DBA_TISSUE
+\item DBA_FACTOR
+\item DBA_CONDITION
+\item DBA_TREATMENT
+\item DBA_REPLICATE
+\item DBA_CALLER
+}
+}
+\item{RowAttributes}{
+Attribute or vector of attributes for row color bars. Row color bars are only allowed for correlation heatmaps.  Same values as for ColAttributes parameter. Default is  to draw a row color bar only if a contrast is specified, in which case the plotted attribute is DBA_GROUP.
+}
+\item{rowSideCols}{
+Vector of colors to use in row color bars. Uses default colors if missing.
+}
+\item{colSideCols}{
+Vector of colors to use in column color bars. Uses default colors if missing.
 }
   \item{margin}{
 margin size of plot

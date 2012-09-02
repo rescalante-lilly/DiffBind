@@ -260,7 +260,7 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
         res$LRT = glmLRT(res$GLM,2)
      } else {
         if(bTagwise){
-  	       res = estimateTagwiseDisp(res,prior.n=50/(ncol(res$counts)-2),trend="none")
+  	       res = estimateTagwiseDisp(res,prior.df=50,trend="none")
   	       #res = estimateTagwiseDisp(res,prior.n=getPriorN(res),trend="movingave")
   	       res$db     = exactTest(res,dispersion='tagwise')
         } else {
@@ -837,7 +837,7 @@ pv.getsites = function(pv,sites){
    return(sites)
 }
 
-pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F,facname="",bNormalized=T,
+pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F,fold=0,facname="",bNormalized=T,
                         cex=.15,...) {
 
    if(missing(contrast)){
@@ -868,8 +868,9 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
             } else {
               idx = res$FDR <= th
               tstr = "FDR"
-           }
-           if(bMA){
+            }
+            idx = idx & (abs(res$Fold) >= fold)
+            if(bMA){
               xmin  = floor(min(res$Conc))
               xmax  = ceiling(max(res$Conc))
               ymin  = floor(min(res$Fold))
