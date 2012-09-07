@@ -9,11 +9,14 @@ PV_DEBUG = FALSE
 ## pv.model -- build model, e.g. from sample sheet
 pv.model = function(model,mask,minOverlap=2,
                     samplesheet='sampleSheet.csv',config=data.frame(RunParallel=FALSE),
-                    caller="raw",skipLines=0,bAddCallerConsensus=T,bRemoveM=T, bRemoveRandom=T,
+                    caller="raw",format, scorecol, bLowerBetter, skipLines=0,bAddCallerConsensus=T,
+                    bRemoveM=T, bRemoveRandom=T,
                     bKeepAll=T,bAnalysis=T,attributes) {
 
-   
-   
+   if(missing(format))       format=NULL
+   if(missing(scorecol))     scorecol=NULL
+   if(missing(bLowerBetter)) bLowerBetter=NULL
+      
    if(!missing(model)) {
    	  if(missing(attributes)) {
          if(is.null(model$attributes)) {   
@@ -75,15 +78,38 @@ pv.model = function(model,mask,minOverlap=2,
    model$config = config
    
    for(i in 1:nrow(samples)) {
+   	
    	  
    	  if(is.null(samples$PeakCaller[i])) {
    	     peakcaller  = caller
-   	     normCol = 0
    	  } else if(is.na(samples$PeakCaller[i])) {
    	     peakcaller  = caller
-   	     normCol = 0
       } else {
    	     peakcaller = as.character(samples$PeakCaller[i])
+   	  }
+   	  
+   	  if(is.null(samples$PeakFormat[i])) {
+   	     peakformat  = format
+   	  } else if(is.na(samples$PeakFormat[i])) {
+   	     peakformat  = format
+      } else {
+   	     peakformat = as.character(samples$PeakFormat[i])
+   	  }
+   	  
+   	  if(is.null(samples$ScoreCol[i])) {
+   	     peakscores  = scorecol
+   	  } else if(is.na(samples$ScoreCol[i])) {
+   	     peakscores  = scorecol
+      } else {
+   	     peakscores = as.character(samples$ScoreCol[i])
+   	  }
+   	  
+   	  if(is.null(samples$LowerBetter[i])) {
+   	     bLowerBetter  = bLowerBetter
+   	  } else if(is.na(samples$LowerBetter[i])) {
+   	     peakscores  = bLowerBetter
+      } else {
+   	     bLowerBetter = as.character(samples$LowerBetter[i])
    	  }
 
    	  if(is.null(samples$ControlID[i])) {
@@ -110,6 +136,9 @@ pv.model = function(model,mask,minOverlap=2,
                          treatment   = as.character(samples$Treatment[i]),
                          consensus   = F,
                          peak.caller = peakcaller,
+                         peak.format = format,
+                         scoreCol    = peakscores,
+                         bLowerScoreBetter = bLowerBetter,
                          control     = controlid,
                          reads       = NA,
                          replicate   = as.integer(samples$Replicate[i]),
@@ -275,7 +304,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
                          replicate   = pv$class[PV_REPLICATE,chipnum],
                          readBam     = pv$class[PV_BAMREADS,chipnum],
                          controlBam  = pv$class[PV_BAMCONTROL,chipnum],
-                         bNormCol    = 0,
+                         scoreCol    = 0,
                          bRemoveM = F, bRemoveRandom=F,bMakeMasks=F)
          numAdded = numAdded + 1
       }                  

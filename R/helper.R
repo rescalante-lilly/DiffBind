@@ -173,8 +173,13 @@ pv.whichPeaksets = function(pv,mask) {
    } else {
       C = NULL
    }
+   if(length(mask) >= 4) {
+      D = mask[4]
+   } else {
+      D = NULL
+   }   
 
-   return(list(A=A,B=B,C=C))
+   return(list(A=A,B=B,C=C,D=D))
 }
 
 pv.listadd = function(a,b){
@@ -210,12 +215,13 @@ pv.peaksort = function(peaks){
    return(peaks)
 }
 
-pv.contrast2 = function(vectors,n1,n2,minVal=0){
-   v1 = vectors[,n1+3] > minVal
-   v2 = vectors[,n2+3] > minVal
+pv.contrast2 = function(vectors,n1,n2,minVal=0,v1,v2){
+   
+   if(missing(v1)) v1 = vectors[,n1+3] > minVal
+   if(missing(v2)) v2 = vectors[,n2+3] > minVal
    
    allpeaks = v1 | v2
-   inAll   = v1 & v2
+   inAll    = v1 & v2
    onlyA    = v1 & !v2
    onlyB    = !v1 & v2
    
@@ -236,32 +242,22 @@ pv.contrast2 = function(vectors,n1,n2,minVal=0){
    return(res)   	
 }
 
-pv.contrast3 = function(vectors,n1,n2,n3,minVal=0){
+pv.contrast3 = function(vectors,n1,n2,n3,minVal=0,v1,v2,v3){
 	
-   v1 = vectors[,n1+3] > minVal
-   v2 = vectors[,n2+3] > minVal
-   v3 = vectors[,n3+3] > minVal
+   if(missing(v1)) v1 = vectors[,n1+3] > minVal
+   if(missing(v2)) v2 = vectors[,n2+3] > minVal
+   if(missing(v3)) v3 = vectors[,n3+3] > minVal
    allpeaks = v1 | v2 | v3
    
-   nv1 = sum(v1); nv2 = sum(v2); nv3 = sum(v3)
    
    inAll  =  v1 &  v2 &  v3
    onlyA  =  v1 & !v2 & !v3
    onlyB  = !v1 &  v2 & !v3 
    onlyC  = !v1 & !v2 &  v3
    
-   sofar = inAll | onlyA | onlyB | onlyC
-   v1 = v1 & !sofar
-   v2 = v2 & !sofar
-   v3 = v3 & !sofar
-   
-   notA   = !v1 &  (v2 | v3)
-   v2 = v2 & !notA
-   v3 = v3 & !notA
-   notB   = !v2 &  (v1 | v3)
-   v1 = v1 & !notB
-   v3 = v3 & !notB
-   notC   = !v3 &  (v1 | v3)       
+   notA   = !v1 &  (v2 & v3)
+   notB   = !v2 &  (v1 & v3)
+   notC   = !v3 &  (v1 & v2)    
 	    
    res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
    	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
@@ -287,6 +283,75 @@ pv.contrast3 = function(vectors,n1,n2,n3,minVal=0){
            
    return(res)
 }
+
+pv.contrast4 = function(vectors,n1,n2,n3,n4,minVal=0,v1,v2,v3,v4){
+	
+   if(missing(v1)) v1 = vectors[,n1+3] > minVal
+   if(missing(v2)) v2 = vectors[,n2+3] > minVal
+   if(missing(v3)) v3 = vectors[,n3+3] > minVal
+   if(missing(v4)) v4 = vectors[,n4+3] > minVal
+   allpeaks = v1 | v2 | v3 | v4
+   
+   
+   inAll  =  v1 &  v2 &  v3 & v4
+   onlyA  =  v1 & !v2 & !v3 & !v4
+   onlyB  = !v1 &  v2 & !v3 & !v4
+   onlyC  = !v1 & !v2 &  v3 & !v4
+   onlyD  = !v1 & !v2 & !v3 & v4
+   
+   notA   = !v1 &  (v2 & v3 & v4)
+   notB   = !v2 &  (v1 & v3 & v4)
+   notC   = !v3 &  (v1 & v2 & v4)
+   notD   = !v4 &  (v1 & v2 & v3)      
+   
+   AandB  = (v1 & v2) & !(v3 | v4)
+   AandC  = (v1 & v3) & !(v2 | v4)
+   AandD  = (v1 & v4) & !(v2 | v3)
+   BandC  = (v2 & v3) & !(v1 | v4)
+   BandD  = (v2 & v4) & !(v1 | v3)
+   CandD  = (v3 & v4) & !(v1 | v2)             
+	    
+   res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
+   	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
+   	          onlyC = vectors[onlyC,c(1:3,(n3+3))],
+   	          onlyD = vectors[onlyD,c(1:3,(n4+3))],   	          
+   	          AandB = vectors[AandB,c(1:3,(n1+3),(n2+3))],
+   	          AandC = vectors[AandC,c(1:3,(n1+3),(n3+3))],
+   	          AandD = vectors[AandD,c(1:3,(n1+3),(n4+3))],
+   	          BandC = vectors[BandC,c(1:3,(n2+3),(n3+3))],
+   	          BandD = vectors[BandD,c(1:3,(n3+3),(n4+3))],
+   	          CandD = vectors[CandD,c(1:3,(n3+3),(n4+3))],
+   	          notA  = vectors[notA,c(1:3,(n2+3),(n3+3),(n4+3))],
+   	          notB  = vectors[notB,c(1:3,(n1+3),(n3+3),(n4+3))],
+   	          notC  = vectors[notC,c(1:3,(n1+3),(n2+3),(n4+3))],
+   	          notD  = vectors[notD,c(1:3,(n1+3),(n2+3),(n3+3))],
+   	          inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3),(n4+3))])      
+   
+   for(i in 1:15){
+      if(is.null(nrow(res[[i]]))){
+         res[[i]] = as.matrix(t(res[[i]]))
+      }
+   }	
+
+   colnames(res[[1]])  = c("chr","start","end","score")	
+   colnames(res[[2]])  = c("chr","start","end","score")	
+   colnames(res[[3]])  = c("chr","start","end","score")	
+   colnames(res[[4]])  = c("chr","start","end","score")
+   colnames(res[[5]])  = c("chr","start","end","scoreA","scoreB")
+   colnames(res[[6]])  = c("chr","start","end","scoreA","scoreC")
+   colnames(res[[7]])  = c("chr","start","end","scoreA","scoreD")
+   colnames(res[[8]])  = c("chr","start","end","scoreB","scoreC")   
+   colnames(res[[9]])  = c("chr","start","end","scoreB","scoreD") 
+   colnames(res[[10]]) = c("chr","start","end","scoreC","scoreD")
+   colnames(res[[11]]) = c("chr","start","end","scoreB","scoreC","scoreD")    
+   colnames(res[[12]]) = c("chr","start","end","scoreA","scoreC","scoreD")       
+   colnames(res[[13]]) = c("chr","start","end","scoreA","scoreB","scoreD")    
+   colnames(res[[14]]) = c("chr","start","end","scoreA","scoreB","scoreC")      
+   colnames(res[[15]]) = c("chr","start","end","scoreA","scoreB","scoreC","scoreD")
+           
+   return(res)
+}
+
 
 
 pv.analysis = function(pv,attributes=pv$attributes,bPCA=T,distMeth="pearson") {
@@ -327,27 +392,90 @@ pv.howmany = function(vals){
 }
 
 
+pv.readPeaks = function(peaks,peak.format,skipLines=0){
+   if(peak.format == "macs") {
+      peaks = pv.macs(peaks)
+   } 
+   else if(peak.format == "bayes") {
+      peaks = pv.bayes(peaks)
+   }
+   else if(peak.format == "swembl") {
+      peaks = pv.swembl(peaks)
+   } 
+   else if(peak.format == "raw") {
+      peaks = pv.readbed(peaks)
+   } 
+   else if(peak.format == "fp4") {
+      peaks =  pv.readbed(peaks,1)
+   } 
+   else if(peak.format == "bed") {
+      peaks =  pv.readbed(peaks,skipLines)
+   } 
+   else if(peak.format == "tpic") {
+      peaks =  pv.tpic(peaks)
+   } 
+   else if(peak.format == "sicer") {
+      peaks =  pv.sicer(peaks)
+   }    
+   else if(peak.format == "narrow") {
+      peaks =  pv.readbed(peaks,skipLines)
+   } 
+   else if(peak.format == "raw") {
+      peaks =  pv.readbed(peaks,skipLines)
+   } else {
+      peaks =  pv.readbed(peaks,skipLines)   	
+   }     
+}
+
+
+pv.defaultScoreCol = function(peak.format){
+   if(peak.format == "macs") {
+      val = 7
+   } 
+   else if(peak.format == "bayes") {
+      val = 0
+   }
+   else if(peak.format == "swembl") {
+      val = 4
+   } 
+   else if(peak.format == "raw") {
+      val = 4
+   } 
+   else if(peak.format == "fp4") {
+      val = 5
+   } 
+   else if(peak.format == "bed") {
+      val = 5
+   } 
+   else if(peak.format == "tpic") {
+      val = 0
+   } 
+   else if(peak.format == "sicer") {
+      val = 7
+   }    
+   else if(peak.format == "narrow") {
+      val = 8
+   } 
+   else if(peak.format == "raw") {
+      val = 4
+   } else {
+      val = 4 	
+   } 
+   return(val)    
+}
+
+
 FDRth=100
 pv.macs = function(fn){
  data = read.table(fn,blank.lines.skip=T,header=T)
- #if(data[1,1] =='chr'){
- #   data = read.table(fn,skip=18)
- #}
- #data = data[data[,9]<=FDRth,]
  res  = pv.peaksort(data)
- return(res[,c(1:3,7)]) 
-}
-
-pv.wold = function(fn){
- data = read.table(fn)[,2:5]	
- res  = pv.peaksort(data)
- return(res[,1:4]) 
+ return(res)
 }
 
 pv.swembl = function(fn){
  data = read.table(fn,skip=14)
  res  = pv.peaksort(data)
- return(res[,1:4]) 
+ return(res) 
 }
 
 pv.readbed = function(fn,skipnum=0){
@@ -367,7 +495,7 @@ pv.bayes = function(fn){
 pv.tpic = function(fn){
  data = read.table(fn)
  res  = pv.peaksort(data)
- return(cbind(res,.5))
+ return(cbind(res,1))
 }
 
 pv.sicer = function(fn){
@@ -628,7 +756,7 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    	  }
       for(second in (first+1):numSets) {
       	 if(!bCorOnly) {
-            res  = pv.overlap(tmp,first,second,minVal=minVal)
+            res  = pv.overlap(tmp,mask = c(first,second),minVal=minVal)
             resl = pv.listadd(resl,res)
             inall = nrow(res$inAll)
             onlya = nrow(res$onlyA)
@@ -817,6 +945,16 @@ pv.venn2 = function(mrec,n1,n2,...){
    vennDiagram(res,names=c(n1,n2), circle.col=2:3,counts.col=1,...)
 }
 
+pv.venn2 = function(olaps,l1,l2,main="",sub="") {
+
+   counts = c(nrow(olaps$onlyA),
+              nrow(olaps$onlyB),
+              nrow(olaps$inAll))
+   names(counts) = c("A","B","A_B")		
+   counts = list(counts)
+   vennPlot(counts,setlabels=c(l1,l2),mysub=sub,mymain=main)
+   		
+}
 
 pv.venn3 = function(m3way,n1,n2,n3,...){
 #require(limma)
@@ -835,4 +973,44 @@ pv.venn3 = function(m3way,n1,n2,n3,...){
    vennDiagram(res,names=c(n1,n2,n3), circle.col=2:4,counts.col=1,...)
 }
 
+pv.venn3 = function(olaps,l1,l2,l3,main="",sub="") {
+
+   counts = c(nrow(olaps$onlyA),
+              nrow(olaps$onlyB),
+              nrow(olaps$onlyC),	
+              nrow(olaps$notC),
+              nrow(olaps$notB),
+              nrow(olaps$notA),
+              nrow(olaps$inAll))
+   names(counts) = c("A","B","C","A_B","A_C","B_C","A_B_C")		
+   counts = list(counts)
+   vennPlot(counts,setlabels=c(l1,l2,l3),mysub=sub,mymain=main)
+   		
+}
+
+
+pv.venn4 = function(olaps,l1,l2,l3,l4,main="",sub="") {
+
+   counts = c(nrow(olaps$onlyA),
+              nrow(olaps$onlyB),
+              nrow(olaps$onlyC),	
+              nrow(olaps$onlyD),
+              nrow(olaps$AandB),
+              nrow(olaps$AandC),
+              nrow(olaps$AandD),
+              nrow(olaps$BandC),
+              nrow(olaps$BandD),
+              nrow(olaps$CandD),
+              nrow(olaps$notD),
+              nrow(olaps$notC),
+              nrow(olaps$notB),
+              nrow(olaps$notA),
+              nrow(olaps$inAll))
+   names(counts) = c("A","B","C","D","A_B","A_C","A_D","B_C","B_D","C_D",
+                     "A_B_C","A_B_D","A_C_D","B_C_D","A_B_C_D")		
+   counts = list(counts)
+   
+   vennPlot(counts,setlabels=c(l1,l2,l3,l4),mysub=sub,mymain=main)
+   		
+}
 

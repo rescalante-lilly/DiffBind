@@ -2,13 +2,13 @@
 \alias{dba.plotVenn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Draw 2-way or 3-way Venn diagrams of overlaps
+Draw 2-way, 3-way, or 4-way Venn diagrams of overlaps
 }
 \description{
-Draws 2-way or 3-way Venn diagrams of overlaps
+Draws 2-way, 3-way, or 4-way Venn diagrams of overlaps
 }
 \usage{
-dba.plotVenn(DBA, mask, overlaps, label1, label2, label3, ...)
+dba.plotVenn(DBA, mask, overlaps, label1, label2, label3, label4, main="", sub="")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,8 +39,14 @@ label for second peakset in diagram
   \item{label3}{
 label for third peakset in diagram
 }
-  \item{\dots}{
-arguments passed on to vennDiagram\{limma\}
+  \item{label4}{
+label for fourth peakset in diagram
+}
+  \item{main}{
+main title for plot
+}
+  \item{sub}{
+subtitle for plot
 }
 }
 %\details{
@@ -53,11 +59,13 @@ arguments passed on to vennDiagram\{limma\}
 %% ~put references to the literature/web site here ~
 %}
 \author{
-Rory Stark
+Rory Stark and Thomas Girke
 }
-%\note{
-%%  ~~further notes~~
-%}
+\note{
+Venn plotting code written by Thomas Girke as part of overLapper code:
+
+http://manuals.bioinformatics.ucr.edu/home/R_BioCondManual#R_graphics_venn
+}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
@@ -84,7 +92,14 @@ Responsive
 Responsive = dba.peakset(Responsive,1:3,sampID="MCF7")
 Responsive = dba.peakset(Responsive,4:5,sampID="T47D")
 Responsive = dba.peakset(Responsive,6:7,sampID="ZR75")
+par(mfrow=c(1,1))
 dba.plotVenn(Responsive,Responsive$masks$Consensus)
+
+#4-way overlap
+data(tamoxifen_peaks)
+tamoxifen = dba.peakset(tamoxifen, consensus=DBA_TISSUE)
+par(mfrow=c(1,1))
+dba.plotVenn(tamoxifen,tamoxifen$masks$Consensus,main="Tissue consensus overlaps")
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

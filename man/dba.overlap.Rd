@@ -26,7 +26,7 @@ DBA object
 %\emph{Optional/defaulted arguments:}
  
 \item{mask}{
-mask or vector of peakset numbers indicating a subset of peaksets to use (see dba.mask). When generating overlapping/unique peaksets, either two or three peaksets must be specified. If the mode type is DBA_OLAP_ALL, and a contrast is specified, a value of TRUE (mask=TRUE) indicates that all samples should be included (otherwise only those present in one of the contrast groups will be included).
+mask or vector of peakset numbers indicating a subset of peaksets to use (see dba.mask). When generating overlapping/unique peaksets, either two, three, or four peaksets may be specified. If the mode type is DBA_OLAP_ALL, and a contrast is specified, a value of TRUE (mask=TRUE) indicates that all samples should be included (otherwise only those present in one of the contrast groups will be included).
 }
 
 \item{mode}{
@@ -123,14 +123,22 @@ dba.overlap(DBA, mask, mode=DBA_OLAP_RATE, minVal)
 \value{
 Value depends on the mode specified in the mode parameter.
 
-If mode = DBA_OLAP_PEAKS, Value is an overlap record: a list of three peaksets for an A-B overlap, and seven peaksets for a A-B-C overlap:
+If mode = DBA_OLAP_PEAKS, Value is an overlap record: a list of three peaksets for an A-B overlap,  seven peaksets for a A-B-C overlap, and fifteen peaksets for a A-B-C-D overlap:
 \item{inAll}{peaks in all peaksets}
 \item{onlyA}{peaks unique to peakset A}
 \item{onlyB}{peaks unique to peakset B}
 \item{onlyC}{peaks unique to peakset C}
-\item{notA}{peaks in both peaksets B and C but not peakset A}
-\item{notB}{peaks in both peaksets A and C but not peakset B}
-\item{notC}{peaks in both peaksets A and B but not peakset C}
+\item{onlyD}{peaks unique to peakset D}
+\item{notA}{peaks in all peaksets except peakset A}
+\item{notB}{peaks in all peaksets except peakset B}
+\item{notC}{peaks in all peaksets except peakset C}
+\item{notD}{peaks in all peaksets except peakset D}
+\item{AandB}{peaks in  peaksets A and B but not in peaksets C or D}
+\item{AandC}{peaks in  peaksets A and C but not in peaksets B or D}
+\item{AandD}{peaks in  peaksets A and D but not in peaksets B or C}
+\item{BandC}{peaks in  peaksets B and C but not in peaksets A or D}
+\item{BandD}{peaks in  peaksets B and D but not in peaksets A or C}
+\item{CandD}{peaks in  peaksets C and D but not in peaksets A or B}
 
 
 If mode = DBA_OLAP_ALL, Value is a correlation record: a matrix with a row for each pair of peaksets and the following columns:

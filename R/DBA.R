@@ -70,7 +70,7 @@ DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE, reportInit="DBA"),
-               caller="raw", skipLines=0, bAddCallerConsensus=FALSE, 
+               peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
 {
@@ -79,7 +79,8 @@ dba = function(DBA,mask, minOverlap=2,
    }
    
    res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
-                    caller=caller, skipLines=skipLines,bAddCallerConsensus=bAddCallerConsensus, 
+                    caller=peakCaller, format=peakFormat, scorecol=scoreCol,bLowerBetter=bLowerScoreBetter,
+                    skipLines=skipLines,bAddCallerConsensus=bAddCallerConsensus, 
                     bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
                     bKeepAll=TRUE, bAnalysis=TRUE, 
                     attributes=attributes)
@@ -124,8 +125,8 @@ dba = function(DBA,mask, minOverlap=2,
 ###############################################
 
 dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treatment, replicate,
-                       control, peak.caller, reads=0, consensus=FALSE, bamReads, bamControl,
-                       normCol=4, bRemoveM=TRUE, bRemoveRandom=TRUE,
+                       control, peak.caller, peak.format, reads=0, consensus=FALSE, bamReads, bamControl,
+                       scoreCol, bLowerScoreBetter, bRemoveM=TRUE, bRemoveRandom=TRUE,
                        minOverlap=2, bMerge=TRUE,
                        bRetrieve=FALSE, writeFile, numCols=4,
                        DataType=DBA$config$DataType)
@@ -140,7 +141,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
      }
    }
    
-   if(bRetrieve==TRUE || !missing(writeFile)) {
+   if(bRetrieve==TRUE || !missing(writeFile)) { ## RETRIEVE/WRITE PEAKSETS
    
       if(missing(writeFile)) {
          writeFile = NULL
@@ -174,7 +175,8 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
          res = pv.peaks2DataType(res,DataType)
       }    
    
-   } else {
+   } else { ## ADD PEAKSET(S)
+   	
    	  if(!is.null(DBA)) {
    	     DBA = pv.check(DBA)
    	  }
@@ -182,15 +184,16 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
    	     if(class(peaks)=="DBA") {
    	        res = pv.peakset_all(DBA, addpv=peaks, minOverlap=minOverlap)
    	     }
-   	   }
-   	   if(is.null(res)) {
+   	  }
+   	  if(is.null(res)) {
    
          res = pv.peakset(DBA, peaks=peaks, 
                           sampID=sampID, tissue=tissue, factor=factor,condition=condition,treatment=treatment,
                           replicate=replicate,control=control,
-                          peak.caller=peak.caller,reads=reads, consensus=consensus, 
+                          peak.caller=peak.caller, peak.format=peak.format, reads=reads, consensus=consensus, 
                           readBam=bamReads, controlBam=bamControl,
-                          bNormCol=normCol, bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
+                          scoreCol=scoreCol, bLowerScoreBetter=bLowerScoreBetter, 
+                          bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
                           minOverlap=minOverlap)
       }
       
@@ -226,7 +229,8 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
 }                      
 
 ##################################################
-## dba.overlap -- compute binding site overlaps ####################################################
+## dba.overlap -- compute binding site overlaps ##
+##################################################
 
 DBA_OLAP_PEAKS = 1 # Return list of peaksets (common/unique peaks) 
 DBA_OLAP_ALL   = 2 # Return overlap report with statstics for peakset pairs
@@ -466,7 +470,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 {
    DBA = pv.check(DBA)
    
-   if(missing(contrast) && !missing(score)) {
+   if( (missing(contrast) || !missing(mask)) && !missing(score) ) {
       DBA = dba.count(DBA,peaks=NULL,score=score)	
    }
    
@@ -476,8 +480,9 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
       }   	
       DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
    	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
-   	                       bPCA=F,bLog=T,minval=minval,maxval=maxval)
-   	  contrast = 1                     
+   	                       bPCA=F,bLog=T,minval=minval,maxval=maxval,mask=mask)
+   	  contrast = 1
+   	  mask = NULL                     
    }
    	                          	  
    if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  { 	
@@ -485,7 +490,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    }
    	  
    if(correlations[1]!=FALSE) {
-      res = pv.plotHeatmap(DBA, attributes=attributes, overlaps=correlations, olPlot=olPlot,
+      res = pv.plotHeatmap(DBA, attributes=attributes, overlaps=correlations, olPlot=olPlot, mask=mask,
                            ColScheme=colScheme, distMeth=distMethod, bReorder=TRUE, contrast=contrast,
                            RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                            minval=minval, maxval=maxval, margins=c(margin,margin),
@@ -633,7 +638,7 @@ dba.plotClust = function(DBA, mask, sites, attributes=DBA$attributes, distMethod
 ## dba.plotVenn -- Venn diagram plots of overlaps ##
 ####################################################
 
-dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
+dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, main="", sub="")
 {
 
    if(!missing(mask)) {
@@ -649,6 +654,9 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
       if(missing(label3)) {
          label3 = DBA$class[PV_ID,res$C]
       }
+      if(missing(label4)) {
+         label4 = DBA$class[PV_ID,res$D]
+      }
 
    } else {
    
@@ -661,12 +669,15 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, ...)
       if(missing(label3)) {
          label3 = "C"
       }
+      if(missing(label4)) {
+         label4 = "D"
+      }
       for(i in 1:length(overlaps)) {
          overlaps[[i]] = pv.DataType2Peaks(overlaps[[i]])
       }
    }
          
-   pv.plotVenn(overlaps,label1=label1,label2=label2,label3=label3,...)
+   pv.plotVenn(overlaps,label1=label1,label2=label2,label3=label3,label4=label4,main,sub)
   
 }
 

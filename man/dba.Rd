@@ -11,8 +11,8 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
     config=data.frame(RunParallel=TRUE, reportInit="DBA"),
-    caller='raw', skipLines=0, bAddCallerConsensus=FALSE, 
-    bRemoveM=TRUE, bRemoveRandom=TRUE, 
+    peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, 
+    bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, 
     bCorPlot=FALSE, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -30,7 +30,7 @@ logical or numerical vetcor indicating which peaksets to include in the resultin
 only include peaks in at least this many peaksets in the main binding matrix if basing DBA object on an existing one.
 }
 \item{sampleSheet}{
-data frame containing sample sheet, or file name of sample sheet to load (ignored if DBA is specified). Columns names in sample sheet should include:
+data frame containing sample sheet, or file name of sample sheet to load (ignored if DBA is specified). Columns names in sample sheet may include:
 \itemize{
 \item {SampleID:}	{Identifier string for sample}
 \item {Tissue:}	{Identifier string for tissue type}
@@ -51,6 +51,9 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 \item {\dQuote{peakset}:}	{peakset written out using pv.writepeakset}
 \item {\dQuote{fp4}:}	{FindPeaks v4}
 }
+\item {PeakFormat:}	{string indicating format for peak files; see PeakCaller}
+\item {ScoreCol:}	{column in peak files that contains peak scores}
+\item {LowerBetter:}	{logical indicating that lower scores signify better peaks}
 }
 }
   \item{config}{
@@ -61,8 +64,17 @@ data frame containing sample sheet, or file name of config file to load when con
 \item {AnalysisMethod:}	{either DBA_EDGER or DBA_DESEQ.}
 }
 }
-  \item{caller}{
-if a sampleSheet is specified, the default peak file format that will be used if the PeakCaller column is absent.
+  \item{peakCaller}{
+if a sampleSheet is specified, the default peak caller that will be used if the PeakCaller column is absent.
+}
+ \item{peakFormat}{
+if a sampleSheet is specified, the default peak file format that will be used if the PeakFormat column is absent.
+}
+ \item{scoreCol}{
+if a sampleSheet is specified, the default column  in the peak files that will be used for scoring if the ScoreCol column is absent.
+}
+ \item{bLowerScoreBetter}{
+if a sampleSheet is specified, the  sort order for peak scores if the LowerBetter column is absent.
 }
   \item{skipLines}{
 if a sampleSheet is specified, the number of lines (ie header lines) at the beginning of each peak file to skip.
@@ -135,6 +147,11 @@ tamoxifen
 data(tamoxifen_peaks)
 Responsive = dba(tamoxifen,tamoxifen$masks$Responsive)
 Responsive
+
+# change peak caller but leave peak format the same
+setwd(system.file("extra", package="DiffBind"))
+tamoxifen = dba(sampleSheet="tamoxifen.csv", peakCaller="macs", peakFormat="raw")
+dba.show(tamoxifen, attributes=c(DBA_TISSUE,DBA_CONDITION,DBA_REPLICATE,DBA_CALLER))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -55,7 +55,7 @@ Set all scores greater than this to maxval
 }
 
 \item{contrast}{
-number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see dba.analyze). See dba.show(DBA, bContrast=T) to get contrast numbers.
+number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see dba.analyze). Only significantly differentially bound sites will be used (subject to the th and bUsePval parameters). If mask is unspecified, only the samples in the contrast will be included. See dba.show(DBA, bContrast=T) to get contrast numbers.
 }
 \item{method}{
 analysis method (used in conjunction with contrast):
@@ -92,7 +92,7 @@ Score to use for count data. Only used when plotting the global binding matrix (
 }
 
 \item{mask}{
-mask indicating a subset of peaksets to use when using global binding matrix (contrast is missing). See dba.mask.
+mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included.
 }
   \item{sites}{
 logical vector indicating which sites to include; first maxSites of these. Only relevant when using global binding matrix (contrast is missing).
@@ -160,7 +160,7 @@ dba.plotHeatmap(DBA, attributes=DBA$attributes, minval, maxval,
 MODE: Correlation Heatmap plot using statistics for significantly differentially bound sites:
 
 dba.plotHeatmap(DBA, attributes=DBA$attributes, minval, maxval,
-                      contrast, method=DBA_EDGER, th=.1, bUsePval=F,
+                      contrast, method=DBA_EDGER, th=.1, bUsePval=F, mask,
                       overlaps, olPlot=DBA_COR,
                       colScheme="Greens", distMethod="pearson", ...)
                       
@@ -217,6 +217,16 @@ dba.plotHeatmap(tamoxifen,contrast=1,correlations=FALSE)
 
 #binding heatmap based on 1,000 sites with highest variance
 dba.plotHeatmap(tamoxifen,contrast=1,th=1,correlations=FALSE,sortFun=var)
+
+data(tamoxifen_counts)
+#Examples of  heatmaps using DB sites with different subsets of samples
+tamoxifen = dba.contrast(tamoxifen,tamoxifen$masks$Resistant,c(3:5,10:11)) #exclude T47D
+tamoxifen = dba.analyze(tamoxifen,bCorPlot=FALSE)
+dba.plotHeatmap(tamoxifen, contrast=1) # regular heatmaps with two contrast groups
+dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$All) #also include the T47D samples
+plot(tamoxifen,contrast=1,mask=!tamoxifen$masks$MCF7) # correlation heatmap without MCF7 with with T47D
+dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$T47D,correlations=FALSE) # binding heatmaps using only the T47D samples
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

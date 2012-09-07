@@ -62,7 +62,7 @@ pv.DataType2Peaks = function(RDpeaks){
 }
 
 pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=.1,bUsePval=FALSE,bNormalized=T,report,
-                          bPCA=F,bLog=T,minval,maxval) {
+                          bPCA=F,bLog=T,minval,maxval,mask) {
                           	
    if(contrast > length(pv$contrasts)) {
       stop('Specified contrast number is greater than number of contrasts')
@@ -78,21 +78,60 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
         stop('Unable to plot -- no sites within threshold')	
      }
    }
-      
-   repcols = colnames(report)
-   numsamps = sum(con$group1)+sum(con$group2)
-   if(length(repcols) < (numsamps+9)) {
-      stop('Report does not have count data, re-run dba.report with bCounts=T')
-   }
-   first = 10
-   if(repcols[10]=="Called1") {
-      if(length(repcols) < (numsamps+11)) {
+   
+   if(!missing(mask)){
+      if (!is.logical(mask)) {
+         if (max(mask) > length(pv$peaks)) {
+            stop("Invalid sample number in mask.",call.=F)
+         }
+         temp = rep(F, length(pv$peaks))
+         temp[mask] = T
+         mask = temp
+      }
+   	  sites = as.numeric(rownames(report))
+   	  group1 = con$group1 & mask
+   	  group2 = con$group2 & mask
+      extra = mask & !(group1 | group2)
+      allsamps = c(which(group1), which(group2), which(extra))
+      numsamps = length(allsamps)
+      domap = matrix(0,length(sites),0)
+      if(sum(group1)) {     
+         domap = cbind(domap,pv$vectors[sites,3+which(group1)])
+      }
+      if(sum(group2)) {
+         domap = cbind(domap,pv$vectors[sites,3+which(group2)])
+      }
+      if(sum(extra)) {
+         domap = cbind(domap,pv$vectors[sites,which(extra)])
+      }
+      rownames(domap) = rownames(report)
+      colnames(domap) = pv$class[PV_ID,allsamps] 
+      con$group1 = group1
+      con$group2 = group2
+   } else {   
+   	  allsamps = c(which(con$group1),which(con$group2))
+   	  extra = rep(F,ncol(pv$class)) 
+      repcols = colnames(report)
+      numsamps = sum(con$group1)+sum(con$group2)
+      if(length(repcols) < (numsamps+9)) {
          stop('Report does not have count data, re-run dba.report with bCounts=T')
       }
-      first = 12	 
+      first = 10
+      if(repcols[10]=="Called1") {
+         if(length(repcols) < (numsamps+11)) {
+            stop('Report does not have count data, re-run dba.report with bCounts=T')
+         }
+         first = 12	 
+      }
+      domap = report[,first:(first+numsamps-1)]
+      group1 = rep(F,numsamps)
+      group2 = rep(T,numsamps)
+      group1[1:sum(con$group1)] = T
+      group2[1:sum(con$group1)] = F
+      con$group1 = group1
+      con$group2 = group2
+            
    }
-   
-   domap = report[,first:(first+numsamps-1)]
    
    if(bLog) {
    	  domap[domap<=0]=1
@@ -110,24 +149,26 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
    if(!missing(maxval)) {
       domap[domap>maxval] = maxval
    }
-   
-
-   
+     
    pv$vectors = cbind(report[,1:3],domap)
    pv$allvectors = pv$vectors
-   pv$class = cbind(pv$class[,con$group1],pv$class[,con$group2])
+   pv$class = pv$class[,allsamps]
    pv$contrasts = list(pv$contrasts[[contrast]])
    pv$contrasts[[1]]$group1 = rep(F,ncol(pv$class))
-   pv$contrasts[[1]]$group2 = rep(T,ncol(pv$class))
-   pv$contrasts[[1]]$group1[1:sum(con$group1)]=T
-   pv$contrasts[[1]]$group2[1:sum(con$group1)]=F   
+   pv$contrasts[[1]]$group2 = rep(F,ncol(pv$class))
+   if(sum(con$group1)) {
+      pv$contrasts[[1]]$group1[1:sum(con$group1)]=T
+   }
+   if(sum(con$group2)) {
+      pv$contrasts[[1]]$group2[(sum(con$group1)+1):(sum(con$group1)+sum(con$group2))]=T   
+   }
       
    if(bPCA)  {
    	
       #pv$pc = princomp(domap,cor=bPCAcor)
 
       if(attributes[1] == PV_GROUP) {
-         pv$class[PV_ID,] = c(rep(con$name1,sum(con$group1)),rep(con$name2,sum(con$group2)))
+         pv$class[PV_ID,] = c( rep(con$name1,sum(con$group1)), rep(con$name2,sum(con$group2)), rep("none",sum(extra)) )
       }
    } 
    
@@ -777,11 +818,12 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
       attribute = attributes[num]
       if(attribute==PV_GROUP) {
          if(!missing(contrast)) {
-            gps = rep(1,length(pv$contrasts[[contrast]]$group1))
+            gps = rep(3,length(pv$contrasts[[contrast]]$group1))
+            gps[pv$contrasts[[contrast]]$group1]=1
             gps[pv$contrasts[[contrast]]$group2]=2
             classdb = rbind(classdb,gps)
             attribute = nrow(classdb)
-            vals = 1:2
+            vals = 1:max(gps)
          } else {
             vals = NA	
          }

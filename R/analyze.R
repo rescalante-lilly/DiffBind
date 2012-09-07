@@ -917,6 +917,9 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
    
    g1     = rep(F,length(pv$peaks))
    g1[1]  = T
+   
+   savenames = pv$class[PV_ID,]
+   pv$class[PV_ID,] = 1:ncol(pv$class)
    res    = pv.DEedgeR(pv,g1,!g1,"1","2",bSubControl=bMinus,bFullLibrarySize=bFullLib,bNormOnly=T)
    #res    = estimateCommonDisp(res)
    counts = res$counts
@@ -924,6 +927,7 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
    counts = t(t(counts)/sizes)
    counts = counts * mean(res$samples$lib.size)
 
+   colnames(counts) = savenames
    return(counts)
                        
 }
