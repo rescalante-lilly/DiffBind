@@ -102,7 +102,7 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
          domap = cbind(domap,pv$vectors[sites,3+which(group2)])
       }
       if(sum(extra)) {
-         domap = cbind(domap,pv$vectors[sites,which(extra)])
+         domap = cbind(domap,pv$vectors[sites,3+which(extra)])
       }
       rownames(domap) = rownames(report)
       colnames(domap) = pv$class[PV_ID,allsamps] 

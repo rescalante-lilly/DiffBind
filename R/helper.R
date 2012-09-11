@@ -481,6 +481,9 @@ pv.swembl = function(fn){
 pv.readbed = function(fn,skipnum=0){
  data = read.table(fn,skip=skipnum)
  res  = pv.peaksort(data)
+ if(ncol(res)==3) {
+    res=cbind(res,1)	
+ }
  return(res)
 }
 
@@ -546,6 +549,9 @@ pv.peakset_all = function(pv, addpv, minOverlap) {
                      )
    }
    
+   if(minOverlap>0 && minOverlap<1) {
+      minOverlap = ceiling(length(pv$peaks) * minOverlap)	
+   }
    pv = dba(pv, minOverlap=minOverlap)
 
    return(pv)
@@ -689,9 +695,9 @@ pv.dovectors = function(allpeaks,classes,bKeepAll=F,maxgap=0,useExternal=TRUE,us
 
 pv.CalledMasks = function(pv,newpv,master) {
    master = cbind(master[,1:3],1)
-   spare = pv.peakset(pv,master,peak.caller='raw')
+   spare = pv.peakset(pv,master,peak.caller='raw',scoreCol=4,bLowerScoreBetter=F)
    spare = pv.model(spare)
-   res = pv.list(spare,spare$masks$counts)
+   res   = pv.list(spare,spare$masks$counts)
    masternum = length(spare$peaks)
    resl = NULL
    for(i in 1:nrow(res)) {

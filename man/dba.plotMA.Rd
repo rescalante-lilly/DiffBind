@@ -10,7 +10,8 @@ Generates MA and scatter plots of differential binding analysis results.
 \usage{
 dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
            th=.1, bUsePval=FALSE,  fold=0,
-           bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33, ...)
+           bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33,
+           bSignificant=TRUE, bSmooth=TRUE, ...)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -57,6 +58,12 @@ logical indicating whether to draw MA plot (FALSE) or XY scatter plot (TRUE).
 
   \item{dotSize}{
 size of points on plot (cex).
+}
+  \item{bSignificant}{
+Logical indicating if points corresponding to significantly differentially bound sites (based on contrast, th, bUsePval, and fold parameters) should be overlaid in red.
+}
+  \item{bSmooth}{
+logical indicating that basic plot should be plotted using smoothScatter. Note that overlaid significant sites will be not plotted using a smoothing function.
 }
   \item{\dots}{
 passed to plot.

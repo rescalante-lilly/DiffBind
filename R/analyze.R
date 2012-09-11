@@ -838,7 +838,7 @@ pv.getsites = function(pv,sites){
 }
 
 pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F,fold=0,facname="",bNormalized=T,
-                        cex=.15,...) {
+                        cex=.15,bSignificant=T, bSmooth=T,...) {
 
    if(missing(contrast)){
       contrast=1:length(pv$contrasts)
@@ -850,9 +850,9 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
    }
    
    plotfun = plot
-#   if (bSmooth) {
-#      plotfun = smoothScatter
-#   }
+   if (bSmooth) {
+      plotfun = smoothScatter
+   }
 
    
    numSites = nrow(pv$vectors)
@@ -875,14 +875,26 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
               xmax  = ceiling(max(res$Conc))
               ymin  = floor(min(res$Fold))
               ymax  = ceiling(max(res$Fold))
-              plotfun(res$Conc[!idx],res$Fold[!idx],pch=20,cex=cex,
-                      xaxp=c(xmin,xmax,xmax-xmin),xlim=c(xmin,xmax),
-                      xlab='log concentration',
-                      yaxp=c(ymin,ymax,(ymax-ymin)),ylim=c(ymin,ymax),
-                      ylab=sprintf('log fold change: %s - %s',conrec$name1,conrec$name2),
-                      main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
-                                   facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)
-              points(res$Conc[idx],res$Fold[idx],pch=20,cex=cex,col=2)
+              if(bSmooth | !bSignificant) {
+                 plotfun(res$Conc,res$Fold,pch=20,cex=cex,
+                         xaxp=c(xmin,xmax,xmax-xmin),xlim=c(xmin,xmax),
+                         xlab='log concentration',
+                         yaxp=c(ymin,ymax,(ymax-ymin)),ylim=c(ymin,ymax),
+                         ylab=sprintf('log fold change: %s - %s',conrec$name1,conrec$name2),
+                         main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
+                                      facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)              	
+              } else {
+                 plotfun(res$Conc[!idx],res$Fold[!idx],pch=20,cex=cex,
+                         xaxp=c(xmin,xmax,xmax-xmin),xlim=c(xmin,xmax),
+                         xlab='log concentration',
+                         yaxp=c(ymin,ymax,(ymax-ymin)),ylim=c(ymin,ymax),
+                         ylab=sprintf('log fold change: %s - %s',conrec$name1,conrec$name2),
+                         main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
+                                      facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)
+              }
+              if(bSignificant) {
+                 points(res$Conc[idx],res$Fold[idx],pch=20,cex=cex,col=2)
+              }
               abline(h=0,col='dodgerblue')
            }
            if(bXY){

@@ -323,7 +323,7 @@ vennPlot <- function(counts=counts, mymain="Venn Diagram", mysub="default", setl
 				setlabels <- setlabels
 			}
 			text(c(5.7, 7.9, 8.5, 4.2, 0.8), c(9.9, 7.9, 1.9, 0.0, 7.3), adj=c(0, 0.5), labels=setlabels, col=lcol, cex=lcex, ...)
-			close.screen(all=TRUE) 
+			close.screen(all.screens=TRUE) 
 		}
 		ellipseVenn(...)
 	} 

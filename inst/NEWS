@@ -1,3 +1,9 @@
+version 1.3.5:(2012-09-11)
+
+- restored smoothScatter option to dba.plotMA -- made default.
+
+- bugfixes 
+
 version 1.3.4:(2012-09-07)
 
 - changed Venn plotting to overLapper (Thomas Girke); added 4-way Venns
@@ -8,8 +14,7 @@ version 1.3.4:(2012-09-07)
 
 - added more flexibility in specifying peak file formats in dba.peakset and dba
 
-
-- can specify mask along with contrast in dba.plotHeatmap to select samples to plot using DB sites
+- can specify mask along with contrast in dba.plotHeatmap and dba.plotPCA to select samples to plot using DB sites
 
 version 1.3.3:(2012-09-02)
 

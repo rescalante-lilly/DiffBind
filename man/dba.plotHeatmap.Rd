@@ -55,7 +55,7 @@ Set all scores greater than this to maxval
 }
 
 \item{contrast}{
-number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see dba.analyze). Only significantly differentially bound sites will be used (subject to the th and bUsePval parameters). If mask is unspecified, only the samples in the contrast will be included. See dba.show(DBA, bContrast=T) to get contrast numbers.
+number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see dba.analyze). Only significantly differentially bound sites will be used (subject to the th and bUsePval parameters). If mask is unspecified, only the samples in the contrast will be included. See dba.show(DBA, bContrast=T) to get contrast numbers. If missing, uses scores in the main binding matrix.
 }
 \item{method}{
 analysis method (used in conjunction with contrast):

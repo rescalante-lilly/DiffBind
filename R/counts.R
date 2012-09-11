@@ -107,7 +107,7 @@ pv.model = function(model,mask,minOverlap=2,
    	  if(is.null(samples$LowerBetter[i])) {
    	     bLowerBetter  = bLowerBetter
    	  } else if(is.na(samples$LowerBetter[i])) {
-   	     peakscores  = bLowerBetter
+   	     bLowerBetter  = bLowerBetter
       } else {
    	     bLowerBetter = as.character(samples$LowerBetter[i])
    	  }
@@ -182,6 +182,11 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
                      bParallel=F,bUseLast=F,bWithoutDupes=F) {
    
    pv = pv.check(pv)
+   
+   
+   if(minOverlap >0 && minOverlap <1) {
+      minOverlap = ceiling(length(pv$peaks) * minOverlap)	
+   }
    
    if(!missing(peaks)) {
       if(is.character(peaks[1,1])){

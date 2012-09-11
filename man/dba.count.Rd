@@ -28,7 +28,7 @@ DBA object
 GRanges, RangedData, dataframe, or matrix containing intervals to use. If missing, generates a consensus peakset using minOverlap parameter. If NULL, changes the score used in the global binding matrix to the score type specified in the score parameter.
 }
 \item{minOverlap}{
-only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).
+only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).  If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
 }
 \item{score}{
 which score to use in the binding affinity matrix. Note that all raw read counts are maintained for use by dba.analyze, regardless of how this is set. One of:

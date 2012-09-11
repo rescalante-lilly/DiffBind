@@ -87,7 +87,7 @@ importFrom(graphics, abline, boxplot, plot, points, smoothScatter)
 
 importFrom(grDevices, colorRampPalette)
 
-importFrom(limma, vennDiagram)
+#importFrom(limma, vennDiagram)
 
 #importFrom(multicore, collect, mclapply, mcparallel)
 

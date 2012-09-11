@@ -117,6 +117,8 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
    if(missing(controlBam))   controlBam=NA
    if(length(controlBam)==0) controlBam=NA
    
+   if(is.null(scoreCol))          scoreCol=0
+   if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE
                   
    if(is.character(peaks)){ # Read in peaks from a file
      
@@ -220,6 +222,10 @@ pv.peakset_all = function(pv, addpv, minOverlap) {
                      )
    }
    
+   if(minOverlap>0 && minOverlap<1) {
+      minOverlap = ceiling(length(pv$peaks) * minOverlap)	
+   }
+   
    pv = dba(pv, minOverlap=minOverlap)
 
    return(pv)
@@ -270,6 +276,10 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
    
    numvecs = length(peaks)
    ncols = numvecs+3
+   
+   if(minOverlap>0 && minOverlap<1) {
+      minOverlap = ceiling(numvecs * minOverlap)	
+   }
    
    npeaks=0
    defval = -1
@@ -450,19 +460,18 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
             res[i] = sum(apply(tmp$allvectors[,4:ncol(tmp$vectors)],1,pv.minOverlap,i))
          }
          return(res)
-      } else if(minOverlap == 1) {
+      } else {
          tmp = pv.vectors(tmp,bKeepAll=T,bAnalysis=F)
          tmp$vectors = tmp$allvectors
-      } else {
-         tmp = pv.vectors(tmp,bKeepAll=F,bAnalysis=F)
       }
    }
    
-   if((minOverlap != 2) | bFast) { 
-      goodvecs = apply(tmp$vectors[,4:ncol(tmp$vectors)],1,pv.minOverlap,minOverlap)
-   } else {
-      goodvecs = rep(T,nrow(tmp$vectors))
+   if(minOverlap>0 && minOverlap <1) {
+      minOverlap = ceiling(length(tmp$peaks) * minOverlap)	
    }
+   
+   goodvecs = apply(tmp$vectors[,4:ncol(tmp$vectors)],1,pv.minOverlap,minOverlap)
+
    tmp$vectors  = tmp$vectors[goodvecs,]
    
    mean.density = apply(tmp$vectors[,4:ncol(tmp$vectors)],1,pv.domean)

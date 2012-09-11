@@ -123,7 +123,7 @@ logical indicating whether to remove peaks on chrM when adding a peakset
 logical indicating whether to remove peaks on chrN_random when adding a peakset
 }
   \item{minOverlap}{
-the minimum number of peaksets a peak must be in to be included when adding a consensus peakset. When retrieving, if the peaks parameter is a vector (logical mask or vector of peakset numbers), a binding matrix will be retrieved including all peaks in at least this many peaksets.
+the minimum number of peaksets a peak must be in to be included when adding a consensus peakset. When retrieving, if the peaks parameter is a vector (logical mask or vector of peakset numbers), a binding matrix will be retrieved including all peaks in at least this many peaksets. If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
 }
   \item{bMerge}{
 logical indicating whether global binding matrix should be compiled after adding the peakset. When adding several peaksets via successive calls to dba.peakset, it may be more efficient to set this parameter to FALSE and call dba(DBA) after all the peaksets have been added.

@@ -24,10 +24,10 @@ dba(DBA,mask, minOverlap=2,
 existing DBA object -- if present, will return a fully-constructed DBA object based on the passed one, using criteria specified in the mask and/or minOverlap parameters. If missing, will create a new DBA object based on the sampleSheet.
 }
 \item{mask}{
-logical or numerical vetcor indicating which peaksets to include in the resulting model if basing DBA object on an existing one. See dba.mask.
+logical or numerical vector indicating which peaksets to include in the resulting model if basing DBA object on an existing one. See dba.mask.
 }
 \item{minOverlap}{
-only include peaks in at least this many peaksets in the main binding matrix if basing DBA object on an existing one.
+only include peaks in at least this many peaksets in the main binding matrix if basing DBA object on an existing one.  If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
 }
 \item{sampleSheet}{
 data frame containing sample sheet, or file name of sample sheet to load (ignored if DBA is specified). Columns names in sample sheet may include:

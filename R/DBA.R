@@ -552,8 +552,9 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
       if(!missing(report)) {
          report = pv.DataType2Peaks(report)
       }  	  
-   	  DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,method=method,th=th,
-   	                       bUsePval=bUsePval,report=report,bPCA=T,minval=minval,maxval=maxval)
+   	  DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
+   	                       method=method,th=th,bUsePval=bUsePval,bNormalized=T,
+   	                       bPCA=T,minval=minval,maxval=maxval,mask=mask)                     
    	  if(attributes[1] == PV_GROUP) {
    	     attributes = PV_ID
    	  }
@@ -602,12 +603,13 @@ dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=0.1
 #########################################
                                       
 dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, fold=0, bNormalized=TRUE,
-                      factor="", bXY=FALSE, dotSize=.33, ...)
+                      factor="", bXY=FALSE, dotSize=.33, bSignificant=TRUE, bSmooth=TRUE, ...)
 
 {
    DBA = pv.check(DBA)
    res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval, fold=fold,
-                      facname=factor, bNormalized=bNormalized, cex=dotSize, ...)
+                      facname=factor, bNormalized=bNormalized, cex=dotSize, 
+                      bSignificant = bSignificant, bSmooth=bSmooth,  ...)
  
    return(res)	
 }

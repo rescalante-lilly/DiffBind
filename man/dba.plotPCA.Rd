@@ -52,7 +52,7 @@ Set all scores greater than this to maxval
 }
 
 \item{contrast}{
-number of contrast to use for PCA; if present, plots a PCA based on a differential binding affinity analysis (see dba.analyze). See dba.show(DBA, bContrast=T) to get contrast numbers. If missing, uses scores in the main binding matrix.
+number of contrast to use for PCA; if present, plots a PCA based on a differential binding affinity analysis (see dba.analyze). If mask is unspecified, only the samples in the contrast will be included.  See dba.show(DBA, bContrast=T) to get contrast numbers. If missing, uses scores in the main binding matrix.
 }
 \item{method}{
 method used for analysis (used in conjunction with contrast):
@@ -88,9 +88,8 @@ Score to use for count data. Only used when plotting the global binding matrix (
 \item DBA_SCORE_TMM_MINUS_EFFECTIVE
 }
 }
-
 \item{mask}{
-mask indicating a subset of peaksets to use when using global binding matrix (contrast is missing). See dba.mask.
+mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included. See dba.mask.
 }
  \item{sites}{
 logical vector indicating which sites to include in PCA. Only relevant when using global binding matrix (contrast is missing).
