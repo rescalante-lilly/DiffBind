@@ -179,7 +179,7 @@ PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,
-                     bParallel=F,bUseLast=F,bWithoutDupes=F) {
+                     bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F) {
    
    pv = pv.check(pv)
    
@@ -267,9 +267,16 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	        if(length(cont$counts)==0){
    	           warning('ERROR IN PROCESSING ',todo[cnum])
    	        }
+   	        if(bScaleControl==TRUE) {
+   	           scale = cond$libsize / cont$libsize
+   	           if(scale > 1) scale = 1
+   	           if(scale != 0) {
+   	              cont$counts = ceiling(cont$counts * scale)
+   	           }	
+   	        }   	        
    	     } else {
    	  	    cont = NULL
-   	        cont$counts = rep(1,length(cond$counts))
+   	        cont$counts = rep(1,length(cond$counts))	
    	        cont$rpkm   = rep(1,length(cond$rpkm))   
    	     }
    	     	  

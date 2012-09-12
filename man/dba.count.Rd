@@ -11,8 +11,8 @@ respectively.
 }
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
-          insertLength, maxFilter, bRemoveDuplicates=FALSE, bCalledMasks=TRUE, 
-          bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+          insertLength, maxFilter, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
+          bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -60,6 +60,9 @@ If peaks is NULL, will remove sites from existing DBA object without recounting.
 }
 \item{bRemoveDuplicates}{
 logical indicating if duplicate reads (ones that map to exactly the same genomic position) should be removed. If TRUE, any location where multiple reads map will  be counted as a single read.
+}
+\item{bScaleControl}{
+logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
 }
 \item{bCalledMasks}{
 logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks(used by dba.report). 

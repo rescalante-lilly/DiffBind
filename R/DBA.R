@@ -318,7 +318,7 @@ DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
-                     insertLength, maxFilter, bRemoveDuplicates=FALSE,
+                     insertLength, maxFilter, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
                      bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)            
@@ -344,7 +344,8 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTI
   
    res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
-                   bCalledMasks=bCalledMasks, minMaxval=maxFilter, bParallel=bParallel, bUseLast=bUseLast, bWithoutDupes=bRemoveDuplicates)
+                   bCalledMasks=bCalledMasks, minMaxval=maxFilter, bParallel=bParallel, bUseLast=bUseLast,
+                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl)
    
    if(bCorPlot){
       x = dba.plotHeatmap(res,correlations=T)
