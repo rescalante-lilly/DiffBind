@@ -1,3 +1,9 @@
+version 1.3.7:(2012-09-14)
+
+- add option to dba.count to pass a mask as a value to peak parameter to be applied before deriving consensus set
+
+- purge references to SAM files in documentation
+
 version 1.3.6:(2012-09-12)
 
 - added bScaleControl parameter to dba.count to enable Control read counts to be scaled down if there are more reads in the Control library than the matching ChIP library.

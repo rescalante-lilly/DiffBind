@@ -188,16 +188,25 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       minOverlap = ceiling(length(pv$peaks) * minOverlap)	
    }
    
+   bed = NULL
    if(!missing(peaks)) {
-      if(is.character(peaks[1,1])){
-         tmp = pv.peakset(NULL,peaks)
-         pv$chrmap = tmp$chrmap
-         peaks = tmp$peaks[[1]]
+   	  if(is.vector(peaks)) {
+         if(is.character(peaks)){
+            tmp = pv.peakset(NULL,peaks)
+            pv$chrmap = tmp$chrmap
+            peaks = tmp$peaks[[1]]
+         } else {
+            tmp = dba(pv,mask=peaks,minOverlap=minOverlap)
+            pv$chrmap = tmp$chrmap
+            bed = tmp$allvectors[,1:3]
+         }
       } else {
          pv$chrmap = unique(as.character(peaks[,1]))
       }
-      colnames(peaks)[1:3] = c("CHR","START","END")
-      bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
+      if(is.null(bed)) {
+         colnames(peaks)[1:3] = c("CHR","START","END")
+         bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
+      }
    } else {
      if(minOverlap == pv$minOverlap) {
         bed = pv$vectors[,1:3]
@@ -214,6 +223,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
 
    numChips = ncol(pv$class)
    chips  = unique(pv$class[PV_BAMREADS,])
+   chips  = unique(chips[!is.na(chips)])
    inputs = pv$class[PV_BAMCONTROL,]
    inputs = unique(inputs[!is.na(inputs)])
    todo   = unique(c(chips,inputs))
@@ -360,6 +370,15 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
 
 pv.nodup = function(pv,chipnum) {
 
+   
+   if(is.null(pv$class[PV_BAMREADS,chipnum])){
+      return(FALSE)
+   }
+
+   if(is.na(pv$class[PV_BAMREADS,chipnum])){
+      return(FALSE)
+   }   
+   
    if(chipnum == 1) {
       return(TRUE)
    }

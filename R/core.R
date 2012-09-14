@@ -551,6 +551,7 @@ pv.consensusSets = function(pv,peaks=NULL,minOverlap,attributes,
    if(is.vector(class)) {
       class = matrix(class,1,length(class))	
    }
+   sampids = pv$class[PV_ID,]
    
    specs = unique(class[,peaks],MARGIN=2)
    if(is.vector(specs)) {
@@ -570,7 +571,10 @@ pv.consensusSets = function(pv,peaks=NULL,minOverlap,attributes,
       diffatts = apply(class,MARGIN=1,function(x){length(unique(x))>1})
       if(sum(samples)>1) {
       	 message('Add consensus: ',paste(specs[diffatts,i],collapse=" "))
-         pv = pv.consensus(pv,samples,sampID=paste(specs[diffatts,i],collapse=":"),minOverlap=minOverlap)
+      	 if(length(unique(sampids[samples]))==1) {
+      	   sampid = sampids[samples][1]	
+      	 } else sampid = paste(specs[diffatts,i],collapse=":")
+         pv = pv.consensus(pv,samples,sampID=sampid,minOverlap=minOverlap)
          sampnum = ncol(pv$class)
          if(pv$class[PV_ID,sampnum]=="") pv$class[PV_ID,sampnum]="ALL"
          if(!missing(tissue))      pv$class[PV_TISSUE,sampnum]    = tissue
@@ -1367,7 +1371,11 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
       colnames(pvals) = names(toplot)
       for(i in 1:(length(toplot)-1)) {
          for(j in (i+1):length(toplot)) {
-            pvals[i,j] = pvalMethod(toplot[[i]],toplot[[j]])$p.value
+         	if(length(toplot[[i]]) == length(toplot[[j]])) {
+               pvals[i,j] = pvalMethod(toplot[[i]],toplot[[j]],paired=TRUE)$p.value
+            } else {
+               pvals[i,j] = pvalMethod(toplot[[i]],toplot[[j]],paired=FALSE)$p.value
+            }
             pvals[j,i] = pvals[i,j]
          }
       }

@@ -25,7 +25,7 @@ DBA object
 }
 %\subsection{Optional/defaulted arguments}{}
  \item{peaks}{
-GRanges, RangedData, dataframe, or matrix containing intervals to use. If missing, generates a consensus peakset using minOverlap parameter. If NULL, changes the score used in the global binding matrix to the score type specified in the score parameter.
+If GRanges, RangedData, dataframe, or matrix, this parameter contains the intervals to use for counting. If character string, it specifies a file containing the intervals to use (with the first three columns specifying chromosome, startpos, endpos).If missing or a mask, generates a consensus peakset using minOverlap parameter (after applying the mask if present). If NULL, changes the score used in the global binding matrix to the score type specified in the score parameter without re-counting.
 }
 \item{minOverlap}{
 only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).  If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
@@ -50,7 +50,7 @@ logical indicating whether log2 of score should be used (only applies to DBA_SCO
 \item{insertLength}{
 if present, this value will be used as the length of the reads. 
 Each read will be extended from its endpoint along the appropriate strand by this many bases. 
-If missing, the read size indicated in the BAM/SAM/BED file will be used.
+If missing, the read size indicated in the BAM/BED file will be used.
 }
 \item{maxFilter}{
 value to use for filtering intervals with low read counts. 
@@ -97,7 +97,7 @@ Rory Stark and Gordon Brown
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 %}
 \examples{
-# These won't run unless you have the reads available in a BAM, SAM, or BED file
+# These won't run unless you have the reads available in a BAM or BED file
 data(tamoxifen_peaks)
 \dontrun{tamoxifen = dba.count(tamoxifen)}
 
@@ -106,6 +106,12 @@ data(tamoxifen_peaks)
 data(tamoxifen_peaks)
 mcf7Common = dba.overlap(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsive)
 \dontrun{tamoxifen = dba.count(tamoxifen,peaks=mcf7Common$inAll)}
+tamoxifen
+
+#First make consensus peaksets from each set of replicates, then derive master consensus set for counting from those
+data(tamoxifen_peaks)
+tamoxifen = dba.peakset(tamoxifen,consensus = -DBA_REPLICATE)
+\dontrun{tamoxifen = dba.count(tamoxifen, peaks=tamoxifen$masks$Consensus)}
 tamoxifen
 
 # Change binding affinity scores

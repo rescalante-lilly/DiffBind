@@ -105,10 +105,10 @@ either the logical value of the consensus attribute when adding a specific peaks
 }
 }
 \item{bamReads}{
-file path of the BAM/SAM/BED file containing the aligned reads for the peakset being added.
+file path of the BAM/BED file containing the aligned reads for the peakset being added.
 }
 \item{bamControl}{
-file path of the BAM/SAM/BED file containing the aligned reads for the control used for the peakset being added.
+file path of the BAM/BED file containing the aligned reads for the control used for the peakset being added.
 }
   \item{scoreCol}{
 peak column to normalize to 0...1 scale when adding a peakset; 0 indicates no normalization

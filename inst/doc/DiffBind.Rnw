@@ -51,7 +51,7 @@ This guide includes a brief overview of the processing flow, followed by three s
 
 \section{Processing overview}
 
-\DBA works primarily with peaksets, which are sets of genomic intervals representing candidate protein binding sites. Each interval consists of a chromosome, a start and end position, and usually a score of some type indicating confidence in, or strength of, the peak. Associated with each peakset are metadata relating to the experiment from which the peakset was derived. Additionally, files containing mapped sequencing reads (BAM/SAM/BED) can be associated with each peakset (one for the ChIP data, and optionally another representing a control dataset).
+\DBA works primarily with peaksets, which are sets of genomic intervals representing candidate protein binding sites. Each interval consists of a chromosome, a start and end position, and usually a score of some type indicating confidence in, or strength of, the peak. Associated with each peakset are metadata relating to the experiment from which the peakset was derived. Additionally, files containing mapped sequencing reads (BAM//BED) can be associated with each peakset (one for the ChIP data, and optionally another representing a control dataset).
 
 Generally, processing data with \DBA involves five phases:
 \begin{enumerate}
@@ -775,7 +775,7 @@ First, a matrix of counts is constructed for the contrast, with columns for all 
 The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted (with a minimum final read count of 1). 
 Next the library size is computed for each sample for use in subsequent normalization. 
 By default, this is the total number of reads in peaks (the sum of each column). 
-Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. 
+Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM//BED file) is used. 
 The default setting is appropriate for situations when the overall signal is expected to be directly comparable between the samples; using the full library size may be preferable if samples are expected to have dramatically different signals (e.g., if some are expected to have very low binding rates compared to others). 
 Next comes a call to \edgeR's \texttt{DGEList} function. The \texttt{DGEList} object that results is next passed to \texttt{calcNormFactors} with all other parameters retained as defaults  (\texttt{method="TMM"}), returning an updated \texttt{DGEList} object. 
 This is passed to \texttt{estimateCommonDisp} with default parameters. 
@@ -807,9 +807,9 @@ For each contrast, a separate analysis is performed.
 First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. 
 The raw read count is used for this matrix; if the \texttt{bSubControl} parameter is set to \texttt{TRUE} (as it is by default), the raw number of reads in the control sample (if available) will be subtracted. 
 Next the library size is computed for each sample for use in subsequent normalization. By default, this is the total number of reads in peaks (the sum of each column). 
-Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/SAM/BED file) is used. 
+Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the total number of reads in the library (calculated from the source BAM/BED file) is used. 
 The first step concludes with a call to DESeq's \texttt{newCountDataSet} function, which returns a \texttt{CountDataSet} object. 
-If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/SAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. 
+If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. 
 Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} object and \texttt{fitType} set to \texttt{local}. If there are no replicates, (only one sample in each group), \texttt{method} is set to \texttt{blind}. 
 Otherwise, if \texttt{bTagwise} is TRUE, \texttt{method} is set to \texttt{per-condition}; if it is FALSE, \texttt{method} is set to \texttt{pooled}. 
 
