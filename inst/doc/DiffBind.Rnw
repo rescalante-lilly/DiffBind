@@ -13,6 +13,7 @@
 \usepackage{subfig}
 %\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 \newcommand{\DBA}{\textsf{DiffBind}~}
+\newcommand{\DiffBind}{\textsf{DiffBind}~}
 \newcommand{\edgeR}{\texttt{edgeR}~}
 \newcommand{\DESeq}{\texttt{DESeq}~}
 \newcommand{\code}[1]{{\small\texttt{#1}}}
@@ -35,7 +36,7 @@ Gordon Brown \\ \texttt{gordon.brown@cancer.org.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{20 March 2012}
+\date{17 September 2012}
 \maketitle
 
 \section{Introduction}
@@ -235,27 +236,9 @@ Displaying the resultant \texttt{DBA object} shows that 235 of the 1,654 sites a
 tamoxifen    
 @ 
 
-%11 Samples, 1654 sites in matrix:
-%        ID Tissue Factor  Condition Peak.caller Replicate Intervals
-%1  BT474.1-  BT474     ER  Resistant      counts         1      1654
-%2  BT474.2-  BT474     ER  Resistant      counts         2      1654
-%3   MCF7.1+   MCF7     ER Responsive      counts         1      1654
-%4   MCF7.2+   MCF7     ER Responsive      counts         2      1654
-%5   MCF7.3+   MCF7     ER Responsive      counts         3      1654
-%6   T47D.1+   T47D     ER Responsive      counts         1      1654
-%7   T47D.2+   T47D     ER Responsive      counts         2      1654
-%8   TAMR.1-   TAMR     ER  Resistant      counts         1      1654
-%9   TAMR.2-   TAMR     ER  Resistant      counts         2      1654
-%10  ZR75.1+   ZR75     ER Responsive      counts         1      1654
-%11  ZR75.2+   ZR75     ER Responsive      counts         2      1654
-%
-%1 Contrast:
-%    Group1 Members1     Group2 Members2 DB.edgeR
-%1 Resistant        4 Responsive        7      176
-
 
 By default, \texttt{dba.analyze} plots a correlation heatmap if it finds any significantly differentially bound sites, shown in \refsf{tamox-sdb-corhm}. 
-Using only the differentially bound sites, we now see that the four tamoxifen resistant samples (representing two cell lines) cluster together, although the tamoxifen-responsive MCF7 replicates cluster closer to them than to the other tamoxifen responsive samples. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 235 differentially bound sites, demonstrates how the differential binding analysis isolates sites that help distinguish between the Resistant and Responsive sample groups. The fact that an ideal clustering is not apparent even when considering only the differentially bound sites indicates that there may be a confounding factor we are not taking into account in this analysis. See Section 5 for a more sophisticated analysis that takes this factor (the presence of MCF7 cell lines in both the responsive and resistant groups) into account.
+Using only the differentially bound sites, we now see that the four tamoxifen resistant samples (representing two cell lines) cluster together, although the tamoxifen-responsive MCF7 replicates cluster closer to them than to the other tamoxifen responsive samples. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 235 differentially bound sites, demonstrates how the differential binding analysis isolates sites that help distinguish between the Resistant and Responsive sample groups. The fact that an ideal clustering is not apparent even when considering only the differentially bound sites indicates that there may be a confounding factor we are not taking into account in this analysis. See Section 5 for a more sophisticated analysis that takes this factor (the presence of MCF7 cell lines in both the responsive and resistant groups) into account, resulting in a more ideal clustering plot.
 
 \subsection{Retrieving the differentially bound sites}
 The final step is to retrieve the differentially bound sites as follows:
@@ -342,10 +325,10 @@ This draws the plot and returns a color legend. The resulting plot (\refsf{tamox
 \end{figure} 
 
 
-A PCA plot using only the differentially bound sites (corresponding to \refsf{tamox-sdb-corhm}), using an FDR threshold of 0.1, can be drawn as follows:
+A PCA plot using only the differentially bound sites (corresponding to \refsf{tamox-sdb-corhm}), using an FDR threshold of 0.05, can be drawn as follows:
 
-<<eval=TRUE,echo=TRUE,results=hide>>=
-dba.plotPCA(tamoxifen, contrast=1,th=.1)
+<<eval=TRUE,echo=TRUE,results=verbatim>>=
+dba.plotPCA(tamoxifen, contrast=1,th=.05)
 @
 
 This plot (\reff{tamox-sdb-pca}) shows that the differential analysis identifies sites than can be used to separate the sample groups along both the first and second components.
@@ -361,8 +344,8 @@ You may have to rotate the resultant plot top-to-bottom to align it with the sta
 Boxplots provide a way to view how read distributions differ between classes of binding sites. Consider the example, where the 235 differentially bound sites are identified. The MA plot (\reff{tamox-sdb-ma}) shows that these are not distributed evenly between those that increase binding affinity in the Responsive group vs. those that increase binding affinity in the Resistant groups. This can be seen quantitatively using the sites returned in the report:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
-sum(values(tamoxifen.DB)$Fold<0)
-sum(values(tamoxifen.DB)$Fold>0)
+sum(tamoxifen.DB$Fold<0)
+sum(tamoxifen.DB$Fold>0)
 @
 
 But how are reads distributed amongst the different classes of differentially bound sites and sample groups? These data can be more clearly seen using a boxplot:
@@ -380,7 +363,7 @@ pvals = dba.plotBox(tamoxifen)
 
 The default plot (\reff{tamox-sdb-box}) shows in the first two boxes that amongst differentially bound sites overall, the Responsive samples have a somewhat higher mean read concentration. The next two boxes show the distribution of reads in differentially bound sites that exhibit increased affinity in the Responsive samples, while the final two boxes show the distribution of reads in differentially bound sites that exhibit increased affinity in the Resistant samples.
 
-\texttt{dba.plotBox} returns a matrix of p-values (computed using a two-sided Wilcoxon `Mann-Whitney' test) indicating which of these distributions are significantly different from another distribution.
+\texttt{dba.plotBox} returns a matrix of p-values (computed using a two-sided Wilcoxon `Mann-Whitney' test, paired where appropriate) indicating which of these distributions are significantly different from another distribution.
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 pvals
@@ -394,7 +377,7 @@ pvals
 %  Responsive.DB- 5.842724e-01  2.526501e-08  2.141676e-10   2.268808e-18  5.719333e-20   1.000000e+00
 
 
-The significance of the overall difference in distribution of concentrations amongst the differentially bound sites in the two groups is shown to be p-value=2.135309e-11, while those between the Resistant and Responsive groups in the individual cases (increased in Responsive or Resistant) have p-values computed as 2.926571e-41 and 2.588615e-18.
+The significance of the overall difference in distribution of concentrations amongst the differentially bound sites in the two groups is shown to be p-value=9.673496e-15, while those between the Resistant and Responsive groups in the individual cases (increased in Responsive or Resistant) have p-values computed as 1.644677e-27 and 1.715161e-14.
 
 \subsection{Heatmaps}
 
@@ -403,7 +386,7 @@ The significance of the overall difference in distribution of concentrations amo
 corvals = dba.plotHeatmap(tamoxifen)
 @
 
-The effect of different scoring methods (normalization) can be examined in these plots by setting the \texttt{score} parameter to a different value.  The default value, \texttt{DBA\_SCORE\_TMM\_MINUS\_FULL}, uses the TMM normalization procedure from \edgeR, with contral reads subtracted first and using the full library size. Another scoring method is to use RPKM fold (RPKM of the ChIP reads divided by RPKM of the control reads; a correaltion heatmap for all the data using this scoring method can be obtained by typing \texttt{dba.plotHeatmap(tamoxifen, score=DBA\_SCORE\_RPKM\_FOLD)}.
+The effect of different scoring methods (normalization) can be examined in these plots by setting the \texttt{score} parameter to a different value.  The default value, \texttt{DBA\_SCORE\_TMM\_MINUS\_FULL}, uses the TMM normalization procedure from \edgeR, with control reads subtracted first and using the full library size. Another scoring method is to use RPKM fold (RPKM of the ChIP reads divided by RPKM of the control reads; a correlation heatmap for all the data using this scoring method can be obtained by typing \texttt{dba.plotHeatmap(tamoxifen, score=DBA\_SCORE\_RPKM\_FOLD)}.
 
 Another way to view the patterns of binding affinity directly in the differentially bound sites is via a binding affinity heatmap. This can be plotted for the example case as follows:
 
@@ -517,7 +500,7 @@ olap.rate
 These values can be plotted to show the overlap rate drop-off curve:
 
 <<eval=TRUE,echo=TRUE,results=hide>>=
-plot(olap.rate,type='b') 
+plot(olap.rate,type='b',ylab='# peaks', xlab='Overlap at least this many peaksets') 
 @
 
 The rate plot is shows in \reff{tamox-rate}. These curves typically exhibit a roughly geometric drop-off, with the number of overlapping sites halving as the overlap criterion become stricter by one site. When the drop-off is extremely steep, this is an indication that the peaksets do not agree very well. For example, if there are replicates you expect to agree, there may be a problem with the experiment. In the current example, peak agreement is high and the curve exhibits a better than geometric drop-off.
@@ -547,7 +530,7 @@ Arbitrary masks can be generated using the \texttt{dba.mask} function, or simply
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 dba.overlap(tamoxifen,tamoxifen$masks$MCF7 & tamoxifen$masks$Responsive,
-                       mode=DBA_OLAP_RATE)
+            mode=DBA_OLAP_RATE)
 @
 
 % [1] 1767 1222  874
@@ -566,26 +549,29 @@ Generated by plotting the result of: \texttt{dba.venn(tamoxifen,tamoxifen\$masks
   \label{fig:tamox-mcf7-venn}
 \end{figure}
 
-The resultant plot is shown as \reff{tamox-mcf7-venn}. This plot shows the 874 consensus peaks identified as common to all replicates, but further breaks down how the replicates relate to each other. The same can be done for each of the replicated cell line experiments, and rather than applying a global cutoff (3 of 11), each cell line could be dealt with individually in deriving a final peakset. For example we could replace the three tamoxifen-responsive MCF7 peaksets with one including the 1,222 peaks identified in at least two replicates by masking the non-consensus MCF7 peaksets (the \$Consensus mask filters peaksets formed from existing peaksets using \texttt{dba.peakset}) as follows:
+The resultant plot is shown as \reff{tamox-mcf7-venn}. This plot shows the 874 consensus peaks identified as common to all replicates, but further breaks down how the replicates relate to each other. The same can be done for each of the replicated cell line experiments, and rather than applying a global cutoff (3 of 11), each cell line could be dealt with individually in deriving a final peakset. A separate consensus peakset for each of the replicated sample types can be added to the DBA object using \texttt{dba.peakset}:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
-tamoxifen = dba.peakset(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsive,
-                                             sampID="MCF7+")
-tamoxifen = dba(tamoxifen,!(!tamoxifen$masks$Consensus&tamoxifen$masks$MCF7))
+tamoxifen = dba.peakset(tamoxifen, consensus = c(DBA_TISSUE,DBA_CONDITION), 
+            minOverlap=0.66)
 tamoxifen
 @
 
-% 9 Samples, 2377 sites in matrix (3322 total):
-%        ID Tissue Factor  Condition Peak.caller Replicate Intervals
-%1 BT474.1-  BT474     ER  Resistant         raw         1      1084
-%2 BT474.2-  BT474     ER  Resistant         raw         2      1115
-%3  T47D.1+   T47D     ER Responsive         raw         1       509
-%4  T47D.2+   T47D     ER Responsive         raw         2       347
-%5  TAMR.1-   TAMR     ER  Resistant         raw         1      1148
-%6  TAMR.2-   TAMR     ER  Resistant         raw         2       933
-%7  ZR75.1+   ZR75     ER Responsive         raw         1      2111
-%8  ZR75.2+   ZR75     ER Responsive         raw         2      1975
-%9    MCF7+   MCF7     ER Responsive         raw     1-2-3      1222
+This adds a new consensus peakset for each set of samples that share the same Tissue and Condition values. The exact effect could be obtained by calling    
+\texttt{tamoxifen = dba.peakset(tamoxifen, consensus = -DBA\_REPLICATE)} on the original set of peaks; this tells \DiffBind to generate a consensus peakset for every set fo samples that have the same metadata values \emph{except} the Replicate number.
+
+From this, a new DBA object can be generated using only the five consensus peaksets (the \$Consensus mask filters peaksets previously formed using \texttt{dba.peakset}) :
+
+<<eval=TRUE,echo=TRUE,results=verbatim>>=
+tamoxifen_consensus = dba(tamoxifen, mask = tamoxifen$masks$Consensus)
+tamoxifen_consensus
+@
+
+Alternatively, a master consensus peakset could be generated, and reads counted, directly using \texttt{dba.count}:
+
+<<eval=FALSE,echo=TRUE,results=hide>>=
+tamoxifen = dba.count(tamoxifen, peaks=tamoxifen$masks$Consensus) 
+@
 
 \subsection{A complete occupancy analysis: identifying sites unique to a sample group}
 
@@ -607,13 +593,10 @@ dba.overlap(tamoxifen,tamoxifen$masks$Responsive,mode=DBA_OLAP_RATE)
 % [1] 1875 1298  597  436
 % [1] 3208 2293 1217  807  584  265  161
 
-For the Resistant group, we choose an overlap rate of two, leaving 1,298 sites, while for the Responsive group, we use an overlap rate of 3, leaving 1,217 sites, and look at the overlap between the two groups:
+Requiring that consensus peaks overlap in at least one third of the samples in each group results in 1,298 sites for the Resistant group and 1,217 sites for the Responsive group:
 
 <<eval=TRUE,echo=TRUE,results=hide>>=
-tamoxifen = dba.peakset(tamoxifen,tamoxifen$masks$Resistant,
-                        sampID="Resistant",minOverlap=2)
-tamoxifen = dba.peakset(tamoxifen,tamoxifen$mask$Responsive, 
-                        sampID="Responsive",minOverlap=3)
+tamoxifen = dba.peakset(tamoxifen, consensus =  DBA_CONDITION, minOverlap = 0.33)
 dba.plotVenn(tamoxifen,tamoxifen$masks$Consensus)
 @
 
@@ -624,7 +607,7 @@ dba.plotVenn(tamoxifen,tamoxifen$masks$Consensus)
   \label{fig:tamox-cons-venn}
 \end{figure}
 
-\reff{tamox-cons-venn} shows that 448 sites are unique to the Resistant group, and 392 sites are unique to the Responsive group, with 819 sites being identified in both groups (meaning in at least half the Resistant samples and at least three of the seven Responsive samples). If our primary interest is in finding binding sites that are different between the two groups, it may seem reasonable to consider the 819 common sites to be uninteresting, and focus on the 840 sites that are unique to a specific group. The sites can be obtained using \texttt{dba.overlap}:
+\reff{tamox-cons-venn} shows that 448 sites are unique to the Resistant group, and 392 sites are unique to the Responsive group, with 819 sites being identified in both groups (meaning in at least half the Resistant samples and at least three of the seven Responsive samples). If our primary interest is in finding binding sites that are different between the two groups, it may seem reasonable to consider the 819 common sites to be uninteresting, and focus on the 840 sites that are unique to a specific group. These unique sites can be obtained using \texttt{dba.overlap}:
 
 <<eval=TRUE,echo=TRUE,results=hide>>=
 tamoxifen.OL = dba.overlap(tamoxifen, tamoxifen$masks$Consensus)
@@ -637,52 +620,6 @@ tamoxifen.OL$onlyA
 tamoxifen.OL$onlyB
 @
 
-%RangedData with 448 rows and 1 value column across 1 space
-%       space               ranges   |  Resistant
-%    <factor>            <IRanges>   |  <numeric>
-%1      chr18     [301531, 302172]   | 0.12897827
-%2      chr18     [346557, 347362]   | 0.02545366
-%3      chr18     [361121, 362106]   | 0.01780650
-%4      chr18     [384853, 386517]   | 0.08871906
-%5      chr18     [479200, 480032]   | 0.08687365
-%6      chr18     [562348, 563067]   | 0.03202105
-%7      chr18     [639178, 639957]   | 0.05527764
-%8      chr18     [647089, 647869]   | 0.05521693
-%9      chr18     [914869, 915486]   | 0.06593881
-%...      ...                  ... ...        ...
-%440    chr18 [74267807, 74268931]   | 0.08594548
-%441    chr18 [74313069, 74313720]   | 0.05233002
-%442    chr18 [74629529, 74630608]   | 0.01670948
-%443    chr18 [74675317, 74676231]   | 0.06404468
-%444    chr18 [75157775, 75158504]   | 0.03463882
-%445    chr18 [75163026, 75163816]   | 0.03066147
-%446    chr18 [75401417, 75402162]   | 0.04940022
-%447    chr18 [75525519, 75526188]   | 0.06458959
-%448    chr18 [75826088, 75826939]   | 0.02528083 
-%> 
-%RangedData with 392 rows and 1 value column across 1 space
- %      space               ranges   | Responsive
- %  <factor>            <IRanges>   |  <numeric>
-%1      chr18   [ 336592,  337347]   | 0.04664408
-%2      chr18   [ 439109,  440079]   | 0.03310468
-%3      chr18   [ 988767,  989698]   | 0.04701041
-%4      chr18   [1065304, 1066051]   | 0.06951515
-%5      chr18   [1231653, 1232311]   | 0.05523114
-%6      chr18   [1369773, 1370746]   | 0.08923925
-%7      chr18   [1470236, 1470902]   | 0.06573040
-%8      chr18   [2161751, 2162455]   | 0.03927969
-%9      chr18   [2197080, 2197908]   | 0.04607203
-%...      ...                  ... ...        ...
-%384    chr18 [72790966, 72791819]   | 0.08770689
-%385    chr18 [72914352, 72914983]   | 0.03892986
-%386    chr18 [73517930, 73518921]   | 0.02559103
-%387    chr18 [74835590, 74836200]   | 0.12889933
-%388    chr18 [74850775, 74851581]   | 0.07360388
-%389    chr18 [74860617, 74861878]   | 0.05664056
-%390    chr18 [74906349, 74907306]   | 0.03568147
-%391    chr18 [75641971, 75642647]   | 0.06198451
-%392    chr18 [76087923, 76089259]   | 0.12598012
-
 
 The scores associated with each site are derived from the peak caller confidence score, and are a measure of confidence in the peak call (occupancy), not a measure of how strong or distinct the peak is.
 
@@ -694,13 +631,13 @@ First, different criteria were used to select the overall consensus peakset. We 
 
 <<eval=TRUE,echo=TRUE,results=hide>>=
 tamoxifen = dba.peakset(tamoxifen,tamoxifen$masks$Consensus, 
-                        minOverlap=1,sampID="OL Consensus")
+            minOverlap=1,sampID="OL Consensus")
 tamoxifen = dba.peakset(tamoxifen,!tamoxifen$masks$Consensus,
-                        minOverlap=3,sampID="Consensus_3") 
+            minOverlap=3,sampID="Consensus_3") 
 dba.plotVenn(tamoxifen,14:15)
 @
 
-\reff{tamox-compare-venn} shows that the two sets agree on about 85\% of their sites, so the results should be directly comparable.\footnote{Alternatively, we could re-run the analysis using the newly derived consensus peakset by passing it into the counting function: \texttt{> tamoxifen = dba.count(tamoxifen, peaks = dba.peakset(tamoxifen, peaks=14, bRetrieve=T))}}
+\reff{tamox-compare-venn} shows that the two sets agree on about 85\% of their sites, so the results should be directly comparable between the differing parameters used to establish the  consensus peaksets.\footnote{Alternatively, we could re-run the analysis using the newly derived consensus peakset by passing it into the counting function: \texttt{> tamoxifen = dba.count(tamoxifen, peaks = tamoxifen$masks$Consensus)}}
 
 \begin{figure}
   \centering
@@ -725,13 +662,11 @@ tamoxifen.rep = dba.report(tamoxifen,bCalled=T,th=1)
 The \texttt{bCalled} option adds two columns to the report (\texttt{Called1} and \texttt{Called2}), one for each group, giving the number of samples within the group in which the site was identified as a peak in the original peaksets generated by the peak caller. We can use these to recreate the overlap criteria used in the occupancy analysis:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
-onlyResistant = values(tamoxifen.rep)$Called1>=2 & 
-                             values(tamoxifen.rep)$Called2<3
+onlyResistant = tamoxifen.rep$Called1>=2 & tamoxifen.rep$Called2<3
 sum(onlyResistant )
-onlyResponsive = values(tamoxifen.rep)$Called2>=3 & 
-                                  values(tamoxifen.rep)$Called1<2
+onlyResponsive = tamoxifen.rep$Called2>=3 &  tamoxifen.rep$Called1<2
 sum(onlyResponsive)
-bothGroups = values(tamoxifen.rep)$Called1>=2 & values(tamoxifen.rep)$Called2>=3
+bothGroups = tamoxifen.rep$Called1>= 2 & tamoxifen.rep$Called2>=3
 sum(bothGroups)
 @
 
@@ -739,17 +674,17 @@ sum(bothGroups)
 % [1] 391
 % [1] 821
 
-Comparing these numbers verifies the similarity with those seen in \reff{tamox-cons-venn}. 
+Comparing these numbers verifies the similarity with those seen in \reff{tamox-cons-venn}, showing again how the basic analysis is not oversensitive to differences in how the consensus peaksets are formed. This overlap analysis suggests that 704 of the sites are uniquely bound in either the Responsive or Resistant groups, while 821 sites are common to both. 
 
-Focusing on only those sites identified as significantly differentially bound (FDR <= 0.1), however, shows a different story than that obtainable using only occupancy data:
+Completing a full differential analysis and focusing on only those sites identified as significantly differentially bound (FDR <= 0.1), however, shows a different story than that obtainable using only occupancy data:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 tamoxifen.DB = dba.report(tamoxifen,bCalled=T,th=.1)
-onlyResistant = values(tamoxifen.DB)$Called1>=2 & values(tamoxifen.DB)$Called2<3
+onlyResistant = tamoxifen.DB$Called1>=2 & tamoxifen.DB$Called2<3
 sum(onlyResistant)
-onlyResponsive = values(tamoxifen.DB)$Called2>=3 & values(tamoxifen.DB)$Called1<2
+onlyResponsive = tamoxifen.DB$Called2>=3 & tamoxifen.DB$Called1<2
 sum(onlyResponsive)
-bothGroups = values(tamoxifen.DB)$Called1>=2 & values(tamoxifen.DB)$Called2>=3
+bothGroups = tamoxifen.DB$Called1>=2 & tamoxifen.DB$Called2>=3
 sum(bothGroups)
 @
 %[1] 32
@@ -757,7 +692,7 @@ sum(bothGroups)
 %[1] 54
 
 
-There are a number of notable differences in the results. First there are many fewer sites identified as differentially bound. Indeed, most of the sites identified in the occupancy analysis as unique to a sample group are not found to be significantly differentially bound using the affinity data. While partly this is a result of the stringency of the statistical tests, it shows how the affinity analysis can discriminate between sites where peak callers are making occupancy decisions that do not reflect significant differences in read densities at these sites. Secondly, while the sites unique to a sample group are more likely to be identified as differentially bound, differentially bound sites are as likely to be called in the consensus of both response groups as they are to be unique to one group, as  \emph{nearly half of the sites identified as significantly differentially bound are called as peaks in both response groups}. Finally, the differentially bound peaks identified using the affinity analysis are associated with significance statistics (p-value and FDR) that can be used to rank them for further examination, while the occupancy analysis yields a relatively unordered list of peaks, as the peak caller statistics refer only to the significance of occupancy, and not of differential binding.
+There are a number of notable differences in the results. First there are many fewer sites identified as differentially bound (232) than are unique to one condition (704). Indeed, most of the sites identified in the occupancy analysis as unique to a sample group are not found to be significantly differentially bound using the affinity data. While partly this is a result of the stringency of the statistical tests, it shows how the affinity analysis can discriminate between sites where peak callers are making occupancy decisions that do not reflect significant differences in read densities at these sites. Note that about 16\% of unique sites are significantly differential bound (113 out of 704). Secondly, differentially bound sites are as likely to be called in the consensus of both response groups as they are to be unique to one group, as  \emph{nearly half of the sites identified as significantly differentially bound are called as peaks in both response groups}. Indeed, sites identified in both sample groups are almost as likely to be identified as significantly differentially bound as sites identified in only one sample group (14.5\%, or 119 out of 821). Finally, the differentially bound peaks identified using the affinity analysis are associated with significance statistics (p-value and FDR) that can be used to rank them for further examination, while the occupancy analysis yields a relatively unordered list of peaks, as the peak caller statistics refer only to the significance of occupancy, and not of differential binding.
 
 \section{Technical notes}
 This section includes some technical notes explaining some of the internal technical details of \DBA processing.
@@ -781,12 +716,12 @@ Next comes a call to \edgeR's \texttt{DGEList} function. The \texttt{DGEList} ob
 This is passed to \texttt{estimateCommonDisp} with default parameters. 
 
 If the method is \texttt{DBA\_EDGER\_CLASSIC}, then if \texttt{ bTagwise} is TRUE (most useful when there are at least three members in each group of a contrast), the resulting \texttt{DGEList} object is then passed to \texttt{estimateTagwiseDisp}, with the prior set to 50 divided by two less than the total number of samples in the contrast, and \texttt{trend="none"}. 
-The final steps are to perform testing to determine the significance measure of the differences between the sample groups by calling \texttt{exactTest}  using the \texttt{DGEList} with the \texttt{dispersion} set based on the \texttt{bTagwise} parameter.
+The final steps are to perform testing to determine the significance measure of the differences between the sample groups by calling \texttt{exactTest} (\cite{RobinsonandSmyth}) using the \texttt{DGEList} with the \texttt{dispersion} set based on the \texttt{bTagwise} parameter.
 
 If the method is \texttt{DBA\_EDGER\_GLM} (the default), then a a design matrix is generated with two coefficients (the Intercept and one of the groups).
 Next  \texttt{estimateGLMCommonDisp} is called; if \texttt{bTagwise=TRUE},  \texttt{estimateGLMTagwiseDisp} is called as well. 
 The model is fitted by calling \texttt{glmFit}, and the specific contrast fitted by calling \texttt{glmLRT}, specifying that the second coefficient be dropped.
-Finally, and \texttt{exactTest} is performed, using either common or tagwise dispersion depending on the value specified for \texttt{bTagwise}.
+Finally, an \texttt{exactTest} (\cite{McCarthyetal}) is performed, using either common or tagwise dispersion depending on the value specified for \texttt{bTagwise}.
 
 This final  \texttt{DGEList} for contrast n is stored in the \texttt{DBA object} as 
 

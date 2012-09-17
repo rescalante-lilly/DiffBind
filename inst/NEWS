@@ -1,3 +1,7 @@
+version 1.3.8:(2012-09-17)
+
+- update vignette
+
 version 1.3.7:(2012-09-14)
 
 - add option to dba.count to pass a mask as a value to peak parameter to be applied before deriving consensus set
