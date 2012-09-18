@@ -8,6 +8,8 @@
 \alias{DBA_CALLER}
 \alias{DBA_CONSENSUS}
 \alias{DBA_CONTROL}
+\alias{DBA_INTERVALS}
+\alias{DBA_SN_RATIO}
 \alias{DBA_GROUP}
 \alias{DBA_OLAP_PEAKS}
 \alias{DBA_OLAP_ALL}
@@ -50,6 +52,9 @@ DBA_REPLICATE
 DBA_CALLER
 DBA_CONSENSUS
 DBA_CONTROL
+
+DBA_INTERVALS
+DBA_SN_RATIO
 
 DBA_GROUP
 
@@ -110,6 +115,14 @@ DBA peakset metadata: Is this a consensus peakset?
 \item{DBA_CONTROL}{
 DBA peakset metadata: ID of Control sample
 }
+
+\item{DBA_INTERVALS}{
+DBA peakset metadata: Number of intervals in peakset
+}
+\item{DBA_SN_RATIO}{
+DBA peakset metadata: Signal to Noise ratio (number of reads in intervals divided by total number of reads in library)
+}
+
 \item{DBA_GROUP}{
 DBA peakset metadata: color PCA plot using contras groups
 }

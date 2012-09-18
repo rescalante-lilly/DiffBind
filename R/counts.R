@@ -68,13 +68,47 @@ pv.model = function(model,mask,minOverlap=2,
    model = NULL
    if(is.character(config)) {
       if(!is.null(config)) {
-         config  = data.frame(t(read.table(config,comment.char="#",row.names=1)),
-                              stringsAsFactors=F)
+         config  = read.table(config,colClasses='character',sep=',',header=T)
+         x = config$DataType
+         if(!is.null(x)) {
+            if(x=="DBA_DATA_FRAME")	{
+               config$DataType = DBA_DATA_FRAME
+            } else if(x=="DBA_DATA_RANGEDDATA"){
+               config$DataType = DBA_DATA_RANGEDDATA            
+            } else {
+               config$DataType = DBA_DATA_GRANGES
+            } 
+         }
+         x = config$RunParallel
+         if(!is.null(x)) {
+            if(x=="FALSE") {
+               config$RunParallel=FALSE
+            } else {
+            	config$RunParallel=TRUE
+            }
+         }
       }
    }
    if(is.null(config$parallelPackage)){
       config$parallelPackage=DBA_PARALLEL_MULTICORE
+   } else if (config$parallelPackage == "DBA_PARALLEL_MULTICORE") {
+   	  config$parallelPackage=DBA_PARALLEL_MULTICORE
+   } else if (config$parallelPackage == "DBA_PARALLEL_RLSF") {
+   	  config$parallelPackage=DBA_PARALLEL_RLSF  
    }
+
+   if(is.null(config$AnalysisMethod)){
+      config$AnalysisMethod = DBA_EDGER
+   } else if(is.character(config$AnalysisMethod)){
+      x = strsplit(config$AnalysisMethod,',')
+      if(length(x[[1]])==1) {
+         config$AnalysisMethod=pv.getMethod(config$AnalysisMethod)
+      }	 else if (length(x[[1]])==2) {
+         #config$AnalysisMethod = c(pv.getMethod(x[[1]][1]),pv.getMethod(x[[1]][2]))	
+         config$AnalysisMethod = pv.getMethod(x[[1]][1])
+      }
+   }
+   
    model$config = config
    
    for(i in 1:nrow(samples)) {
@@ -101,7 +135,7 @@ pv.model = function(model,mask,minOverlap=2,
    	  } else if(is.na(samples$ScoreCol[i])) {
    	     peakscores  = scorecol
       } else {
-   	     peakscores = as.character(samples$ScoreCol[i])
+   	     peakscores = as.integer(samples$ScoreCol[i])
    	  }
    	  
    	  if(is.null(samples$LowerBetter[i])) {
@@ -109,7 +143,7 @@ pv.model = function(model,mask,minOverlap=2,
    	  } else if(is.na(samples$LowerBetter[i])) {
    	     bLowerBetter  = bLowerBetter
       } else {
-   	     bLowerBetter = as.character(samples$LowerBetter[i])
+   	     bLowerBetter = as.logical(samples$LowerBetter[i])
    	  }
 
    	  if(is.null(samples$ControlID[i])) {
@@ -160,6 +194,24 @@ pv.model = function(model,mask,minOverlap=2,
    return(model)
 }
 
+pv.getMethod = function(str) {   
+   if (str == "DBA_EDGER") {
+   	  ret=DBA_EDGER
+   } else if (str == "DBA_DESEQ") {
+   	  ret=DBA_DESEQ  
+   } else if (str == "DBA_EDGER_CLASSIC") {
+   	  ret=DBA_EDGER_CLASSIC
+   } else if (str == "DBA_DESEQ_CLASSIC") {
+   	  ret=DBA_DESEQ_CLASSIC  
+   } else if (str == "DBA_EDGER_GLM") {
+   	  ret=DBA_EDGER_GLM  
+   } else if (str == "DBA_DESEQ_GLM") {
+   	  ret=DBA_DESEQ_GLM  
+   } else ret = NULL
+   
+   return(ret)
+}
+
 
 ## pv.counts -- add peaksets with scores based on read counts
 PV_RES_RPKM             = 1
@@ -179,7 +231,7 @@ PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,
-                     bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F) {
+                     bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T) {
    
    pv = pv.check(pv)
    
@@ -363,6 +415,21 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          res = pv.setScore(res,redoScore,minMaxval=minMaxval)	
       } 
       res = pv.vectors(pv)   
+   }
+   
+   if(bSignal2Noise) {
+      sns = rep("",length(res$peaks))
+      for(i in 1:length(sns)) {
+         rip = sum(res$peaks[[i]]$Reads)
+         treads = as.integer(res$class[PV_READS,i])
+         if(treads) {
+            sn  = rip / treads
+            sns[i] = sprintf("%1.2f",sn)
+         }	
+      }
+      if(sum(as.numeric(sns) > 0,na.rm=T)) {
+         res$SN = sns  	
+      }
    }
    
    return(res)	

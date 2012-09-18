@@ -155,19 +155,6 @@ The result is a \texttt{DBA object}; the metadata associated with this object ca
 tamoxifen
 @
 
-%11 Samples, 2602 sites in matrix (3557 total):
-%         ID Tissue Factor  Condition Peak.caller Replicate Intervals
-%1  BT474.1-  BT474     ER  Resistant         raw         1      1084
-%2  BT474.2-  BT474     ER  Resistant         raw         2      1115
-%3   MCF7.1+   MCF7     ER Responsive         raw         1      1513
-%4   MCF7.2+   MCF7     ER Responsive         raw         2      1037
-%5   MCF7.3+   MCF7     ER Responsive         raw         3      1372
-%6   T47D.1+   T47D     ER Responsive         raw         1       509
-%7   T47D.2+   T47D     ER Responsive         raw         2       347
-%8   TAMR.1-   TAMR     ER  Resistant         raw         1      1148
-%9   TAMR.2-   TAMR     ER  Resistant         raw         2       933
-%10  ZR75.1+   ZR75     ER Responsive         raw         1      2111
-%11  ZR75.2+   ZR75     ER Responsive         raw         2      1975
 
 This shows how many peaks are in each peakset, as well as (in the first line) total number of unique peaks after merging overlapping ones (3,557) and the default binding matrix of 11 samples by the 2,602 sites that overlap in at least two of the samples. This object is available for loading using \texttt{data(tamoxifen\_peaks)}.
 
@@ -253,28 +240,6 @@ These are returned as a \texttt{GRanges} object, appropriate for downstream proc
 tamoxifen.DB
 @
 
-%RangedData with 182 rows and 6 value columns across 1 space
-%       space               ranges   |      Conc     Conc1     Conc2      Fold      p.value         FDR
-%    <factor>            <IRanges>   | <numeric> <numeric> <numeric> <numeric>    <numeric>   <numeric>
-%1      chr18 [  384853,   386517]   |  6.822477  8.096600  4.422122  3.674478 7.560491e-07 0.001250505
-%2      chr18 [62640747, 62642453]   |  6.935226  2.818403  7.556743 -4.738340 3.231268e-06 0.002672258
-%3      chr18 [ 8719898,  8721018]   |  6.666340  7.927585  4.356627  3.570957 9.123563e-06 0.004610124
-%4      chr18 [67583814, 67584869]   |  5.344121  1.001062  5.970114 -4.969051 1.318678e-05 0.004610124
-%5      chr18 [72497301, 72498984]   |  7.855787  4.253954  8.463994 -4.210040 1.652061e-05 0.004610124
-%6      chr18 [10013642, 10014854]   |  6.331710  7.540254  4.336512  3.203741 1.672354e-05 0.004610124
-%7      chr18 [ 7635601,  7636863]   |  6.222280  7.392168  4.415090  2.977078 2.334838e-05 0.005516888
-%8      chr18 [ 8167364,  8168199]   |  4.835931  6.025611  2.936172  3.089440 3.189348e-05 0.006593976
-%9      chr18 [ 8947487,  8948503]   |  5.915582  7.151613  3.766335  3.385278 3.767074e-05 0.006846554
-%...      ...                  ... ...       ...       ...       ...       ...          ...         ...
-%174    chr18 [  479200,   480041]   |  4.919858  5.828205  3.916731  1.911473   0.01003126  0.09457060
-%175    chr18 [ 8489855,  8490579]   |  3.978404  4.891862  2.964229  1.927633   0.01004482  0.09457060
-%176    chr18 [40476698, 40477842]   |  4.098327  2.024730  4.620057 -2.595327   0.01009693  0.09457060
-%177    chr18 [ 3821937,  3822886]   |  4.507370  2.320755  5.039343 -2.718587   0.01012031  0.09457060
-%178    chr18 [ 7054204,  7054814]   |  4.299982  5.256037  3.188626  2.067411   0.01029863  0.09565665
-%179    chr18 [23704720, 23705570]   |  5.901634  6.769520  4.981827  1.787693   0.01044403  0.09565665
-%180    chr18 [29846635, 29847337]   |  4.086749  5.006580  3.058624  1.947956   0.01044488  0.09565665
-%181    chr18 [10569384, 10570571]   |  6.461755  7.379404  5.438426  1.940978   0.01046787  0.09565665
-%182    chr18 [52191999, 52193072]   |  4.708795  5.602390  3.736879  1.865511   0.01057757  0.09612806
 
 The value columns show the mean read concentration over all the samples (the default calculation uses log2 normalized ChIP read counts with control read counts subtracted) and the mean concentration over the first (Resistant) group and second (Responsive) group. The Fold column shows the difference in mean concentrations between the two groups (Conc\_Resistant - Conc\_Responsive), with a positive value indicating increased binding affinity in the Resistant group and a negative value indicating increased binding affinity in the Responsive group. The final two columns give confidence measures for identifying these sites as differentially bound, with a raw p-value and a multiple testing corrected FDR in the final column.
 
@@ -487,7 +452,7 @@ data(tamoxifen_peaks)
 
 \subsection{Overlap rates}
 
-One reason to do an occupancy-based analysis is to determine what candidate sites should be used in a subsequent affinity-based analysis. In the example so far, we took all sites that were identified in peaks in at least three of the eleven peaksets, reducing the number of sites from 3,557 overall to the 1,654 sites used in the differential analysis. We could have used a more stringent criterion, such as only taking sites identified in five or six of the peaksets, or a less stringent one, such as including all 3,557 sites. In making the decision of what criteria to use many factors come into play, but it helps to get an idea of the rates at which the peaksets overlap (for more details on how overlaps are determined, see Section 7.1 on peak merging). A global overview can be obtained using the RATE mode of the \texttt{dba.overlap} function as follows:
+One reason to do an occupancy-based analysis is to determine what candidate sites should be used in a subsequent affinity-based analysis. In the example so far, we took all sites that were identified in peaks in at least three of the eleven peaksets, reducing the number of sites from 3,557 overall to the 1,654 sites used in the differential analysis. We could have used a more stringent criterion, such as only taking sites identified in five or six of the peaksets, or a less stringent one, such as including all 3,557 sites. In making the decision of what criteria to use many factors come into play, but it helps to get an idea of the rates at which the peaksets overlap (for more details on how overlaps are determined, see Section 7.2 on peak merging). A global overview can be obtained using the RATE mode of the \texttt{dba.overlap} function as follows:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 olap.rate = dba.overlap(tamoxifen,mode=DBA_OLAP_RATE)
@@ -521,10 +486,6 @@ Consider for example the standard (tamoxifen responsive) MCF7 cell line, represe
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 names(tamoxifen$masks)
 @
-
-% [1]  "BT474"       "MCF7"        "T47D"        "TAMR"        "ZR75"        "ER"
-% [6]  "Resistant"   "Responsive"  "raw"         "Replicate.1" "Replicate.2"
-% [12] "Replicate.3"
 
 Arbitrary masks can be generated using the \texttt{dba.mask} function, or simply by specifying a vector of peakset numbers. In this case, a mask that isolates the MCF7 samples can be generated by combining to pre-defined masks (MCF7 and Responsive) and passed into the \texttt{dba.overlap} function:
 
@@ -696,6 +657,13 @@ There are a number of notable differences in the results. First there are many f
 
 \section{Technical notes}
 This section includes some technical notes explaining some of the internal technical details of \DBA processing.
+
+\subsection{Loading peaksets}
+There are a number of ways to get peaksets loaded into a DBA object. Peaksets can be read in from files or loaded from interval sets already stored in an R object. Samples can be specified either in a sample sheet  (using \texttt{dba}) or loaded one at a time (using \texttt{dba.peakset}).
+
+When loading in peaksets from files, specifying what peak caller generated the file enables peaks from supported peak callers to be read in. See the help page for \texttt{dba.peakset} for a list of supported peak callers. Any string to indicate the peak caller; if it is not one of the supported callers, a default "raw" format is assumed, consisting of a text file with three or four columns (indicating the chromosome, start position, and end position, with a score for each interval found in the fourth column, if present). You can further control how peaks are read using the \texttt{PeakFormat}, \texttt{ScoreCol}, and \texttt{bLowerBetter} fields if you want to override the defaults for the specified peak caller identifier. For example, with the tamoxifen dataset used in this tutorial, the peaks were called using the MACS peak caller, but the data are supplied as simple text files, no the expected MACS \"xls\" format. To maintain the peak caller int he metadata, we could specify the \texttt{PeakCaller} as \"macs\" but the \texttt{PeakFormat} as \"raw\". If  we wanted to use peak scores in a different column than the fourth, the \texttt{scorecol} parameter could be set to indicate the appropriate column number.  When handling scoring, \DBA by default assumes that a higher score indicates a \"better\" peak. If this is not the case, for example if the score is a p-value or FDR, we could set  \texttt{bLowerScoreBetter} to \texttt{TRUE}.
+
+When using a sample sheet,,  values for fields missing in the sample sheet can be supplied when calling \texttt{dba}. In addition to the minimal sample sheet used for the tutorial, an equivalent sample sheet with all the metadata fields is included, called \"tamoxifen\_allfields.csv\". See the help page for \texttt{dba} for an example using this sample sheet.
 
 \subsection{Merging peaks}
 When forming the global binding matrix consensus peaksets, \DBA first identifies all unique peaks amongst the relevant peaksets. As part of this process, it merges overlapping peaks, replacing them with a single peak representing the narrowest region that covers all peaks that overlap by at least one base. There are at least two consequences of this that are worth noting.

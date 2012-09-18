@@ -49,7 +49,8 @@ DBA_CALLER    = PV_CALLER
 DBA_CONTROL   = PV_CONTROL
 DBA_READS     = PV_READS
 DBA_REPLICATE = PV_REPLICATE
-
+DBA_INTERVALS = PV_INTERVALS
+DBA_SN_RATIO  = PV_SN_RATIO
 
 
 DBA_EDGER_CLASSIC = 'edgeR'
@@ -69,7 +70,7 @@ DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
-               config=data.frame(RunParallel=TRUE, reportInit="DBA"),
+               config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
                peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 

@@ -10,7 +10,7 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 \usage{
 dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
-    config=data.frame(RunParallel=TRUE, reportInit="DBA"),
+    config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
     peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, 
     bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, 
     bCorPlot=FALSE, attributes) 
@@ -36,28 +36,30 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 \item {Tissue:}	{Identifier string for tissue type}
 \item {Factor:}	{Identifier string for factor}
 \item {Condition:}	{Identifier string for condition}
+\item {Treatment:}	{Identifier string for treatment}
 \item {Replicate:}	{Replicate number of sample}
 \item {bamReads:}	{file path for bam file containing aligned reads for ChIP sample}
 \item {bamControl:}	{file path for bam file containing aligned reads for control sample}
-\item {ControlID:}	{Identifier string for control sample (optional)}
+\item {ControlID:}	{Identifier string for control sample}
 \item {Peaks:}	{path for file containing peaks for sample. format determined by PeakCaller field or caller parameter}
 \item {PeakCaller:}	{Identifier string for peak caller used. If Peaks is not a bed file, this will determine how the Peaks file is parsed. If missing, will use default peak caller specified in caller parameter. Possible values:}
 \itemize{
 \item {\dQuote{raw}:}	{text file file; peak score is in fourth column}
 \item {\dQuote{bed}:}	{.bed file; peak score is in fifth column}
+\item {\dQuote{narrow}:}  {default peak.format: narrowPeaks file}
 \item {\dQuote{macs}:}	{MACS .xls file}
 \item {\dQuote{swembl}:}	{SWEMBL .peaks file}
 \item {\dQuote{bayes}:}	{bayesPeak file}
 \item {\dQuote{peakset}:}	{peakset written out using pv.writepeakset}
 \item {\dQuote{fp4}:}	{FindPeaks v4}
 }
-\item {PeakFormat:}	{string indicating format for peak files; see PeakCaller}
+\item {PeakFormat:}	{string indicating format for peak files; see PeakCaller and dba.peakset}
 \item {ScoreCol:}	{column in peak files that contains peak scores}
-\item {LowerBetter:}	{logical indicating that lower scores signify better peaks}
+\item {bLowerBetter:}	{logical indicating that lower scores signify better peaks}
 }
 }
   \item{config}{
-data frame containing sample sheet, or file name of config file to load when constructing a new DBA object from a sample sheet. NULL indicates no config file. Relevant fields include:
+data frame containing configuration options, or file name of config file to load when constructing a new DBA object from a sample sheet. NULL indicates no config file. Relevant fields include:
 \itemize{
 \item {RunParallel:}	{logical indicating if counting and analysis operations should be run in parallel using multicore by default.}
 \item {DataType:}	{default class for peaks and reports (DBA_DATA_GRANGES, DBA_DATA_RANGEDDATA, or DBA_DATA_FRAME).}
@@ -141,6 +143,12 @@ Rory Stark and Gordon Brown
 # Create DBA object from a samplesheet
 setwd(system.file("extra", package="DiffBind"))
 tamoxifen = dba(sampleSheet="tamoxifen.csv")
+tamoxifen
+
+tamoxifen = dba(sampleSheet="tamoxifen_allfields.csv")
+tamoxifen
+
+tamoxifen = dba(sampleSheet="tamoxifen_allfields.csv",config="config.csv")
 tamoxifen
 
 #Create a DBA object with a subset of samples

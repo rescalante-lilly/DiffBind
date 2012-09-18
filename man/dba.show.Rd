@@ -35,6 +35,8 @@ attribute or vector of attributes to retrieve. Number of intervals is always sho
 \item DBA_CONSENSUS
 \item DBA_CALLER
 \item DBA_CONTROL
+\item DBA_INTERVALS
+\item DBA_SN_RATIO
 }
 }
 

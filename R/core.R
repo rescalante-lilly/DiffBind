@@ -45,6 +45,8 @@ PV_REPLICATE  = 9
 PV_BAMREADS   = 10
 PV_BAMCONTROL = 11
 PV_TREATMENT  = 12
+PV_INTERVALS  = 13
+PV_SN_RATIO   = 14
 
 PV_DEBUG = FALSE
 
@@ -349,7 +351,7 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
 }
 
 ## pv.list -- list attributes of samples in model
-pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_REPLICATE,PV_CALLER)
+pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_REPLICATE,PV_CALLER,PV_INTERVALS,PV_SN_RATIO)
 pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F){
  
    if(!missing(mask)){
@@ -380,17 +382,37 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
       mask = newm
    }
    
+   if(PV_INTERVALS %in% attributes) {
+      attributes = attributes[-which(attributes %in% PV_INTERVALS)]	
+      bIntervals = T
+   } else bIntervals = F
+
+   if(PV_SN_RATIO %in% attributes) {
+      attributes = attributes[-which(attributes %in% PV_SN_RATIO)]	
+      bSN = T
+   } else bSN = F   
+   
+   
    res = t(pv$class[attributes,mask])
    rownames(res) = which(mask)
    
-   intervals = NULL
-   for(i in 1:length(mask)) {
-      if(mask[i]) {
-         intervals = c(intervals,nrow(pv$peaks[[i]]))
-      }	
+   if(bIntervals) {
+	   intervals = NULL
+	   for(i in 1:length(mask)) {
+	      if(mask[i]) {
+	         intervals = c(intervals,nrow(pv$peaks[[i]]))
+	      }	
+	   }
+	   res = cbind(res,intervals)
+	   colnames(res)[ncol(res)]='Intervals'
+	}
+	
+   if(bSN) {	   
+	   if(!is.null(pv$SN)){
+	      res = cbind(res,pv$SN)
+	      colnames(res)[ncol(res)]='SN'
+	   }
    }
-   res = cbind(res,intervals)
-   colnames(res)[ncol(res)]='Intervals'
    
    j = ncol(res)
    for(i in j:1) {
