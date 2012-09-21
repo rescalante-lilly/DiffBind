@@ -349,10 +349,12 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 	   if(bTagwise && !bGLM && is.null(blockList)) {
 	      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='per-condition')
 	   } else {
-	      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled')
-	      if(bTagwise && is.null(blockList)) {
-	         warning('Unable to use tagwise dispersion estimates with GLM',call.=FALSE)	
+	   	  if(bGLM && is.null(blockList)) {
+	         res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled')
 	      }
+	      #if(bTagwise && is.null(blockList)) {
+	      #  warning('Unable to use tagwise dispersion estimates with GLM',call.=FALSE)	
+	      #}
 	   }
    }
    if(bGLM && is.null(blockList)){
@@ -366,24 +368,38 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 	   message('DESeq multi-factor analysis')
        attr =  blockList[[1]]$attribute
        if(attr=='Replicate') {
+	   	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Replicate)       	
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Replicate)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Replicate)
        } else if(attr=='Tissue') {
+	   	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Tissue)          	
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Tissue)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Tissue)
        } else if(attr=='Factor') {
+       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Factor)  
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Factor)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Factor)
        } else if(attr=='Condition') {
+       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Condition)  
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Condition)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Condition)
        } else if(attr=='Caller') {
+       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Caller)  
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Caller)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Caller)
        } else if(attr=='Treatment') {
+       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Treatment)  
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Treatment)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Treatment)
        } else if(attr=='Block') {
+       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+	   	  	                                 modelFormula = count ~ group + Block)  
           res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Block)
           res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Block)
        } else {

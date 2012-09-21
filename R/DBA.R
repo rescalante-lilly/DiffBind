@@ -421,7 +421,7 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
    	     }
    	  }
    	  if(warn) {
-   	     warning('No correlation heatmap plotted -- contrast 1 has no differentially bound sites.')	
+   	     warning('No correlation heatmap plotted -- contrast 1 does not have enough differentially bound sites.')	
    	  }
    }
 
@@ -542,7 +542,9 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    
    if(missing(contrast) && !missing(score)) {
       DBA = dba.count(DBA,peaks=NULL,score=score)	
-   }   
+   } else if (!missing(score)) {
+      warning('score parameter ignored when contrast is specified')	
+   }  
    
    if(!missing(contrast)){
    	  if(missing(attributes)) {

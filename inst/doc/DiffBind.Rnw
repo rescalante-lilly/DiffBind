@@ -36,7 +36,7 @@ Gordon Brown \\ \texttt{gordon.brown@cancer.org.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{19 September 2012}
+\date{21 September 2012}
 \maketitle
 
 \section{Introduction}
@@ -444,7 +444,7 @@ tamoxifen = dba.analyze(tamoxifen,method=DBA_DESEQ)
 tamoxifen
 @
 
-While \DESeq has a much more conservative approach to the single factor analysis, identifying only 54 sites as differentially bound, modelling the confounding fact results in an almost identical result. You can check this by looking at the identified sites using \texttt{dba.report}, and performing MA, heatmap, and PCA plots.
+While \DESeq has a much more conservative approach to the single factor analysis, identifying only 54 sites as differentially bound, when modelling the confounding factor, the greater sensitivity results in many more sites being identified. You can check this by looking at the identified sites using \texttt{dba.report}, and performing MA, heatmap, and PCA plots.
 
 \section{Example: occupancy analysis and overlaps}
 
@@ -737,11 +737,11 @@ Alternatively, if the \texttt{bFullLibrarySize} parameter is set to TRUE, the to
 The first step concludes with a call to DESeq's \texttt{newCountDataSet} function, which returns a \texttt{CountDataSet} object. 
 If \texttt{bFullLibrarySize} is set to TRUE, then \texttt{sizeFactors} is called with the number of reads in the BAM/BED files for each ChIP sample, divided by the minimum of these; otherwise, \texttt{estimateSizeFactors} is invoked. 
 Next, \texttt{estimateDispersions} is called with the \texttt{CountDataSet} object and \texttt{fitType} set to \texttt{local}. If there are no replicates, (only one sample in each group), \texttt{method} is set to \texttt{blind}. 
-Otherwise, if \texttt{bTagwise} is TRUE, \texttt{method} is set to \texttt{per-condition}; if it is FALSE, \texttt{method} is set to \texttt{pooled}. 
+Otherwise, if \texttt{bTagwise} is TRUE, \texttt{method} is set to \texttt{per-condition}; if it is FALSE, \texttt{method} is set to \texttt{pooled} (or \texttt{pooled-CR} for a blocking analysis). 
 
 If the method is \texttt{DBA\_DESEQ\_CLASSIC}, \texttt{nbinomTest} is called, and the result (reordered by adjusted p-value) saved for reporting.
 
-If the method is \texttt{DBA\_DESEQ\_GLM} (the default), two models are fitted using \texttt{fitNbinomGLMs}: a full model is fitted with all the coefficients, and a second model is fitted with the second coefficient dropped. These are tested against each other using \texttt{nbinomGLMTest}, witht he resulting p values adjusted using \texttt{p.adjust} (with \texttt{method="BH"}).
+If the method is \texttt{DBA\_DESEQ\_GLM} (the default), two models are fitted using \texttt{fitNbinomGLMs}: a full model is fitted with all the coefficients, and a second model is fitted with the second coefficient dropped. These are tested against each other using \texttt{nbinomGLMTest}, with the resulting p values adjusted using \texttt{p.adjust} (with \texttt{method="BH"}).
 
 The final results are acessible within the \texttt{DBA object} as 
 

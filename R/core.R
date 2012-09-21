@@ -788,6 +788,10 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    
    pc = pv$pc
    
+   if(is.null(pc)) {
+      stop("Unable to perform PCA. Make sure there aren't fewer sites than there are samples.",call.=F)	
+   }
+   
    #if(!is.null(pv$mask)) {
    #   classes = pv$class[,which(pv$mask)]
    #} else {
