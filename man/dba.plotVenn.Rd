@@ -20,12 +20,12 @@ DBA object; if present, only the mask parameter will apply.
 }
 
 \item{mask}{
-mask or vector of peakset numbers indicating which peaksets to include in Venn diagram. Only 2 or 3 peaksets should be included.  See dba.mask.
+mask or vector of peakset numbers indicating which peaksets to include in Venn diagram. Only 2 or 3 peaksets should be included.  See  \code{\link{dba.mask}}.
 Only one of mask or overlaps is used.
 }
 
 \item{overlaps}{
-overlap record, as computed by dba.overlap(Report=DBA_OLAP_PEAKS). 
+overlap record, as computed by  \code{\link{dba.overlap}(Report=DBA_OLAP_PEAKS)}. 
 Only one of mask or overlaps is used.
 }
 %\subsection{Optional/defaulted arguments}{}
@@ -69,9 +69,10 @@ http://manuals.bioinformatics.ucr.edu/home/R_BioCondManual#R_graphics_venn
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.analyze}},  \code{\link{dba.overlap}},  \code{\link{dba.plotPCA}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 

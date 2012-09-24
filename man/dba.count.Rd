@@ -31,7 +31,7 @@ If GRanges, RangedData, dataframe, or matrix, this parameter contains the interv
 only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).  If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
 }
 \item{score}{
-which score to use in the binding affinity matrix. Note that all raw read counts are maintained for use by dba.analyze, regardless of how this is set. One of:
+which score to use in the binding affinity matrix. Note that all raw read counts are maintained for use by \code{\link{dba.analyze}}, regardless of how this is set. One of:
 \tabular{ll}{
 DBA_SCORE_READS \tab raw read count for interval using only reads from ChIP\cr
 DBA_SCORE_READS_FOLD \tab raw read count for interval from ChIP divided by read count for interval from control\cr
@@ -65,7 +65,7 @@ logical indicating if duplicate reads (ones that map to exactly the same genomic
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
 }
 \item{bCalledMasks}{
-logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks(used by dba.report). 
+logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks(used by \code{\link{dba.report)}}. 
 }
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the counted data
@@ -92,10 +92,11 @@ Rory Stark and Gordon Brown
 %}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
+ 
+ \seealso{
+ \code{\link{dba.analyze}}
+ }
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
 \examples{
 # These won't run unless you have the reads available in a BAM or BED file
 data(tamoxifen_peaks)

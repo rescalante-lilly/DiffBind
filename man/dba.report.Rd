@@ -21,11 +21,11 @@ dba.report(DBA, contrast=1, method=DBA$config$AnalysisMethod,
 
 
 \item{DBA}{
-DBA object. A differential binding affinity analysis needs to have been previously carried out (see dba.analyze).
+DBA object. A differential binding affinity analysis needs to have been previously carried out (see  \code{\link{dba.analyze}}).
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{contrast}{
-contrast number to report on. See dba.show(DBA, bContrast=T) to get contrast numbers.
+contrast number to report on. See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers.
 }
   \item{method}{
 method used for analysis:
@@ -48,7 +48,7 @@ only sites with an absolute Fold value greater than equal to this will be includ
 logical indicating that normalized data (using normalization factors computed by differential analysis method) should be reported. FALSE uses raw count data.
 }
 \item{bCalled}{
-logical indicating that peak caller status should be included (if available from a previous call to dba.count(bCalledMasks=TRUE)). This will add a column for each group, each indicating the number of samples in the group identified as a peak in the original peaksets.
+logical indicating that peak caller status should be included (if available from a previous call to  \code{\link{dba.count}(bCalledMasks=TRUE)}). This will add a column for each group, each indicating the number of samples in the group identified as a peak in the original peaksets.
 }
 \item{bCounts}{
 logical indicating that count data for individual samples should be reported as well as group statistics. Columns are added for each sample in the first group, followed by columns for each sample in the second group.
@@ -109,9 +109,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.analyze}}
+}
+
 \examples{
 data(tamoxifen_analysis)
 

@@ -26,7 +26,7 @@ DBA object
 %\emph{Optional/defaulted arguments:}
  
 \item{mask}{
-mask or vector of peakset numbers indicating a subset of peaksets to use (see dba.mask). When generating overlapping/unique peaksets, either two, three, or four peaksets may be specified. If the mode type is DBA_OLAP_ALL, and a contrast is specified, a value of TRUE (mask=TRUE) indicates that all samples should be included (otherwise only those present in one of the contrast groups will be included).
+mask or vector of peakset numbers indicating a subset of peaksets to use (see \code{\link{dba.mask}}). When generating overlapping/unique peaksets, either two, three, or four peaksets may be specified. If the mode type is DBA_OLAP_ALL, and a contrast is specified, a value of TRUE (mask=TRUE) indicates that all samples should be included (otherwise only those present in one of the contrast groups will be included).
 }
 
 \item{mode}{
@@ -42,7 +42,7 @@ indicates which results should be returned (see MODES below). One of:
 minimum score value to be considered a "called" peak.
 }
   \item{contrast}{
-contrast number to use. Only specified if contrast data is to be used when mode=DBA_OLAP_ALL. See dba.show(DBA, bContrast=T) to get contrast numbers. 
+contrast number to use. Only specified if contrast data is to be used when mode=DBA_OLAP_ALL. See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers. 
 }
   \item{method}{
 if contrast is specified and mode=DBA_OLAP_ALL, use data from method used for analysis:
@@ -60,7 +60,7 @@ if contrast is specified and mode=DBA_OLAP_ALL, significance threshold; all site
 if contrast is specified and mode=DBA_OLAP_ALL, logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding.
 }
 \item{report}{
-if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from dba.report) specifying the data to be used. If counts are included in the report (and a contrast is specified), the count data from the report will be used to compute correlations, rather than the scores in the global binding affinity matrix.  If report is present, the method, th, and bUsePval parameters are ignored.
+if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from  \code{\link{dba.report}}) specifying the data to be used. If counts are included in the report (and a contrast is specified), the count data from the report will be used to compute correlations, rather than the scores in the global binding affinity matrix.  If report is present, the method, th, and bUsePval parameters are ignored.
 }
 \item{byAttribute}{
 when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peaksets with the same value for a specific attribute, one of:
@@ -78,7 +78,7 @@ when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peak
 }
 
 \item{bCorOnly}{
-when computing co-occupancy statistics (DBA_OLAP_ALL), logical indicating that only correlations, and not overlaps, should be computed. This is much faster if only correlations are desired (e.g. to plot the correlations using dba.plotHeatmap).
+when computing co-occupancy statistics (DBA_OLAP_ALL), logical indicating that only correlations, and not overlaps, should be computed. This is much faster if only correlations are desired (e.g. to plot the correlations using  \code{\link{dba.plotHeatmap}}).
 }
 
 \item{CorMethod}{
@@ -165,9 +165,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.plotVenn}},  \code{\link{dba.plotHeatmap}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 # default mode: DBA_OLAP_PEAKS -- get overlapping/non overlapping peaksets

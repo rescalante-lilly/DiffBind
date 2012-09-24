@@ -11,6 +11,11 @@
 #########################
 
 pv.check = function(pv) {
+   
+   if(missing(pv)) {
+      stop('DBA object missing!',call.=F)
+   }
+   
    if(is.null(pv)) {
       return(NULL)	
    }

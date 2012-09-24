@@ -18,7 +18,7 @@ dba.analyze(DBA, method=DBA$config$AnalysisMethod,
 %\subsection{Required arguments}{}
 
   \item{DBA}{
-DBA object. If no contrasts are specified (DBA$contrast is NULL), default contrasts will be added via a call to dba.contrast(DBA).
+DBA object. If no contrasts are specified (DBA$contrast is NULL), default contrasts will be added via a call to \code{\link{dba.contrast}}.
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{method}{
@@ -64,9 +64,15 @@ DBA object with results of analysis added to DBA$contrasts.
 Rory Stark
 }
 \note{
-If the "edgeR" method is specified, and there is a blocking factor for the contrast(s) specified using a previous call to dba.contrast, a multi-factor analysis will automatically be carried out in addition to a single factor analysis.
+If there is a blocking factor for the contrast(s) specified using a previous call to \code{\link{dba.contrast}}, a multi-factor analysis will automatically be carried out in addition to a single factor analysis.
 }
 
+
+\seealso{
+
+\code{\link{dba.contrast}}, \code{\link{dba.report}}
+
+}
 
 
 \examples{
@@ -78,5 +84,4 @@ tamoxifen
 tamoxifen = dba.analyze(tamoxifen,method=c(DBA_EDGER,DBA_DESEQ))
 tamoxifen
 }
-
 

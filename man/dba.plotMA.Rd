@@ -21,11 +21,11 @@ dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod,
 
 
   \item{DBA}{
-DBA object, on which dba.analyze should have been successfully run.
+DBA object, on which  \code{\link{dba.analyze}} should have been successfully run.
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{contrast}{
-number of contrast to report on. See dba.show(DBA, bContrast=T) to get contrast numbers.
+number of contrast to report on. See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers.
 }
 \item{method}{
  method or vector of methods to plot results for:
@@ -85,9 +85,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.analyze}}
+}
+
 \examples{
 data(tamoxifen_analysis)
 

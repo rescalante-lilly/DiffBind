@@ -54,9 +54,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.load}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 savefile = dba.save(tamoxifen,'tamoxifenPeaks')

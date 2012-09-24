@@ -24,10 +24,10 @@ DBA object with count data
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{group1}{
-mask of samples in first group (when adding a specific contrast). See dba.mask
+mask of samples in first group (when adding a specific contrast). See \code{\link{dba.mask}}.
 }
   \item{group2}{
-mask of samples in second group (when adding a specific contrast). See dba.mask
+mask of samples in second group (when adding a specific contrast). See \code{\link{dba.mask}}.
 }
   \item{name1}{
 label for samples in first group (when adding a specific contrast). 
@@ -94,11 +94,14 @@ Contrasts will only be set up for peaksets where DBA_CALLER == "counts".
 Contrasts can be cleared by DBA$contrasts=NULL.
 }
 
+\seealso{
+
+\code{\link{dba.analyze}}
+
+}
+
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
 \examples{
 data(tamoxifen_counts)
 tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION)
@@ -130,6 +133,8 @@ tamoxifen = dba.analyze(tamoxifen)
 tamoxifen
 
 }
+
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 %\keyword{ ~kwd1 }

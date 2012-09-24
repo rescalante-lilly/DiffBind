@@ -16,32 +16,32 @@ Also enables occupancy (overlap) analysis and plotting functions.
 
 Entry Points:
 \tabular{ll}{
-dba:		\tab 	Construct a dba object\cr
-dba.peakset:	\tab	Add a peakset to, or retrieve a peakset from, a dba object\cr
+\code{\link{dba}}:		\tab 	Construct a dba object\cr
+\code{\link{dba.peakset}}:	\tab	Add a peakset to, or retrieve a peakset from, a dba object\cr
 \cr
 
-dba.overlap:	\tab	Compute binding site overlaps and/or correlations\cr
-dba.count:	\tab	Count reads in binding sites\cr
+\code{\link{dba.overlap}}:	\tab	Compute binding site overlaps and/or correlations\cr
+\code{\link{dba.count}}:	\tab	Count reads in binding sites\cr
 \cr
 	
-dba.contrast:	\tab	Establish contrast(s) for analysis\cr
-dba.analyze:	\tab	Execute affinity analysis\cr
-dba.report:	\tab	Generate report for a contrast analysis\cr
+\code{\link{dba.contrast}}:	\tab	Establish contrast(s) for analysis\cr
+\code{\link{dba.analyze}}:	\tab	Execute affinity analysis\cr
+\code{\link{dba.report}}:	\tab	Generate report for a contrast analysis\cr
 \cr
 
-dba.plotHeatmap:\tab	Heatmap plot\cr
-dba.plotPCA:	\tab	Principal Components plot\cr
-dba.plotBox:	\tab	Boxplots\cr
-dba.plotMA:	\tab	MA/scatter plot\cr
-dba.plotVenn:	\tab 	Venn diagram plot\cr
+\code{\link{dba.plotHeatmap}}:\tab	Heatmap plot\cr
+\code{\link{dba.plotPCA}}:	\tab	Principal Components plot\cr
+\code{\link{dba.plotBox}}:	\tab	Boxplots\cr
+\code{\link{dba.plotMA}}:	\tab	MA/scatter plot\cr
+\code{\link{dba.plotVenn}}:	\tab 	Venn diagram plot\cr
 \cr
 	
-dba.show:	\tab	Show dba metadata\cr
-dba.mask:	\tab	Mask samples or sites \cr
+\code{\link{dba.show}}:	\tab	Show dba metadata\cr
+\code{\link{dba.mask}}:	\tab	Mask samples or sites \cr
 \cr
 	
-dba.save:	\tab	Save dba object\cr
-dba.load:	\tab	Load dba object\cr
+\code{\link{dba.save}}:	\tab	Save dba object\cr
+\code{\link{dba.load}}:	\tab	Load dba object\cr
 }
 }
 \author{

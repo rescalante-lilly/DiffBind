@@ -101,9 +101,9 @@ dba automatically generates masks for each unique value of DBA_TISSUE, DBA_FACTO
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+\code{\link{dba.show}}
+}
 \examples{
 data(tamoxifen_peaks)
 

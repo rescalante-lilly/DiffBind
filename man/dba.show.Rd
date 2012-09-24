@@ -21,10 +21,10 @@ DBA object
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{mask}{
-mask of peaksets for which to get attributes (used when obtaining peakset attributes, i.e. bContrasts=FALSE).
+mask of peaksets for which to get attributes (used when obtaining peakset attributes, i.e. \code{bContrasts=FALSE}).
 }
 \item{attributes}{
-attribute or vector of attributes to retrieve. Number of intervals is always shown. Used when obtaining peakset attributes, i.e. bContrasts=FALSE. Values:
+attribute or vector of attributes to retrieve. Number of intervals is always shown. Used when obtaining peakset attributes, i.e. \code{bContrasts=FALSE}. Values:
 \itemize{ 
 \item DBA_ID
 \item DBA_TISSUE
@@ -41,13 +41,13 @@ attribute or vector of attributes to retrieve. Number of intervals is always sho
 }
 
  \item{bContrasts}{
-logical indicating whether peaksets or contrast attributes are to be retrieved. TRUE retrieves a dataframe of contrast information instead of peakset attributes. If no contrasts are set, returns possible contrasts. See dba.contrast.
+logical indicating whether peaksets or contrast attributes are to be retrieved. TRUE retrieves a dataframe of contrast information instead of peakset attributes. If no contrasts are set, returns possible contrasts. See  \code{\link{dba.contrast}}.
 }
   \item{th}{
-if bContrasts is TRUE, then th is used as the threshold for determining how many significant sites there are for each contrast. Only relevant when obtaining contrast attributes (bContrasts=TRUE) and dba.analyze has been run.
+if \code{bContrasts} is TRUE, then th is used as the threshold for determining how many significant sites there are for each contrast. Only relevant when obtaining contrast attributes (\code{bContrasts=TRUE}) and  \code{\link{dba.analyze}} has been run.
 }
   \item{bUsePval}{
-logical indicating that p-values will be used (along with th) to determine how many significant sites there are for each contrast; if FALSE, adjusted p-values (FDR) are used. Only relevant when obtaining contrast attributes (bContrasts=TRUE) and dba.analyze has been run.
+logical indicating that p-values will be used (along with \code{th}) to determine how many significant sites there are for each contrast; if FALSE, adjusted p-values (FDR) are used. Only relevant when obtaining contrast attributes (\code{bContrasts=TRUE}) and dba.analyze has been run.
 }
 }
 \details{
@@ -71,9 +71,11 @@ If bContrasts == TRUE, each row represent a contrast, with the following columns
 \item{Group2}{Label for first group of contrast}
 \item{Members3}{Number of samples in first group of contrast}
 
-if dba.analyze has been successfully run, there there will be up to two more columns showing the number of significant differentially bound (DB) sites identified for \item{DB.edgeR}{Number of significantly differentially bound sites identified using edgeR}
+if dba.analyze has been successfully run, there there will be up to four more columns showing the number of significant differentially bound (DB) sites identified for 
+\item{DB.edgeR}{Number of significantly differentially bound sites identified using edgeR}
 \item{DB.DESeq}{Number of significantly differentially bound sites identified using DESeq}
-
+\item{DB.edgeR.block}{Number of significantly differentially bound sites identified for blocking analysis using edgeR}
+\item{DB.DESeq.block}{Number of significantly differentially bound sites identified for blocking analysis using DESeq}
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -87,9 +89,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+\code{\link{dba}}, \code{\link{dba.peakset}}, \code{\link{dba.contrast}}. \code{\link{dba.analyze}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 dba.show(tamoxifen)

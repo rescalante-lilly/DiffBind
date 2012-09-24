@@ -55,7 +55,7 @@ Set all scores greater than this to maxval
 }
 
 \item{contrast}{
-number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see dba.analyze). Only significantly differentially bound sites will be used (subject to the th and bUsePval parameters). If mask is unspecified, only the samples in the contrast will be included. See dba.show(DBA, bContrast=T) to get contrast numbers. If missing, uses scores in the main binding matrix.
+number of contrast to report on; if present, draws a heatmap based on a differential binding affinity analysis (see  \code{\link{dba.analyze}}). Only significantly differentially bound sites will be used (subject to the th and bUsePval parameters). If mask is unspecified, only the samples in the contrast will be included. See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers. If missing, uses scores in the main binding matrix.
 }
 \item{method}{
 analysis method (used in conjunction with contrast):
@@ -74,7 +74,7 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding. Used in conjunction with contrast.
 }
 \item{report}{
-report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
+report (obtained from  \code{\link{dba.report)}} specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
 }
 \item{score}{
 Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:
@@ -103,11 +103,11 @@ function taking a vector of scores and returning a single value. Only relevant w
 }
 
 \item{correlations}{
-logical indicating that a correlation heatmap should be plotted (TRUE). If FALSE, a binding heatmap of scores/reads is plotted. This parameter can also be set to a correlation record; see dba.overlap(mode=DBA_OLAP_ALL), in which case a correlation heatmap is plotted based on the specified correlation record, using the statistic specified in olPlot.
+logical indicating that a correlation heatmap should be plotted (TRUE). If FALSE, a binding heatmap of scores/reads is plotted. This parameter can also be set to a correlation record; see  \code{\link{dba.overlap}(mode=DBA_OLAP_ALL)}, in which case a correlation heatmap is plotted based on the specified correlation record, using the statistic specified in olPlot.
 }
 
  \item{olPlot}{
-if correlations is specified as a dataframe returned by dba.overlap, indicates which statistic to plot. One of:
+if correlations is specified as a dataframe returned by  \code{\link{dba.overlap}}, indicates which statistic to plot. One of:
 \itemize{
 \item{DBA_COR}  {Correlation}
 \item{DBA_OLAP}  {Percentage overlap}
@@ -193,9 +193,10 @@ Rory Stark
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.overlap}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 # peak overlap correlation heatmap

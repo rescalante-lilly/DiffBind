@@ -52,7 +52,7 @@ Set all scores greater than this to maxval
 }
 
 \item{contrast}{
-number of contrast to use for PCA; if present, plots a PCA based on a differential binding affinity analysis (see dba.analyze). If mask is unspecified, only the samples in the contrast will be included.  See dba.show(DBA, bContrast=T) to get contrast numbers. If missing, uses scores in the main binding matrix.
+number of contrast to use for PCA; if present, plots a PCA based on a differential binding affinity analysis (see  \code{\link{dba.analyze}}). If mask is unspecified, only the samples in the contrast will be included.  See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers. If missing, uses scores in the main binding matrix.
 }
 \item{method}{
 method used for analysis (used in conjunction with contrast):
@@ -71,7 +71,7 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 if TRUE, uses p-value instead of FDR for thresholding. Used in conjunction with contrast.
 }
 \item{report}{
-report (obtained from dba.report) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
+report (obtained from  \code{\link{dba.report}}) specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored.
 }
 
 \item{score}{
@@ -89,7 +89,7 @@ Score to use for count data. Only used when plotting the global binding matrix (
 }
 }
 \item{mask}{
-mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included. See dba.mask.
+mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included. See  \code{\link{dba.mask}}.
 }
  \item{sites}{
 logical vector indicating which sites to include in PCA. Only relevant when using global binding matrix (contrast is missing).
@@ -141,9 +141,10 @@ uses rgl package for 3D plots (if available)
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+\seealso{
+ \code{\link{dba.analyze}},  \code{\link{dba.plotHeatmap}}
+}
+
 \examples{
 data(tamoxifen_peaks)
 
