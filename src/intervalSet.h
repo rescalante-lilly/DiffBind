@@ -30,7 +30,7 @@ class IntervalSet {
     ~IntervalSet();
     virtual void insert(Interval const *inter);
     int coverage(std::string const &chrom,int point) const;
-    int overlapping(Interval const *inter) const;
+    int overlapping(Interval const *inter,int withoutDupes) const;
     int count() const;
     int realCount() const;
     int chromCount() const;

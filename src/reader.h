@@ -4,7 +4,6 @@
 #include <string>
 
 #include "interval.h"
-#include "writer.h"
 
 namespace bode {
 
@@ -15,8 +14,6 @@ class Reader {
     virtual void close(void) = 0;
     virtual bool eof(void) = 0;
     static Reader *open(std::string const &filename);
-    virtual void *header(void) = 0;
-    virtual Writer *getWriter(void) = 0;
 };
 
 }

@@ -21,26 +21,6 @@ bode::IntervalTree::~IntervalTree(void) {
   }
 }
 
-#if 0
-static int traverseRange(inodeP node,int left,int right) {
-  int sum = 0;
-  if (node->left != NULL && node->rightEnd >= left) {
-    sum += traverseRange(node->left,left,right);
-  }
-  if (overlap(node,left,right)) {
-    sum += node->count;
-  }
-  if (node->right != NULL && node->leftEnd <= right) {
-    sum += traverseRange(node->right,left,right);
-  }
-  return sum;
-}
-
-int countIntervals(isetP tree,int left,int right) {
-  return traverseRange(tree->root,left,right);
-}
-#endif
-
 bode::IntervalNode *bode::IntervalTree::raw_insert(IntervalNode *node) {
   bode::IntervalNode *x,*y;
   x = root;
@@ -52,7 +32,9 @@ bode::IntervalNode *bode::IntervalTree::raw_insert(IntervalNode *node) {
     } else if (*node > *x) {
       x = x->getRight();
     } else { /* duplicate intervals */
-      x->incrementCount();
+//      x->incrementCount(node->strand());
+      if (node->getCountFwd() > 0) x->incrementCountF();
+      if (node->getCountRev() > 0) x->incrementCountR();
       return x;
     }
   }
@@ -158,18 +140,36 @@ int bode::IntervalTree::i_coverage(bode::IntervalNode *n,int point) {
   }
 }
 
-int bode::IntervalTree::i_countIntervals(bode::IntervalNode *n,int left,int right) {
+int bode::IntervalTree::i_countIntervals(bode::IntervalNode *n,int left,int right,int withoutDupes) {
+  int count = 0,overlap;
+/*  int minOverlap; */
+
   if (n == NULL) {
     return 0;
-  } else if (left >= n->r()) {
-    return i_countIntervals(n->getRight(),left,right);
-  } else if (right <= n->l()) {
-    return i_countIntervals(n->getLeft(),left,right);
-  } else {
-    return (  i_countIntervals(n->getLeft(),left,right)
-            + n->getCount()
-            + i_countIntervals(n->getRight(),left,right));
   }
+  if (left < n->r()) {
+    count += i_countIntervals(n->getLeft(),left,right,withoutDupes);
+  }
+  if (right >= n->l()) {
+    count += i_countIntervals(n->getRight(),left,right,withoutDupes);
+  }
+  overlap = std::min(right,n->r()) - std::max(left,n->l());
+  if (overlap == 0 && n->r() == n->l()) {
+    if (left <= n->l() && right > n->l()) {
+      overlap = 1;
+    }
+  }
+  /* minOverlap: half the length of the read, or the length of the interval */
+/*  minOverlap = std::min(right-left,(n->r()-n->l())/2); */
+  if (overlap > 0) {
+    count += withoutDupes ? 1 : n->getCount();
+  }
+/*
+    return (  i_countIntervals(n->getLeft(),left,right,withoutDupes)
+            + (withoutDupes ? 1 : n->getCount())
+            + i_countIntervals(n->getRight(),left,right,withoutDupes));
+*/
+  return count;
 }
 
 int bode::IntervalTree::i_realCount(bode::IntervalNode *n) {
@@ -184,8 +184,8 @@ int bode::IntervalTree::i_realCount(bode::IntervalNode *n) {
 
 /******************************************************************************/
 
-void bode::IntervalTree::insert(int left,int right) {
-  bode::IntervalNode *x = new bode::IntervalNode(left,right);
+void bode::IntervalTree::insert(int left,int right,int strand) {
+  bode::IntervalNode *x = new bode::IntervalNode(left,right,strand);
   bode::IntervalNode *y;
   y = raw_insert(x);
   if (y != x) { // this means we found a duplicate interval and just incremented
@@ -202,8 +202,8 @@ int bode::IntervalTree::coverage(int point) {
   return i_coverage(root,point);
 }
 
-int bode::IntervalTree::reads(int left,int right) {
-  return i_countIntervals(root,left,right);
+int bode::IntervalTree::reads(int left,int right,int withoutDupes) {
+  return i_countIntervals(root,left,right,withoutDupes);
 }
 
 int bode::IntervalTree::summit(int left,int right) {

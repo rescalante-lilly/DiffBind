@@ -4,7 +4,7 @@
 #include "croi_func.h"
 
 Croi::Croi(void) {
-  isets = new bode::IntervalSetSplit();
+  isets = new bode::IntervalSet();
   iv = new bode::Interval();
 }
 
@@ -38,9 +38,9 @@ Croi::~Croi(void) {
   delete isets;
 }
 
-int Croi::count(const char *chrom,int left,int right) {
+int Croi::count(const char *chrom,int left,int right,int withoutDupes) {
   iv->update(chrom,left,right);
-  return isets->overlapping(iv);
+  return isets->overlapping(iv,withoutDupes);
 }
 
 int Croi::size(void) {

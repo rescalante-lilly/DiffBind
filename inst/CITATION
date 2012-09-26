@@ -4,8 +4,8 @@ citEntry(
    title = "DiffBind: differential binding analysis of ChIP-Seq peak data",
    author = "Rory Stark and Gordon Brown",
    year = 2011,
-   url = "http://bioconductor.org/packages/2.9/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf",
-   textVersion = "Stark R and Brown G (2011). DiffBind: differential binding analysis of ChIP-Seq peak data. Bioconductor http://bioconductor.org/packages/2.9/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf"
+   url = "http://bioconductor.org/packages/release/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf",
+   textVersion = "Stark R and Brown G (2011). DiffBind: differential binding analysis of ChIP-Seq peak data. Bioconductor http://bioconductor.org/packages/release/bioc/vignettes/DiffBind/inst/doc/DiffBind.pdf"
 )
 
 citEntry(

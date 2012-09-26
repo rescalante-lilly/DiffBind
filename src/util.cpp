@@ -1,3 +1,4 @@
+#include <iostream>
 #include <ctype.h>
 #include <string.h>
 
@@ -23,4 +24,16 @@ int bode::splits(char *str,char **dest,int max) {
     dest[index++] = start;
   }
   return index;
+}
+
+void bode::trimTrailing(char *str) {
+  int n;
+  char *curr;
+  n = strlen(str);
+  curr = str + (n-1);
+  while (curr >= str && isspace(*curr)) {
+    *curr = '\0';
+    curr--;
+  }
+  return;
 }

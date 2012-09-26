@@ -22,7 +22,7 @@ void bode::IntervalSet::insert(Interval const *inter) {
   if (chroms->count(chrom) == 0) {
     (*chroms)[chrom] = new IntervalTree();
   }
-  (*chroms)[chrom]->insert(inter->left(),inter->right());
+  (*chroms)[chrom]->insert(inter->left(),inter->right(),inter->strand());
 }
 
 int bode::IntervalSet::coverage(std::string const &chrom,int point) const {
@@ -35,13 +35,13 @@ int bode::IntervalSet::coverage(std::string const &chrom,int point) const {
   return rv;
 }
 
-int bode::IntervalSet::overlapping(Interval const *inter) const {
+int bode::IntervalSet::overlapping(Interval const *inter,int withoutDupes) const {
   int rv;
   const string chrom = inter->chrom();
   if (chroms->count(chrom) == 0) {
     rv = 0;
   } else {
-    rv = (*chroms)[chrom]->reads(inter->left(),inter->right());
+    rv = (*chroms)[chrom]->reads(inter->left(),inter->right(),withoutDupes);
   }
   return rv;
 }

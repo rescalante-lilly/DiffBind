@@ -8,6 +8,7 @@ namespace bode {
 class Interval {
   public:
     Interval(std::string const &chr,int l,int r);
+    Interval(std::string const &chr,int l,int r,int strand);
     Interval(void)                                         { _mapped = false; };
     Interval(Interval const &i);
     virtual ~Interval(void) {};
@@ -19,11 +20,12 @@ class Interval {
     int left(void) const                                   { return _left; }; 
     int right(void) const                                  { return _right; };
     bool isMapped(void) const                              { return _mapped; };
+    int strand(void) const                                 { return _strand; };
 
     virtual void update(std::string const &chr,int l,int r);
+    virtual void update(std::string const &chr,int l,int r,int s);
     virtual std::string format(void) const;
     virtual void setUnmapped(void)                         { _mapped = false; };
-    virtual int score(void) const;
     virtual void extend(int insertLen);
 
   protected:
@@ -31,6 +33,7 @@ class Interval {
     int _right;
     std::string _chrom;
     bool _mapped;
+    int _strand;
 
 };
 

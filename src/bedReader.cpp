@@ -5,26 +5,22 @@
 #include <iostream>
 
 #include "interval.h"
-#include "bed.h"
 #include "util.h"
 #include "bedReader.h"
 
 bode::BedReader::BedReader(std::string const &filename) {
   char *res;
-/*  _fd = new std::ifstream(filename.c_str()); */
   _fd = gzopen(filename.c_str(),"r");
   _buffer = new char[maxLine];
 
-/*  _fd->getline(_buffer,maxLine); */
   res = gzgets(_fd,_buffer,maxLine);
   if (strncmp(_buffer,"track",5) == 0) {
     res = gzgets(_fd,_buffer,maxLine);
-/*    _fd->getline(_buffer,maxLine); */
   }
   if (res == NULL) {
     _eof = true;
   }
-  _bseq = new Bed();
+  _bseq = new Interval();
 }
 
 bode::BedReader::~BedReader(void) {
@@ -49,7 +45,7 @@ void bode::BedReader::close(void) {
 
 bode::Interval *bode::BedReader::next(void) {
   char *fields[12];
-  int count;
+  int count,strand;
   bode::Interval *rv = NULL;
 
   if (_buffer[0] == '\0') {
@@ -57,15 +53,18 @@ bode::Interval *bode::BedReader::next(void) {
     _bseq->setUnmapped();
     return rv;
   }
+  bode::trimTrailing(_buffer);
   count = bode::splits(_buffer,fields,12);
-  if (count == 3) {
+  if (count < 6) {
     _bseq->update(fields[0],atoi(fields[1]),atoi(fields[2]));
     rv = _bseq;
   } else {
-    if (fields[5][0] == '1') {
-      fields[5][0] = '+';
+    if (fields[5][0] == '-') {
+      strand = -1;
+    } else {
+      strand = 1;
     }
-    _bseq->update(fields[0],atoi(fields[1]),atoi(fields[2]),fields[3],atoi(fields[4]),fields[5][0]);
+    _bseq->update(fields[0],atoi(fields[1]),atoi(fields[2]),strand);
     rv = _bseq;
   }
 /*  if (_fd->eof()) { */

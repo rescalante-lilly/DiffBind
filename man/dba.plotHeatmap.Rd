@@ -74,7 +74,7 @@ significance threshold; all sites with FDR (or p-values, see bUsePval) less than
 logical indicating whether to use FDR (FALSE) or p-value (TRUE) for thresholding. Used in conjunction with contrast.
 }
 \item{report}{
-report (obtained from  \code{\link{dba.report)}} specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
+report (obtained from \code{\link{dba.report}} specifying the data to be used . If this is present, the method, th, and bUsePval parameters are ignored. Used in conjunction with contrast.
 }
 \item{score}{
 Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:

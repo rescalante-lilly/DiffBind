@@ -65,7 +65,7 @@ logical indicating if duplicate reads (ones that map to exactly the same genomic
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
 }
 \item{bCalledMasks}{
-logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks(used by \code{\link{dba.report)}}. 
+logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks (used by \code{\link{dba.report}}). 
 }
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the counted data

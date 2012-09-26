@@ -4,6 +4,7 @@
 namespace bode {
 
 int splits(char *str,char **dest,int max);
+void trimTrailing(char *str);
 
 }
 

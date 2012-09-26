@@ -1,15 +1,14 @@
 #include <string>
 #include <samtools/sam.h>
+#include <samtools/bam.h>
 
-#include "bam.h"
 #include "interval.h"
 #include "bamReader.h"
 
 bode::BamReader::BamReader(std::string const &filename) {
   _fd = samopen(filename.c_str(),"rb",0);
   _seq = bam_init1();
-  _bseq = new Bam();
-  _bseq->setHeader(_fd->header);
+  _bseq = new Interval();
   _eof = false;
 }
 
@@ -34,12 +33,18 @@ void bode::BamReader::close(void) {
 }
 
 bode::Interval *bode::BamReader::next(void) {
-  int samrv;
+  int samrv,left,right,strand;
+  std::string chrom;
   Interval *rv = NULL;
 
   samrv = samread(_fd,_seq);
   if (samrv > 0) {
-    _bseq->update(_seq);
+//    _bseq->update(_seq);
+    left = _seq->core.pos;
+    right = bam_calend(&(_seq->core),bam1_cigar(_seq));
+    chrom = _fd->header->target_name[_seq->core.tid];
+    strand = bam1_strand(_seq) == 0 ? 1 : -1;
+    _bseq->update(chrom,left,right,strand);
     rv = _bseq;
   } else {
     _bseq->setUnmapped();

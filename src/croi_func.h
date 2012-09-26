@@ -2,17 +2,17 @@
 #define __CROI_H
 
 #include "interval.h"
-#include "intervalSetSplit.h"
+#include "intervalSet.h"
 
 class Croi {
   public:
     Croi(void);
     ~Croi(void);
     int load(const char *filename,int insertLength);
-    int count(const char *chrom,int left,int right);
+    int count(const char *chrom,int left,int right,int withoutDupes);
     int size();
   private:
-    bode::IntervalSetSplit *isets;
+    bode::IntervalSet *isets;
     bode::Interval *iv;
 };
 

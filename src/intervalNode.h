@@ -9,10 +9,13 @@ namespace bode {
 
 class IntervalNode {
   public:
-    IntervalNode(int left,int right);
+    IntervalNode(int left,int right,int s);
     ~IntervalNode();
-    void incrementCount()           { count++; };
-    int getCount()                  { return count; };
+    void incrementCountF()          { countFwd++; };
+    void incrementCountR()          { countRev++; };
+    int getCount()                  { return countFwd+countRev; };
+    int getCountFwd()               { return countFwd; };
+    int getCountRev()               { return countRev; };
     void setParent(IntervalNode *p) { parent = p; };
     void setLeft(IntervalNode *l)   { leftChild = l; };
     void setRight(IntervalNode *r)  { rightChild = r; };
@@ -35,7 +38,8 @@ class IntervalNode {
   private:
     int leftEnd;
     int rightEnd;
-    int count;
+    int countFwd;
+    int countRev;
     bool redFlag;
     IntervalNode *leftChild;
     IntervalNode *rightChild;
