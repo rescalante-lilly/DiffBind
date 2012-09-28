@@ -35,8 +35,8 @@
 ## dba -- construct DBA object, e.g. from sample sheet ##
 #########################################################
 DBA_VERSION1  = 1
-DBA_VERSION2  = 1
-DBA_VERSION3  = 4
+DBA_VERSION2  = 4
+DBA_VERSION3  = 0
 
 DBA_GROUP     = PV_GROUP
 DBA_ID        = PV_ID 
