@@ -132,17 +132,18 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
 	         }
 	      } else if(score == PV_SCORE_READS_MINUS) {
 	         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads-pv$peaks[[i]]$cReads	
-	      }  
+	      }
+	      pv$peaks[[i]]$Score = pv$allvectors[,colnum]
 	   }
    }
       
    pv$vectors = pv$allvectors
        
    if(!missing(minMaxval)) {
-      data = pv$allvectors[,4:ncol(pv$allvectors)]
+      #data = pv$allvectors[,4:ncol(pv$allvectors)]
       maxs = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,max)
       tokeep = maxs>=minMaxval
-      if(sum(tokeep)>1) {
+      if(sum(tokeep)>1 && (sum(tokeep) < length(tokeep)) ) {
          pv$allvectors = pv$allvectors[tokeep,]
          rownames(pv$allvectors) = 1:sum(tokeep)
          pv$vectors = pv$allvectors
@@ -153,7 +154,9 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
          pv$overlapping = pv$overlapping[tokeep]
          pv = pv.vectors(pv,minOverlap=1,bAnalysis=F,bAllSame=T)
       } else {
-         stop('No sites have activity greater than maxFilter')
+      	 if(sum(tokeep)<2) {
+            stop('No sites have activity greater than maxFilter')
+         }
       }
       if(!is.null(pv$contrasts)) {
          for(i in 1:length(pv$contrasts)) {
