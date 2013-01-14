@@ -847,7 +847,7 @@ pv.getsites = function(pv,sites){
    if(is.logical(sites)) {
       sites = which(sites)
    }
-   idx   = match(sites,rownames(pv$allvectors))
+   idx   = match(as.integer(sites),rownames(pv$allvectors))
    sites = pv$allvectors[idx,1:3]
    sites[,1] = pv$chrmap[sites[,1]]
    return(sites)

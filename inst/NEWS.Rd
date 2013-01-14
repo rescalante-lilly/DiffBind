@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.1}{
+   \itemize{
+      \item{Roll up bugfixes for 1.4.0}
+   }
+}
+
 \section{Version 1.4.0}{
    \itemize{
       \item{Plotting}

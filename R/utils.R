@@ -1,4 +1,8 @@
 pv.peaks2DataType = function(peaks,datatype=DBA_DATA_DEFAULT) {
+
+   if(is.null(peaks)) {
+      return(NULL)
+   }   
    
    if(datatype==DBA_DATA_FRAME) {
       return(peaks)	
@@ -177,6 +181,9 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
 
 
 pv.get_reads = function(pv,peaksets,bSubControl=T){
+   if(is.null(bSubControl)) {
+      bSubControl = T
+   }
    reads = NULL
    for(peakset in peaksets) {
       reads = cbind(reads,pv$peaks[[peakset]][,PV_CHIP_READS])

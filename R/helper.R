@@ -80,7 +80,11 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
 
    if(!is.null(pv$score)) {
       if(pv$score == score) {
-         return(pv)	
+         if(!is.null(pv$maxFilter)) {
+            if(pv$maxFilter == minMaxval) {
+               return(pv)	
+            }	
+         }
       }	
    }
    	
@@ -146,10 +150,18 @@ pv.setScore = function(pv,score,bLog=F,minMaxval) {
                pv$peaks[[i]] = pv$peaks[[i]][tokeep,]
                rownames(pv$peaks[[i]]) = 1:sum(tokeep)
          }
+         pv$overlapping = pv$overlapping[tokeep]
          pv = pv.vectors(pv,minOverlap=1,bAnalysis=F,bAllSame=T)
       } else {
-         stop('No sites have activity greater than minMaxval')
+         stop('No sites have activity greater than maxFilter')
       }
+      if(!is.null(pv$contrasts)) {
+         for(i in 1:length(pv$contrasts)) {
+            pv$contrasts[[i]]$edgeR=NULL
+            pv$contrasts[[i]]$DESeq=NULL
+         }
+      }
+      pv$maxFilter = minMaxval
    }
    
    pv$score = score

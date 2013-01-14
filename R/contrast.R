@@ -399,6 +399,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
    deseq   = F
    edgerlm = F
    deseqlm = F
+   maxbvals = 0
    for(crec in clist) {
       newrec = c(crec$name1,sum(crec$group1),crec$name2,sum(crec$group2))
       bvals = 0
@@ -408,6 +409,7 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
             newrec = c(newrec,brec$label,sum(brec$samples&(crec$group1|crec$group2)))
          }
       }
+      maxbvals = max(bvals,maxbvals)
       if(!is.null(crec$edgeR)) {
          edger = T
       }
@@ -430,8 +432,8 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       res = rbind(res,newrec)
    }
    cvec = c("Group1","Members1","Group2","Members2")
-   if(bvals > 0) {
-     for(i in 1:bvals) {
+   if(maxbvals > 0) {
+     for(i in 1:maxbvals) {
         cvec = c(cvec,sprintf("Block%sVal",i),sprintf("InBlock%i",i))
      }
    }

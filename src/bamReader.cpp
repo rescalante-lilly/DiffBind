@@ -39,12 +39,15 @@ bode::Interval *bode::BamReader::next(void) {
 
   samrv = samread(_fd,_seq);
   if (samrv > 0) {
-//    _bseq->update(_seq);
-    left = _seq->core.pos;
-    right = bam_calend(&(_seq->core),bam1_cigar(_seq));
-    chrom = _fd->header->target_name[_seq->core.tid];
-    strand = bam1_strand(_seq) == 0 ? 1 : -1;
-    _bseq->update(chrom,left,right,strand);
+    if (_seq->core.tid == -1) {
+      _bseq->setUnmapped();
+    } else {
+      left = _seq->core.pos;
+      right = bam_calend(&(_seq->core),bam1_cigar(_seq));
+      chrom = _fd->header->target_name[_seq->core.tid];
+      strand = bam1_strand(_seq) == 0 ? 1 : -1;
+      _bseq->update(chrom,left,right,strand);
+    }
     rv = _bseq;
   } else {
     _bseq->setUnmapped();

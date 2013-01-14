@@ -319,7 +319,7 @@ DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
-                     insertLength, maxFilter, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
+                     insertLength, maxFilter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
                      bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)            
@@ -487,8 +487,13 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    	  mask = NULL                     
    }
    	                          	  
-   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  { 	
-   	  correlations = pv.occupancy(DBA, mask=mask, sites=sites, Sort='cor', bCorOnly=T,CorMethod=distMethod) 
+   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
+   	  if(nrow(DBA$allvectors)>1) { 	
+   	     correlations = pv.occupancy(DBA, mask=mask, sites=sites, Sort='cor', bCorOnly=T,CorMethod=distMethod)
+   	  } else {
+   	     warning('No correlation heatmap plotted -- contrast does not have enough differentially bound sites.')	
+         return(NULL)   	     	
+   	  }
    }
    	  
    if(correlations[1]!=FALSE) {
@@ -501,6 +506,10 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    }
       
    if(!missing(contrast)) {
+   	  if(nrow(DBA$allvectors)<2) { 	
+   	     warning('No heatmap plotted -- contrast does not have enough differentially bound sites.')	
+         return(NULL)   	     	
+   	  }
       res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, contrast=contrast,
                            RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                            ColScheme=colScheme, distMeth=distMethod, 

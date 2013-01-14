@@ -789,13 +789,14 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    pc = pv$pc
    
    if(is.null(pc)) {
-      stop("Unable to perform PCA. Make sure there aren't fewer sites than there are samples.",call.=F)	
+      warning("Unable to perform PCA. Make sure there aren't fewer sites than there are samples.",call.=F)
+      return(NULL)	
    }
    
    #if(!is.null(pv$mask)) {
    #   classes = pv$class[,which(pv$mask)]
    #} else {
-      classes = pv$class
+      classes = pv$class[,mask]
    #}
    
    if(max(class) > nrow(classes)){
@@ -811,29 +812,32 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    } else {
       pvar = sum(vr[startComp:(startComp+1)])/sum(vr)*100
    }
-
+   c1p = vr[1]/sum(vr)*100
+   c2p = vr[2]/sum(vr)*100   
+   c3p = vr[3]/sum(vr)*100
+   
    if(!missing(second)){
    	  if(!missing(third)) {
    	     if(!missing(fourth)) {
 	     	classvec = sprintf("%s:%s:%s:%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
-            thetitle = sprintf("PCA: %s:%s:%s:%s [%2.0f%% of total variance]",rownames(classes)[class],
+            thetitle = sprintf("PCA: %s:%s:%s:%s",rownames(classes)[class],
                                                rownames(classes)[second],
                                                rownames(classes)[third],
                                                rownames(classes)[fourth],pvar)
    	     } else {
             classvec = sprintf("%s:%s:%s",classes[class,],classes[second,],classes[third,])      
-            thetitle = sprintf("PCA: %s:%s:%s [%2.0f%% of total variance]",rownames(classes)[class],
+            thetitle = sprintf("PCA: %s:%s:%s",rownames(classes)[class],
                                                rownames(classes)[second],
                                                rownames(classes)[third],pvar)
             }
          } else {
          classvec = sprintf("%s:%s",classes[class,],classes[second,])      
-         thetitle = sprintf("PCA: %s:%s [%2.0f%% of total variance]",rownames(classes)[class],
+         thetitle = sprintf("PCA: %s:%s",rownames(classes)[class],
                                             rownames(classes)[second],pvar)
       }
    } else {
       classvec = classes[class,]	
-      thetitle = sprintf("PCA: %s [%2.0f%% of total variance]",rownames(classes)[class],pvar)
+      thetitle = sprintf("PCA: %s",rownames(classes)[class],pvar)
   }
    
    numsamps = ncol(classes)
@@ -857,12 +861,16 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    if(b3D) {
     if (length(find.package(package='rgl',quiet=T))>0) {
        library(rgl)
-       plot3d(pc$loadings[,startComp:(startComp+2)],col=pv.colorv(classvec,vColors),type='s',size=sval,
+       plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
+              xlab=sprintf('PC #%d [%2.0f%%]',startComp,c1p),
+              ylab=sprintf('PC #%d [%2.0f%%]',startComp+2,c3p),
+              zlab=sprintf('PC #%d [%2.0f%%]',startComp+1,c2p),
               aspect=c(1,1,1),main=thetitle,...)
     } else {
        warning("Package rgl not installed")
        plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
-            xlab=sprintf('Principal Component #%d',startComp),ylab=sprintf('Principal Component #%d',startComp+1),
+            xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+            ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
             main = thetitle,...)
     }
    } else {
@@ -870,7 +878,8 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    	     #sval = sval + .5
    	  }
       plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
-           xlab=sprintf('Principal Component #%d',startComp),ylab=sprintf('Principal Component #%d',startComp+1),
+           xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+           ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
            main = thetitle,...)
    }      
    uclass = unique(classvec)
@@ -927,7 +936,6 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
 
    } else {
 
-
       if(missing(sites)){
          sites = 1:nrow(pv$vectors)
          numSites = min(length(sites),numSites)
@@ -964,6 +972,15 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
    if(!missing(maxval)) {
       domap[domap>maxval]=maxval
    }
+   
+   if(missing(overlaps)) {
+      for(i in 1:ncol(domap)) {
+         if(sum(domap[,i]==0)==nrow(domap)) {
+            domap[1,i] = 0.000001	
+         }   	
+      }	
+   }
+   
    cols = colorRampPalette(brewer.pal(9,ColScheme))(256)
    
    if(missing(rowSideCols)) {
@@ -999,13 +1016,13 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
    	  if(!missing(RowAttributes)) {
    	     warning("Row color bars not permitted for peak score heatmaps.",call.=F)	
    	  }
-      heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
+      heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,KeyValueName="Score",
                 distfun=function(x) Dist(x,method=distMeth),
                 ColSideColors=colatts,NumColSideColors=colcols,
                 ...)
    } else {
 
-      res = heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,
+      res = heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab, KeyValueName="Correlation",
                       distfun=function(x) Dist(x,method=distMeth),symm=T,revC=T,Colv=T,
                       RowSideColors=rowatts,ColSideColors=colatts,NumRowSideColors=rowcols,NumColSideColors=colcols,
                       ...)         

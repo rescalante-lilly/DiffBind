@@ -308,7 +308,7 @@ The \texttt{dba.plotPCA} function is customizable.
 For example, if you want to see where each of the unique cell lines lies, type
 \texttt{dba.plotPCA(tamoxifen, attributes=c(DBA\_TISSUE,DBA\_CONDITION)}. 
 If your installation of \R supports 3D graphics using the \texttt{rgl} package, try \texttt{dba.plotPCA(tamoxifen, b3D=T)}. 
-You may have to rotate the resultant plot top-to-bottom to align it with the standard two-dimension plot, but seeing the first three principal components can be a useful exploratory exercise.
+Seeing the first three principal components can be a useful exploratory exercise.
 
 \subsection{Boxplots}
 

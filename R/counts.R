@@ -453,6 +453,8 @@ pv.nodup = function(pv,chipnum) {
    chips = pv$class[PV_BAMREADS,1:(chipnum-1)] == pv$class[PV_BAMREADS,chipnum]
    conts = pv$class[PV_BAMCONTROL,1:(chipnum-1)] == pv$class[PV_BAMCONTROL,chipnum]
    
+   conts[is.na(conts)] = T
+   
    if(sum(chips&conts)>0) {
       return(FALSE)
    } else {
