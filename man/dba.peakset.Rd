@@ -29,7 +29,7 @@ DBA object. Required unless creating a new DBA object by adding an initial peaks
 \item{peaks}{
 When adding a specified peakset: set of peaks, either a GRanges or RangedData object, or a peak dataframe or matrix (chr,start,end,score), or a filename where the peaks are stored.
 
-When adding a consensus peakset: a sample mask or vector of peakset numbers t include int he consensus. If missing or NULL, a consensus is derived from all peaksets present in the model. See  \code{\link{dba.mask}}, or \code{\link{dba.show}} to get peakset numbers.
+When adding a consensus peakset: a sample mask or vector of peakset numbers to include in the consensus. If missing or NULL, a consensus is derived from all peaksets present in the model. See  \code{\link{dba.mask}}, or \code{\link{dba.show}} to get peakset numbers.
 
 When adding a set of consensus peaksets: a sample mask or vector of peakset numbers. Sample sets will  be derived only from subsets of these peaksets.
 

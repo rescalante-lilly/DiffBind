@@ -1,10 +1,10 @@
 Package: DiffBind
 Type: Package
-Version: 1.5.1
+Version: 1.5.2
 Title: Differential Binding Analysis of ChIP-Seq peak data
-Date: 2013-01-14
-Author: Rory Stark<rory.stark@cancer.org.uk>, Gordon Brown <gordon.brown@cancer.org.uk>
-Maintainer: Rory Stark<rory.stark@cancer.org.uk>
+Date: 2013-02-13
+Author: Rory Stark<rory.stark@cruk.cam.ac.uk>, Gordon Brown <gordon.brown@cruk.cam.ac.uk>
+Maintainer: Rory Stark<rory.stark@cruk.cam.ac.uk>
 Description: Compute differentially bound sites from multiple ChIP-seq experiments using affinity (quantitative) data. Also enables occupancy (overlap) analysis and plotting functions.
 biocViews: Bioinformatics, HighThroughputSequencing, ChIPseq
 License: Artistic-2.0

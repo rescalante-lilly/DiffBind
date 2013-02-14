@@ -319,20 +319,27 @@ DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
-                     insertLength, maxFilter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+                     insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
+                     bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)            
    
    bUseLast = F
   
-   if(!missing(peaks)) {
-      if(is.null(peaks)) {
+   if(!missing(peaks) || length(filter)>1) {
+      if(is.null(peaks) || length(filter)>1) {
          callers = unique(DBA$class[DBA_CALLER,])
          if((length(callers)==1) & (callers=='counts')) {
             DBA = pv.check(DBA)
-            res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=maxFilter)
+            if(length(filter)>1) {
+               DBA = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=0,filterFun=filterFun)
+               res = pv.filterRate(DBA,filter,filterFun=filterFun)	
+            } else {
+               res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=filter,filterFun=filterFun)
+            }
             return(res)	
+         } else {
+            warning('DBA object must contains only counts')	
          }	
       } else {
          peaks = pv.DataType2Peaks(peaks)
@@ -345,8 +352,8 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTI
   
    res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
-                   bCalledMasks=bCalledMasks, minMaxval=maxFilter, bParallel=bParallel, bUseLast=bUseLast,
-                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl)
+                   bCalledMasks=bCalledMasks, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
+                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun)
    
    if(bCorPlot){
       x = dba.plotHeatmap(res,correlations=T)
@@ -487,14 +494,19 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
    	  mask = NULL                     
    }
    	                          	  
-   if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
-   	  if(nrow(DBA$allvectors)>1) { 	
-   	     correlations = pv.occupancy(DBA, mask=mask, sites=sites, Sort='cor', bCorOnly=T,CorMethod=distMethod)
-   	  } else {
-   	     warning('No correlation heatmap plotted -- contrast does not have enough differentially bound sites.')	
-         return(NULL)   	     	
-   	  }
-   }
+	if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
+		if(nrow(DBA$allvectors)>1) {
+			if(!missing(sites)) {
+			   if(is.logical(sites)) {
+			      sites = which(sites)	
+			   }	   
+			} 	
+			correlations = pv.occupancy(DBA, mask=mask, sites=sites, Sort='cor', bCorOnly=T,CorMethod=distMethod)
+		} else {
+			warning('No correlation heatmap plotted -- contrast does not have enough differentially bound sites.')	
+			return(NULL)   	     	
+		}
+	}
    	  
    if(correlations[1]!=FALSE) {
       res = pv.plotHeatmap(DBA, attributes=attributes, overlaps=correlations, olPlot=olPlot, mask=mask,

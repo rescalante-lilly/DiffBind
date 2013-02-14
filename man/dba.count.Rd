@@ -11,8 +11,8 @@ respectively.
 }
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
-          insertLength, maxFilter, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          bCalledMasks=TRUE, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+          insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
+          bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -52,11 +52,11 @@ if present, this value will be used as the length of the reads.
 Each read will be extended from its endpoint along the appropriate strand by this many bases. 
 If missing, the read size indicated in the BAM/BED file will be used.
 }
-\item{maxFilter}{
+\item{filter}{
 value to use for filtering intervals with low read counts. 
-Only intervals where at least one sample has at least maxFilter reads will be included. 
-If missing, includes all intervals.
-If peaks is NULL, will remove sites from existing DBA object without recounting.
+Only intervals where at least one sample has a \code{score} at least this high will be included. 
+If \code{peaks} is NULL, will remove sites from existing DBA object without recounting. 
+If filter is a vector of values, \code{dba.count} will return a vector of the same length, indicating how many intervals will be retained for each specified \code{filter} level.
 }
 \item{bRemoveDuplicates}{
 logical indicating if duplicate reads (ones that map to exactly the same genomic position) should be removed. If TRUE, any location where multiple reads map will  be counted as a single read.
@@ -66,6 +66,9 @@ logical indicating if the Control reads should be scaled based on relative libra
 }
 \item{bCalledMasks}{
 logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks (used by \code{\link{dba.report}}). 
+}
+\item{filterFun}{
+function that will be invoked for each interval with a vector of scores for each sample. Returns a score that will be evaluated against the \code{filter} value (only intervals with a score at least as high as \code{filter} will be kept). Default is \code{max}, indicating that at least one sample should have a score of at least \code{filter}; other possible values include \code{sum}, indicating that all the scores added together should be at least \code{filter}. Users can supply their own function as well.
 }
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the counted data
@@ -123,6 +126,15 @@ tamoxifen = dba.count(tamoxifen,peaks=NULL,score=DBA_SCORE_RPKM_FOLD)
 head(tamoxifen$vectors)
 tamoxifen = dba.count(tamoxifen,peaks=NULL,score=DBA_SCORE_TMM_MINUS_FULL)
 head(tamoxifen$vectors)
+
+# Plot effect of a range of filter values and then apply filter 
+data(tamoxifen_counts)
+rate.max = dba.count(tamoxifen, peaks=NULL, filter=0:250)
+rate.sum = dba.count(tamoxifen, peaks=NULL, filter=0:250,filterFun=sum)
+plot(0:250,rate.max/rate.max[1],type='l',xlab="Filter Value",ylab="Proportion Retained Sites")
+lines(0:250,rate.sum/rate.sum[1],col=2)
+tamoxifen = dba.count(tamoxifen,peaks=NULL,filter=125,filterFun=sum)
+tamoxifen
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

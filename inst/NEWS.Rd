@@ -2,6 +2,19 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.2}{
+   \itemize{
+      \item{add features to dba.count to deal with filtering}
+      \itemize{
+         \item{Change parameter name: maxFilter -> filter}
+         \item{Allow maxFilter to be a numerical vector to retrieve filtering rate}
+         \item{Add parameter: filterFun to control filtering method}
+         \item{Fix bug so SN gets recomputed after filtering}
+         \item{Update documentation with example}
+      }
+   }
+}
+
 \section{Version 1.5.1}{
    \itemize{
       \item{Roll up bugfixes for 1.4.0}

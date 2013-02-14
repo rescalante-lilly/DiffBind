@@ -230,7 +230,7 @@ PV_SCORE_TMM_READS_FULL       = 8
 PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
-                     bOnlyCounts=T,bCalledMasks=T,minMaxval,
+                     bOnlyCounts=T,bCalledMasks=T,minMaxval,filterFun=max,
                      bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T) {
    
    pv = pv.check(pv)
@@ -388,11 +388,11 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	  numpeaks = length(pv$peaks)
       res = pv.vectors(pv,(numpeaks-numAdded+1):numpeaks,minOverlap=1,bAnalysis=F,bAllSame=T)
       if(redoScore > 0) {
-         res = pv.setScore(res,redoScore)	
+         res = pv.setScore(res,redoScore,bSignal2Noise=bSignal2Noise)	
       }   
       if(!missing(minMaxval)) {
          data = res$allvectors[,4:ncol(res$allvectors)]
-         maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,max)
+         maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,filterFun)
          tokeep = maxs>=minMaxval
          if(sum(tokeep)>1) {
             res$allvectors = res$allvectors[tokeep,]
@@ -412,25 +412,15 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       }
    } else {
       if(redoScore > 0) {
-         res = pv.setScore(res,redoScore,minMaxval=minMaxval)	
+         res = pv.setScore(res,redoScore,minMaxval=minMaxval,filterFun=filterFun,bSignal2Noise=bSignal2Noise)	
       } 
       res = pv.vectors(pv)   
    }
    
    if(bSignal2Noise) {
-      sns = rep("",length(res$peaks))
-      for(i in 1:length(sns)) {
-         rip = sum(res$peaks[[i]]$Reads)
-         treads = as.integer(res$class[PV_READS,i])
-         if(treads) {
-            sn  = rip / treads
-            sns[i] = sprintf("%1.2f",sn)
-         }	
-      }
-      if(sum(as.numeric(sns) > 0,na.rm=T)) {
-         res$SN = sns  	
-      }
+      res$SN = pv.Signal2Noise(res)
    }
+						 
    
    return(res)	
 }
@@ -501,4 +491,16 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F) {
    return(list(counts=counts,rpkm=rpkm,libsize=libsize))
 }
 
+pv.filterRate = function(pv,vFilter,filterFun=max) {
+   if(!is.numeric(vFilter)) {
+      stop('Filter value must be a numeric vector to retrieve filter rate',call.=FALSE)	
+   }
+   maxs = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,filterFun)
+   res = NULL
+   for(filter in vFilter) {
+	  tokeep = maxs >= filter
+      res = c(res,sum(tokeep))	
+   }
+   return(res)
+}
 
