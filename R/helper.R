@@ -456,8 +456,13 @@ pv.readPeaks = function(peaks,peak.format,skipLines=0){
    else if(peak.format == "narrow") {
       peaks =  pv.readbed(peaks,skipLines)
    } 
-   else if(peak.format == "raw") {
-      peaks =  pv.readbed(peaks,skipLines)
+   #else if(peak.format == "raw") {
+   #   peaks =  pv.readbed(peaks,skipLines)
+   #}  
+   else if(peak.format == "csv") {
+	   peaks =  pv.csv(peaks)
+   }  else if(peak.format == "report") {
+	   peaks =  pv.csv(peaks)
    } else {
       peaks =  pv.readbed(peaks,skipLines)   	
    }     
@@ -494,6 +499,10 @@ pv.defaultScoreCol = function(peak.format){
    } 
    else if(peak.format == "raw") {
       val = 4
+   } else if(peak.format == "csv") {
+	   val = 4
+   } else if(peak.format == "report") {
+	   val = 9
    } else {
       val = 4 	
    } 
@@ -525,8 +534,8 @@ pv.readbed = function(fn,skipnum=0){
 
 pv.bayes = function(fn){
  data = read.table(fn)
- idx = data[,4]>0.5
- data = data[idx,]
+#idx = data[,4]>0.5
+#data = data[idx,]
  res  = pv.peaksort(data)
  return(res)
 }
@@ -555,6 +564,15 @@ pv.sourcedata = function(fn,maxval){
  data = cbind(data[,1:3],vals,data[,4:5])
  data = pv.peaksort(data)
  return(data)
+}
+
+pv.csv = function(fn){
+   data = read.csv(fn)
+	res  = pv.peaksort(data)
+	if(ncol(res)==3) {
+		res=cbind(res,1)	
+	}
+    return(res)
 }
 
 pv.peakset_all = function(pv, addpv, minOverlap) {
@@ -1072,3 +1090,91 @@ pv.Signal2Noise = function(pv) {
 	   return(NULL)
 	}
 }
+
+
+pv.peaksetCounts = function(pv=NULL,peaks,counts,
+                  sampID="",tissue="",factor="",condition="",treatment="",replicate) {
+                  	
+
+   if(!is.null(pv)) {
+      if(sum(!pv$class[PV_CALLER,] %in% "caller")) {
+        stop("DBA object can only have count peaksets",call.=FALSE)	
+      }	
+   }
+
+ 	  IDs = "counts"
+      froms = NULL
+      tos   = NULL
+      if(is.null(dim(counts)) && length(counts)==1) { # filename
+         counts = read.table(counts,as.is=T)
+      }
+      if(!is.vector(counts)) {   
+         numcols = ncol(counts)
+         if(numcols>1) {
+            if(numcols == 2) {
+               IDs = counts[,1]
+               counts = counts[,2]	
+            } else if(numcols == 4) {
+               IDs    = counts[,1]
+               froms  = counts[,2]
+               tos    = counts[,3]
+               counts = counts[,4]	
+            } else {
+               stop("Counts must have 1, 2, or 4 columns.",call.=FALSE)	
+            }
+         } else counts = counts[,1]
+      }
+      
+      if(!is.null(dim(counts))) {
+         stop('counts must be vector of counts',call.=FALSE)	
+      }
+      numcounts = length(counts)
+      if(!missing(peaks)) {
+         warning('Specified peaks ignored',call.=FALSE)
+      }
+      if(is.null(froms)) {
+         froms = tos = 1:numcounts	
+      }
+      peaks = data.frame(cbind(IDs,froms,tos))
+
+   
+   peaks = cbind(peaks,counts,counts,rep(0,numcounts),counts,rep(0,numcounts),rep(0,numcounts))
+   colnames(peaks) = c("Chr","Start","End", "Score", "Score","RPKM", "Reads","cRPKM","cReads")
+
+   
+   if(!is.null(pv)) {
+      if(nrow(peaks) != nrow(pv$peaks[[1]])) {
+         stop('Mismatch in number of intervals',call.=FALSE)
+      }
+   }
+   
+   res = dba.peakset(pv,
+                    peaks       = peaks,
+                    sampID      = sampID,
+                    tissue      = tissue,
+                    factor      = factor,
+                    condition   = condition,
+                    treatment   = treatment,
+                    consensus   = T,
+                    peak.caller = "counts",
+                    reads       = NA,
+                    replicate   = replicate)
+                    
+   res$class[PV_READS,length(res$peaks)] = sum(counts)
+   
+   if(sum(as.integer(res$peaks[[1]][,1]) != as.integer(res$peaks[[length(res$peaks)]][,1]))) {
+      stop("Mismatch in ID",call.=FALSE)	
+   }
+   if(sum(res$peaks[[1]][,2] != res$peaks[[length(res$peaks)]][,2])) {
+      stop("Mismatch in interval start",call.=FALSE)	
+   }
+   if(sum(res$peaks[[1]][,3] != res$peaks[[length(res$peaks)]][,3])) {
+      stop("Mismatch in interval end",call.=FALSE)	
+   }
+      
+   return(res)
+}
+
+
+
+

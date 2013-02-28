@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.4}{
+   \itemize{
+      \item{Add ability to add externally derived counts via dba.peakset and a sample sheet}
+   }
+}
+
 \section{Version 1.5.2}{
    \itemize{
       \item{add features to dba.count to deal with filtering}

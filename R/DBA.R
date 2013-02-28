@@ -71,7 +71,7 @@ DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
-               peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, bAddCallerConsensus=FALSE, 
+               peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, 
                bCorPlot=FALSE, attributes) 
 {
@@ -127,7 +127,7 @@ dba = function(DBA,mask, minOverlap=2,
 
 dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treatment, replicate,
                        control, peak.caller, peak.format, reads=0, consensus=FALSE, bamReads, bamControl,
-                       scoreCol, bLowerScoreBetter, bRemoveM=TRUE, bRemoveRandom=TRUE,
+                       scoreCol, bLowerScoreBetter, filter, counts, bRemoveM=TRUE, bRemoveRandom=TRUE,
                        minOverlap=2, bMerge=TRUE,
                        bRetrieve=FALSE, writeFile, numCols=4,
                        DataType=DBA$config$DataType)
@@ -195,7 +195,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
                           readBam=bamReads, controlBam=bamControl,
                           scoreCol=scoreCol, bLowerScoreBetter=bLowerScoreBetter, 
                           bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
-                          minOverlap=minOverlap)
+                          minOverlap=minOverlap, filter=filter, counts=counts)
       }
       
       if(class(res)!="DBA") {

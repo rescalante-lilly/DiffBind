@@ -11,7 +11,8 @@ Adds a peakset to, or retrieves a peakset from, a DBA object
 dba.peakset(DBA=NULL, peaks, sampID, tissue, factor, condition, treatment, replicate,
             control, peak.caller, peak.format, reads=0, consensus=FALSE, 
             bamReads, bamControl,
-            scoreCol, bLowerScoreBetter, bRemoveM=TRUE, bRemoveRandom=TRUE,
+            scoreCol, bLowerScoreBetter, filter, counts,
+            bRemoveM=TRUE, bRemoveRandom=TRUE,
             minOverlap=2, bMerge=TRUE,
             bRetrieve=FALSE, writeFile, numCols=4,
             DataType=DBA$config$DataType)
@@ -72,7 +73,9 @@ peak caller name string. If peaks is specified as a file, and peak.format is mis
 \item {\dQuote{tpic}:}	        {default peak.format: TPIC file}
 \item {\dQuote{sicer}:}      {default peak.format: SICER file}
 \item {\dQuote{fp4}:}	        {default peak.format: FindPeaks v4 file}
-\item {\dQuote{swembl}:} {default peak.format: SWEMBLfile}
+\item {\dQuote{swembl}:} {default peak.format: SWEMBL file}
+\item {\dQuote{csv}:} {default peak.format: comma separated value file}
+\item {\dQuote{report}:} {default peak.format: csv file saved via \code{\link{dba.report}}}
 }
 When adding a consensus peakset, a default value (a concatenation of peak caller names) is assigned if this is missing. 
 }
@@ -83,11 +86,13 @@ peak format string. If specified, overrides the default file format for the spec
 \item {\dQuote{bed}:}	  {bed file; scoreCol=5}
 \item {\dQuote{narrow}:}  {narrowPeaks file; scoreCol=8}
 \item {\dQuote{macs}:}  {MACS .xls file; scoreCol=7}
-\item {\dQuote{bayes}:}  {bayesPeak file; scoreCol=4}
+\item {\dQuote{bayes}:}  {bayesPeak file; scoreCol=4, filter=0.5}
 \item {\dQuote{tpic}:}	  {TPIC file; scoreCol=0 (all scores=1)}
 \item {\dQuote{sicer}:}  {SICER file; scoreCol=7}
 \item {\dQuote{fp4}:}	  {FindPeaks v4 file; scoreCol=5}
-\item {\dQuote{swembl}:}	{SWEMBLfile; scoreCol=4}
+\item {\dQuote{swembl}:}	{SWEMBL file; scoreCol=4}
+\item {\dQuote{csv}:}	{csv file; scoreCol=4}
+\item {\dQuote{report}:}	{report file; scoreCol=9, bLowerScoreBetter=T}
 }
 }
 \item{reads}{
@@ -115,6 +120,12 @@ peak column to normalize to 0...1 scale when adding a peakset; 0 indicates no no
 }
   \item{bLowerScoreBetter}{
 Logical indicating that lower scores indicate higher confidence peaks; default is that higher scores indicate better peaks.
+}
+  \item{filter}{
+Numeric indicating a filter value for peaks. If present, any peaks with a score less than this value (or higher if \code{bLowerScoreBetter==TRUE}) will be removed from the peakset. 
+}
+  \item{counts}{
+Used for adding externally computed peak counts. Can be a filename or a dataframe. Can consist of a single column (or vector) with the counts, or two columns, with an ID for each interval int he first column and the counts int he second column, or four columns (chr, start, end, counts). When \code{counts} is specified, \code{peaks} and related parameters are ignored, and all peaksets in the DBA object must be specified in this way, all with exactly the same number of intervals.
 }
   \item{bRemoveM}{
 logical indicating whether to remove peaks on chrM when adding a peakset

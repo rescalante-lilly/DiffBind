@@ -11,7 +11,7 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
     config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
-    peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, skipLines=0, 
+    peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, 
     bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, 
     bCorPlot=FALSE, attributes) 
 }
@@ -56,6 +56,7 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 \item {PeakFormat:}	{string indicating format for peak files; see PeakCaller and  \code{\link{dba.peakset}}}
 \item {ScoreCol:}	{column in peak files that contains peak scores}
 \item {bLowerBetter:}	{logical indicating that lower scores signify better peaks}
+\item{Counts:} {file path for externally computed read counts; see \code{\link{dba.peakset}} (\code{counts} parameter)}
 }
 }
   \item{config}{
@@ -67,16 +68,19 @@ data frame containing configuration options, or file name of config file to load
 }
 }
   \item{peakCaller}{
-if a sampleSheet is specified, the default peak caller that will be used if the PeakCaller column is absent.
+if a sampleSheet is specified, the default peak caller that will be used if the \code{fPeakCaller} column is absent.
 }
  \item{peakFormat}{
-if a sampleSheet is specified, the default peak file format that will be used if the PeakFormat column is absent.
+if a sampleSheet is specified, the default peak file format that will be used if the \code{fPeakFormat} column is absent.
 }
  \item{scoreCol}{
-if a sampleSheet is specified, the default column  in the peak files that will be used for scoring if the ScoreCol column is absent.
+if a sampleSheet is specified, the default column  in the peak files that will be used for scoring if the \code{ScoreCol} column is absent.
 }
  \item{bLowerScoreBetter}{
-if a sampleSheet is specified, the  sort order for peak scores if the LowerBetter column is absent.
+if a sampleSheet is specified, the  sort order for peak scores if the \code{LowerBetter} column is absent.
+}
+ \item{filter}{
+if a sampleSheet is specified, a filter value if the \code{Filter} column is absent. Peaks with scores lower than this value (or higher if \code{ bLowerScoreBetter} or \code{LowerBetter} is TRUE) will be removed.
 }
   \item{skipLines}{
 if a sampleSheet is specified, the number of lines (ie header lines) at the beginning of each peak file to skip.

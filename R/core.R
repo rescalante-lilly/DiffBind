@@ -56,19 +56,28 @@ PV_DEBUG = FALSE
 pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment, replicate,
                       control, peak.caller, peak.format, reads=0, consensus=F, readBam, controlBam,
                       scoreCol=NULL, bLowerScoreBetter=NULL, bRemoveM=T, bRemoveRandom=T,
-                      minOverlap=2,bFast=F,bMakeMasks=T,skipLines=1){
+                      minOverlap=2,bFast=F,bMakeMasks=T,skipLines=1, filter=NULL, counts=NULL){
 	
    zeroVal = -1
    bLog=F
      
-   if(missing(peaks)) {
+   if(!is.null(pv) && missing(peaks)) {
      peaks = 1:length(pv$peaks)
+   }
+
+   if(missing(counts)) counts=NULL   
+   if(!is.null(counts)) {
+      res = pv.peaksetCounts(pv=pv,peaks=peaks,counts=counts,
+                             sampID=sampID,tissue=tissue,factor=factor,condition=condition,
+                             treatment=treatment,replicate=replicate)
+      return(res)
    }
      
    if(missing(peak.format))       peak.format=NULL
    if(missing(scoreCol))          scoreCol=NULL
    if(missing(bLowerScoreBetter)) bLowerScoreBetter=NULL   
-   
+   if(missing(filter))            filter=NULL
+
    bConsensus = F
    if(is.numeric(consensus)) { ## Add a set of consensus peaksets
    	  bConsensus = T
@@ -119,8 +128,8 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
    if(missing(controlBam))   controlBam=NA
    if(length(controlBam)==0) controlBam=NA
    
-   if(is.null(scoreCol))          scoreCol=0
-   if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE
+#if(is.null(scoreCol))          scoreCol=0
+#if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE
                   
    if(is.character(peaks)){ # Read in peaks from a file
      
@@ -131,21 +140,45 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
       if(is.null(scoreCol)) {
          scoreCol = pv.defaultScoreCol(peak.format)	
       }
-      if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE
-      
       peaks = pv.readPeaks(peaks,peak.format,skipLines)
+   } else {
+      if(is.null(scoreCol))          scoreCol=0
+      if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE   
    }
    
    if(ncol(peaks) < scoreCol) {
       peaks = cbind(peaks=1)
       scoreCol = 0
    }
-      
+
+  if(is.null(bLowerScoreBetter)) {
+	  if(peak.caller == "report") {
+		  bLowerScoreBetter = TRUE
+	  } else {
+		  bLowerScoreBetter = FALSE
+	  }
+  }
+						  
+   if(is.null(filter) && peak.caller == "bayes") {
+      filter = 0.5
+   }
+						  
    if(scoreCol > 0) {
+	  if(!missing(filter)){
+		  if(!is.null(filter)) {
+			 if(bLowerScoreBetter) {
+				tokeep = peaks[,scoreCol] <= filter
+			 } else {
+				tokeep = peaks[,scoreCol] >= filter
+			 }
+			 peaks = peaks[tokeep,]
+		  } 		  
+	  }
       peaks[,scoreCol] = pv.normalize(peaks,scoreCol,zeroVal=zeroVal,bLog=bLog)
       if(bLowerScoreBetter) {
          peaks[,scoreCol] = 1 - peaks[,scoreCol]   	
       }
+	  peaks = peaks[,c(1:3,scoreCol)] 
    }      
       
    if(bRemoveM) {
@@ -415,21 +448,23 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    }
    
    j = ncol(res)
-   for(i in j:1) {
-      x = unique(res[,i])
-      if(colnames(res)[i]=='Peak caller') {
-         if(all.equal(attributes,pv.deflist) == TRUE) {
-            if(length(x)==1) {
-               res = res[,-i]	
-            }
-         }
-      } else {
-         if(length(x)==1 && x[1]=="") {
-            res = res[,-i]	
-         }    	
-      }
+   if (nrow(res)>1) {	
+	   for(i in j:1) {
+		  x = unique(res[,i])
+		  if(colnames(res)[i]=='Peak caller') {
+			 if(all.equal(attributes,pv.deflist) == TRUE) {
+				if(length(x)==1) {
+				   res = res[,-i]	
+				}
+			 }
+		  } else {
+			 if(length(x)==1 && x[1]=="") {
+				res = res[,-i]	
+			 }    	
+		  }
+	   }
    }
-   
+	
    return(data.frame(res))
 }
 

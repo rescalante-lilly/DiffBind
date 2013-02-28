@@ -10,13 +10,14 @@ PV_DEBUG = FALSE
 pv.model = function(model,mask,minOverlap=2,
                     samplesheet='sampleSheet.csv',config=data.frame(RunParallel=FALSE),
                     caller="raw",format, scorecol, bLowerBetter, skipLines=0,bAddCallerConsensus=T,
-                    bRemoveM=T, bRemoveRandom=T,
+                    bRemoveM=T, bRemoveRandom=T,filter,
                     bKeepAll=T,bAnalysis=T,attributes) {
 
-   if(missing(format))       format=NULL
-   if(missing(scorecol))     scorecol=NULL
-   if(missing(bLowerBetter)) bLowerBetter=NULL
-      
+   if(missing(format))       format       = NULL
+   if(missing(scorecol))     scorecol     = NULL
+   if(missing(bLowerBetter)) bLowerBetter = NULL
+   if(missing(filter))       filter       = NULL
+   						
    if(!missing(model)) {
    	  if(missing(attributes)) {
          if(is.null(model$attributes)) {   
@@ -63,6 +64,7 @@ pv.model = function(model,mask,minOverlap=2,
       samples$Condition[is.na(samples$Condition)]=""
       samples$Treatment[is.na(samples$Treatment)]=""
       samples$Replicate[is.na(samples$Replicate)]=""
+	   
    } else samples = samplesheet
    
    model = NULL
@@ -145,6 +147,14 @@ pv.model = function(model,mask,minOverlap=2,
       } else {
    	     bLowerBetter = as.logical(samples$LowerBetter[i])
    	  }
+	  
+	   if(is.null(samples$Filter[i])) {
+		   filter  = filter
+	   } else if(is.na(samples$Filter[i])) {
+		   filter  = filter
+	   } else {
+		   filter = as.numeric(samples$Filter[i])
+	   } 
 
    	  if(is.null(samples$ControlID[i])) {
    	     controlid  = ''
@@ -160,6 +170,15 @@ pv.model = function(model,mask,minOverlap=2,
          as.character(samples$Condition[i]),' ',
          as.character(samples$Treatment[i]),' ',
          as.integer(samples$Replicate[i]),' ',peakcaller)
+     
+     counts = samples$Counts[i]
+     if(!is.null(counts)) {
+        if(is.na(counts)) {
+           counts =NULL
+        } else if (counts == "") {
+           counts =NULL
+        }
+     }
          
      model = pv.peakset(model,
                          peaks       = as.character(samples$Peaks[i]),
@@ -178,6 +197,8 @@ pv.model = function(model,mask,minOverlap=2,
                          replicate   = as.integer(samples$Replicate[i]),
                          readBam     = as.character(samples$bamReads[i]),
                          controlBam  = as.character(samples$bamControl[i]),
+						 filter      = filter,
+						 counts      = counts,
                          bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,skipLines=skipLines)
       }
 
