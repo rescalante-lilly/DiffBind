@@ -12,7 +12,8 @@ respectively.
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
           insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+          bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bLowMem=FALSE,
+          bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -59,7 +60,7 @@ If \code{peaks} is NULL, will remove sites from existing DBA object without reco
 If filter is a vector of values, \code{dba.count} will return a vector of the same length, indicating how many intervals will be retained for each specified \code{filter} level.
 }
 \item{bRemoveDuplicates}{
-logical indicating if duplicate reads (ones that map to exactly the same genomic position) should be removed. If TRUE, any location where multiple reads map will  be counted as a single read.
+logical indicating if duplicate reads (ones that map to exactly the same genomic position) should be removed. If TRUE, any location where multiple reads map will  be counted as a single read. Note that if \code{bLowMem} is set, duplicates needs to have been already marked in all of the BAM files.
 }
 \item{bScaleControl}{
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
@@ -68,12 +69,18 @@ logical indicating if the Control reads should be scaled based on relative libra
 logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks (used by \code{\link{dba.report}}). 
 }
 \item{filterFun}{
-function that will be invoked for each interval with a vector of scores for each sample. Returns a score that will be evaluated against the \code{filter} value (only intervals with a score at least as high as \code{filter} will be kept). Default is \code{max}, indicating that at least one sample should have a score of at least \code{filter}; other possible values include \code{sum}, indicating that all the scores added together should be at least \code{filter}. Users can supply their own function as well.
+function that will be invoked for each interval with a vector of scores for each sample. Returns a score that will be evaluated against the \code{filter} value (only intervals with a score at least as high as \code{filter} will be kept). Default is \code{max}, indicating that at least one sample should have a score of at least \code{filter}; other useful values include \code{sum} (indicating that all the scores added together should be at least \code{filter}) and \code{mean} (setting a minimum mean normalized count level). Users can supply their own function as well.
 }
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the counted data
 }
-
+\item{bLowMem}{
+logical indicating that the low-memory options should be used for counting (using \code{\link{summarizeOverlaps}}). This option is slower but memory use does not increase with the number of reads to count. If \code{TRUE}, all read files must be BAM (.bam extension), with associated index files (.bam.bai extension). \code{insertLength} must absent. Two additional parameters for \code{\link{summarizeOverlaps}} may be specified in \code{DBA$config}:
+\tabular{ll}{
+DBA$config$yieldSize \tab yieldSize indicating how many reads to process at one time; default is 5000000. The lower this value, the less memory will be used, but the more time it will take to complete the count operation.\cr
+DBA$config$intersectMode \tab mode indicating which overlap algorithm to use; default is \code{"IntersectionNotEmpty"}\cr 
+}
+}
 \item{bParallel}{
 if TRUE, use multicore to get counts for each read file in parallel
 }

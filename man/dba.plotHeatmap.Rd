@@ -142,7 +142,7 @@ margin size of plot
 Color scheme; see colorRampPalette {RColorBrewer} 
 }
   \item{distMethod}{
-distance method for clustering; see Dist {amap}.
+distance method for clustering; see \link{Dist} 
 }
 
 \item{\dots}{

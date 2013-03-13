@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.5}{
+   \itemize{
+      \item{Add bLowMem option to dba.count for low memory counting}
+   }
+}
+
 \section{Version 1.5.4}{
    \itemize{
       \item{Add ability to add externally derived counts via dba.peakset and a sample sheet}

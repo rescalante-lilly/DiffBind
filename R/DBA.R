@@ -61,6 +61,7 @@ DBA_EDGER         = DBA_EDGER_GLM
 DBA_DESEQ_CLASSIC = 'DESeq'
 DBA_DESEQ_BLOCK   = 'DESeqBlock'
 DBA_DESEQ_GLM     = 'DESeqGLM'
+DBA_DESEQ2        = 'DESeq2'
 DBA_DESEQ         = DBA_DESEQ_GLM
 
 DBA_DATA_FRAME      = 0
@@ -320,7 +321,7 @@ DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
                      insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bParallel=DBA$config$RunParallel) 
+                     bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bLowMem=FALSE, bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)            
    
@@ -353,7 +354,14 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTI
    res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
                    bCalledMasks=bCalledMasks, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
-                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun)
+                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,bLowMem=bLowMem)
+   
+   if(length(res$contrasts)>0) {
+      for(i in 1:length(res$contrasts)) {
+         res$contrasts[[i]]$edgeR = NULL
+         res$contrasts[[i]]$DESeq = NULL         	
+      }
+   }
    
    if(bCorPlot){
       x = dba.plotHeatmap(res,correlations=T)

@@ -252,7 +252,8 @@ PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,filterFun=max,
-                     bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T) {
+                     bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T,
+                     bLowMem=F) {
    
    pv = pv.check(pv)
    
@@ -305,17 +306,49 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       stop('Some read files could not be accessed. See warnings for details.')
    }
    
+   yieldSize = 5000000
+   mode      = "IntersectionNotEmpty"
+   if(bLowMem){
+   	  
+   	  require(Rsamtools)
+   	     
+      if (insertLength !=0) {
+         stop("Can not specify insert size when bLowMem is TRUE in dba.count",call.=FALSE)
+      }
+      bAllBam = T
+      for(st in todo) {
+         if(substr(st,nchar(st)-3,nchar(st)) != ".bam")	{
+            bAllBam=F
+            warning(st,": not a .bam",call.=FALSE)	
+         } else if(file.access(paste(st,".bai",sep=""))==-1) {
+            bAllBam=F
+            warning(st,": no associated .bam.bai index",call.=FALSE)	
+         }
+      }
+      if(!bAllBam) {
+         stop('All files must be BAM (.bam) with associated .bam.bai index when bLowMem is TRUE in dba.count',call.=FALSE)	
+      }
+      if(!is.null(pv$config$yieldSize)) {
+         yieldSize = pv$config$yieldSize	
+      }
+      if(!is.null(pv$config$intersectMode)) {
+         mode = pv$config$intersectMode	
+      } 	
+   }
+   
    if(!bUseLast) {
       pv = dba.parallel(pv)
       if((pv$config$parallelPackage>0) && bParallel) {   	     
    	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug"))            
          results = dba.parallel.lapply(pv$config,params,todo,
-                                       pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes)
+                                       pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
+                                       bLowMem,yieldSize,mode)
       } else {
          results = NULL
          for(job in todo) {
       	    message('Sample: ',job)
-            results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes))
+            results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes,
+                                                      bLowMem,yieldSize,mode))
          }	
       }
       if(PV_DEBUG){
@@ -484,9 +517,14 @@ pv.checkExists = function(filelist){
    return(sum(res)==0)
 }
 
-pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F) {
+pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,bLowMem=F,yieldSize,mode) {
 
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
+   
+   if(bLowMem) {
+      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize)
+      return(res)
+   }
    
    fdebug("Starting croi_load_reads...")
    bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength))
@@ -523,5 +561,24 @@ pv.filterRate = function(pv,vFilter,filterFun=max) {
       res = c(res,sum(tokeep))	
    }
    return(res)
+}
+
+pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,mode="IntersectionNotEmpty",yieldSize=5000000) {
+   
+   intervals = pv.peaks2DataType(intervals,DiffBind:::DBA_DATA_GRANGES)
+   
+   bfl       = BamFileList(bamfile,yieldSize=yieldSize)
+   
+   if(bWithoutDups==FALSE) {
+      Dups = NA
+   } else {
+      Dups = FALSE   
+   }
+   params  = ScanBamParam(flag=scanBamFlag(isDuplicate=Dups))
+   counts  = assay(summarizeOverlaps(features=intervals,reads=bfl,ignore.strand=TRUE,param=params))
+   libsize = countBam(bfl)$records
+   rpkm    = (counts/(width(intervals)/1000))/(libsize/1e+06)
+
+   return(list(counts=counts,rpkm=rpkm,libsize=libsize))
 }
 

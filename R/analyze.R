@@ -144,18 +144,24 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
   
   fdebug('enter pv.DEinit')
   
-  edgeR = F
-  DESeq = F
+  edgeR  = F
+  DESeq1 = F
+  DESeq2 = F
   if(method == 'edgeR') {
      #require('edgeR')
      edgeR = T   
   } else if (method == 'DESeq'|| method=='DESeqGLM') {
     if (length(find.package(package='DESeq',quiet=T))>0) {
        require(DESeq)
+       DESeq1 = T 
+    }   
+  } else if (method == 'DESeq2') {
+    if (length(find.package(package='DESeq2',quiet=T))>0) {
+       require(DESeq2)
+       DESeq2 = T 
     } else {
-       stop("Package DESeq not installed")
-    }
-     DESeq = T 
+       stop("Package DESeq2 not installed")
+    }    
   } else {
     warning('Invalid method: ',method,call.=FALSE)
     return(NULL)
@@ -207,7 +213,7 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
         rownames(res$counts) = 1:nrow(res$counts)
         fdebug(sprintf('DGEList counts: %f',res$counts[7,1]))
      }
-     if(DESeq) {
+     if(DESeq1) {
   	    colnames(counts) = NULL
   	    if(is.null(targets)) {
            res = newCountDataSet(counts,groups)
@@ -217,6 +223,14 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
         if(bFullLibrarySize) {
            sizeFactors(res) = libsize/min(libsize)
         }
+     }
+     if(DESeq2) {
+  	    colnames(counts) = NULL
+  	    if(is.null(targets)) {     	
+     	   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(groups),formula(~ groups))
+     	} else {
+     	   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(targets),formula(~ targets))     		
+     	}
      }
   }                
   return(res)

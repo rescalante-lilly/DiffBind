@@ -1,8 +1,8 @@
 Package: DiffBind
 Type: Package
-Version: 1.5.4
+Version: 1.5.5
 Title: Differential Binding Analysis of ChIP-Seq peak data
-Date: 2013-02-28
+Date: 2013-03-12
 Author: Rory Stark<rory.stark@cruk.cam.ac.uk>, Gordon Brown <gordon.brown@cruk.cam.ac.uk>
 Maintainer: Rory Stark<rory.stark@cruk.cam.ac.uk>
 Description: Compute differentially bound sites from multiple ChIP-seq experiments using affinity (quantitative) data. Also enables occupancy (overlap) analysis and plotting functions.
@@ -12,7 +12,7 @@ LazyLoad: yes
 Depends: R (>= 2.14.0), GenomicRanges
 Imports: RColorBrewer, amap, edgeR (>= 2.3.58), gplots, DESeq, grDevices,
         stats, utils, IRanges, zlibbioc
-Suggests: DESeq
+Suggests: DESeq, Rsamtools, DESeq2
 Enhances: rgl, parallel
 LinkingTo: Rsamtools
 Collate: core.R parallel.R counts.R contrast.R analyze.R io.R helper.R

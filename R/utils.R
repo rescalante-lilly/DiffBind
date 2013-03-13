@@ -1,5 +1,7 @@
 pv.peaks2DataType = function(peaks,datatype=DBA_DATA_DEFAULT) {
 
+   res = peaks
+   
    if(is.null(peaks)) {
       return(NULL)
    }   
