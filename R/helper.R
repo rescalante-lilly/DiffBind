@@ -19,6 +19,9 @@ pv.check = function(pv) {
    if(is.null(pv)) {
       return(NULL)	
    }
+   if(is.null(pv$peaks)) {
+      return(pv)	
+   }
    if(is.null(pv$vectors)) {
    	  if(is.null(pv$minOverlap)) {
    	     minOverlap=2
@@ -1096,8 +1099,8 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
                   sampID="",tissue="",factor="",condition="",treatment="",replicate) {
                   	
 
-   if(!is.null(pv)) {
-      if(sum(!pv$class[PV_CALLER,] %in% "caller")) {
+   if(!is.null(pv$peaks)) {
+      if(sum(!pv$class[PV_CALLER,] %in% "counts")) {
         stop("DBA object can only have count peaksets",call.=FALSE)	
       }	
    }
@@ -1112,8 +1115,12 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
          numcols = ncol(counts)
          if(numcols>1) {
             if(numcols == 2) {
-               IDs = counts[,1]
-               counts = counts[,2]	
+              numcounts = nrow(counts)
+               if(counts[numcounts,1]=="alignment_not_unique") {
+                  numcounts = numcounts - 5	
+               }
+               IDs = counts[1:numcounts,1]
+               counts = counts[1:numcounts,2]	
             } else if(numcols == 4) {
                IDs    = counts[,1]
                froms  = counts[,2]
@@ -1129,9 +1136,9 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
          stop('counts must be vector of counts',call.=FALSE)	
       }
       numcounts = length(counts)
-      if(!missing(peaks)) {
-         warning('Specified peaks ignored',call.=FALSE)
-      }
+      #if(length(peaks)>0) {
+      #   warning('Specified peaks ignored',call.=FALSE)
+      #}
       if(is.null(froms)) {
          froms = tos = 1:numcounts	
       }
@@ -1140,13 +1147,6 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
    
    peaks = cbind(peaks,counts,counts,rep(0,numcounts),counts,rep(0,numcounts),rep(0,numcounts))
    colnames(peaks) = c("Chr","Start","End", "Score", "Score","RPKM", "Reads","cRPKM","cReads")
-
-   
-   if(!is.null(pv)) {
-      if(nrow(peaks) != nrow(pv$peaks[[1]])) {
-         stop('Mismatch in number of intervals',call.=FALSE)
-      }
-   }
    
    res = dba.peakset(pv,
                     peaks       = peaks,
@@ -1162,6 +1162,10 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
                     
    res$class[PV_READS,length(res$peaks)] = sum(counts)
    
+   if(nrow(peaks) != nrow(res$peaks[[1]])) {
+      stop('Mismatch in number of intervals',call.=FALSE)
+   }
+      
    if(sum(as.integer(res$peaks[[1]][,1]) != as.integer(res$peaks[[length(res$peaks)]][,1]))) {
       stop("Mismatch in ID",call.=FALSE)	
    }

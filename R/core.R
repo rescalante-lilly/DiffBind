@@ -60,8 +60,12 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
 	
    zeroVal = -1
    bLog=F
-     
-   if(!is.null(pv) && missing(peaks)) {
+   
+   if(missing(peaks)) {
+      peaks = NULL	
+   }
+      
+   if(!is.null(pv$peaks) && length(peaks)==0) {
      peaks = 1:length(pv$peaks)
    }
 

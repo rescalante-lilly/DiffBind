@@ -164,13 +164,6 @@ pv.model = function(model,mask,minOverlap=2,
    	     controlid = as.character(samples$ControlID[i])
    	  }
    	  
-     message(as.character(samples$SampleID[i]),' ',
-         as.character(samples$Tissue[i]),' ',
-         as.character(samples$Factor[i]),' ',
-         as.character(samples$Condition[i]),' ',
-         as.character(samples$Treatment[i]),' ',
-         as.integer(samples$Replicate[i]),' ',peakcaller)
-     
      counts = samples$Counts[i]
      if(!is.null(counts)) {
         if(is.na(counts)) {
@@ -179,7 +172,17 @@ pv.model = function(model,mask,minOverlap=2,
            counts =NULL
         }
      }
-         
+     if(!is.null(counts)) {
+        peakcaller = 'counts'
+     }
+     
+     message(as.character(samples$SampleID[i]),' ',
+         as.character(samples$Tissue[i]),' ',
+         as.character(samples$Factor[i]),' ',
+         as.character(samples$Condition[i]),' ',
+         as.character(samples$Treatment[i]),' ',
+         as.integer(samples$Replicate[i]),' ',peakcaller)
+                  
      model = pv.peakset(model,
                          peaks       = as.character(samples$Peaks[i]),
                          sampID      = as.character(samples$SampleID[i]),

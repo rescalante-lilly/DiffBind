@@ -331,7 +331,7 @@ pv.BlockList = function(pv,attribute=PV_REPLICATE) {
    return(res)	
 }
 
-pv.checkBlock = function(contrast,bCheckBalanced=F,bCheckMultiple=T,bCheckCross=T,bCheckUnique=T,bWarning=T) {
+pv.checkBlock = function(contrast,bCheckBalanced=F,bCheckMultiple=T,bCheckCross=T,bCheckUnique=T,bCheckAllInOne=T,bWarning=T) {
    
    if(bCheckBalanced){
       if(sum(contrast$group1)!=sum(contrast$group2)) {
@@ -354,15 +354,23 @@ pv.checkBlock = function(contrast,bCheckBalanced=F,bCheckMultiple=T,bCheckCross=
       }	
    }
    
-   if(bCheckCross) {
-   	  cross = FALSE
+   if(bCheckCross || bCheckAllInOne) {
+   	  cross  = FALSE
+   	  allone = FALSE
       for(att in contrast$blocklist) {
          if(sum(contrast$group1 & att$samples) & sum(contrast$group2 & att$samples)) {
             cross = TRUE
          }
+         if(sum(att$samples & (contrast$group1 | contrast$group2)) ==
+            sum(contrast$group1 | contrast$group2))
+            allone=TRUE
       }
-      if(!cross) {
+      if(!cross && bCheckCross) {
          if(bWarning) warning('No blocking values are present in both groups',call.=F)	
+         return(FALSE)
+      }
+      if(allone && bCheckAllInOne) {
+         if(bWarning) warning('A blocking value applies to all samples in both groups',call.=F)	
          return(FALSE)
       }
    }
