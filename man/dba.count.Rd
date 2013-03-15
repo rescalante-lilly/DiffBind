@@ -79,6 +79,8 @@ logical indicating that the low-memory options should be used for counting (usin
 \tabular{ll}{
 DBA$config$yieldSize \tab yieldSize indicating how many reads to process at one time; default is 5000000. The lower this value, the less memory will be used, but the more time it will take to complete the count operation.\cr
 DBA$config$intersectMode \tab mode indicating which overlap algorithm to use; default is \code{"IntersectionNotEmpty"}\cr 
+DBA$config$singleEnd \tab logical indicating if reads are single end; default is \code{TRUE}\cr 
+DBA$config$scanbamparam \tab \code{\link{ScanBamParam}} object to pass to \code{\link{summarizeOverlaps}}. If present, \code{bRemoveDuplicates} is ignored.\cr 
 }
 }
 \item{bParallel}{

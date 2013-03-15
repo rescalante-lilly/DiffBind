@@ -311,6 +311,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    
    yieldSize = 5000000
    mode      = "IntersectionNotEmpty"
+   singleEnd = TRUE
    if(bLowMem){
    	  
    	  require(Rsamtools)
@@ -336,7 +337,11 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       }
       if(!is.null(pv$config$intersectMode)) {
          mode = pv$config$intersectMode	
-      } 	
+      }
+      if(!is.null(pv$config$singleEnd)) {
+         singleEnd = pv$config$singleEnd	
+      }
+      scanbamparam = pv$config$scanbamparam 	
    }
    
    if(!bUseLast) {
@@ -345,13 +350,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug"))            
          results = dba.parallel.lapply(pv$config,params,todo,
                                        pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                       bLowMem,yieldSize,mode)
+                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam)
       } else {
          results = NULL
          for(job in todo) {
       	    message('Sample: ',job)
             results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                                      bLowMem,yieldSize,mode))
+                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam))
          }	
       }
       if(PV_DEBUG){
@@ -520,12 +525,13 @@ pv.checkExists = function(filelist){
    return(sum(res)==0)
 }
 
-pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,bLowMem=F,yieldSize,mode) {
+pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
+                        bLowMem=F,yieldSize,mode,singleEnd,scanbamparam) {
 
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
    
    if(bLowMem) {
-      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize)
+      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize,singleEnd,scanbamparam)
       return(res)
    }
    
@@ -566,19 +572,23 @@ pv.filterRate = function(pv,vFilter,filterFun=max) {
    return(res)
 }
 
-pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,mode="IntersectionNotEmpty",yieldSize=5000000) {
+pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,
+                              mode="IntersectionNotEmpty",yieldSize=5000000,singleEnd=TRUE,params=NULL) {
    
    intervals = pv.peaks2DataType(intervals,DiffBind:::DBA_DATA_GRANGES)
    
    bfl       = BamFileList(bamfile,yieldSize=yieldSize)
    
-   if(bWithoutDups==FALSE) {
-      Dups = NA
-   } else {
-      Dups = FALSE   
+   if(is.null(params)) {
+	   if(bWithoutDups==FALSE) {
+	      Dups = NA
+	   } else {
+	      Dups = FALSE   
+	   }
+	   params  = ScanBamParam(flag=scanBamFlag(isDuplicate=Dups))
    }
-   params  = ScanBamParam(flag=scanBamFlag(isDuplicate=Dups))
-   counts  = assay(summarizeOverlaps(features=intervals,reads=bfl,ignore.strand=TRUE,param=params))
+
+   counts  = assay(summarizeOverlaps(features=intervals,reads=bfl,ignore.strand=TRUE,singleEnd=singleEnd,param=params))
    libsize = countBam(bfl)$records
    rpkm    = (counts/(width(intervals)/1000))/(libsize/1e+06)
 
