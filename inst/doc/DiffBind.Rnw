@@ -31,12 +31,12 @@
 \author{Rory Stark \\ \texttt{rory.stark@cruk.cam.ac.uk}
 \and
 Gordon Brown \\ \texttt{gordon.brown@cruk.cam.ac.uk} 
-\and Cancer Research UK\\Cambridge Research Institute
+\and University of Cambridge\\Cancer Research UK - Cambridge Institute
 }
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{14 February 2013}
+\date{21 February 2013}
 \maketitle
 
 \tableofcontents
@@ -219,7 +219,7 @@ tamoxifen = dba.analyze(tamoxifen)
 @
 
 This will run an \edgeR analysis (see subsequent section discussing the technical details of the \edgeR analysis) on the binding affinity matrix.
-Displaying the resultant \texttt{DBA object} shows that 235 of the 1,654 sites are identified as being significantly differentially bound (DB) using the default threshold of FDR <= 0.1:
+Displaying the resultant \texttt{DBA object} shows that 224 of the 1,654 sites are identified as being significantly differentially bound (DB) using the default threshold of FDR <= 0.1:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 tamoxifen    
@@ -227,7 +227,9 @@ tamoxifen
 
 
 By default, \texttt{dba.analyze} plots a correlation heatmap if it finds any significantly differentially bound sites, shown in \refsf{tamox-sdb-corhm}. 
-Using only the differentially bound sites, we now see that the four tamoxifen resistant samples (representing two cell lines) cluster together, although the tamoxifen-responsive MCF7 replicates cluster closer to them than to the other tamoxifen responsive samples. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 235 differentially bound sites, demonstrates how the differential binding analysis isolates sites that help distinguish between the Resistant and Responsive sample groups. The fact that an ideal clustering is not apparent even when considering only the differentially bound sites indicates that there may be a confounding factor we are not taking into account in this analysis. See Section 5 for a more sophisticated analysis that takes this factor (the presence of MCF7 cell lines in both the responsive and resistant groups) into account, resulting in a more ideal clustering plot.
+Using only the differentially bound sites, we now see that the four tamoxifen resistant samples (representing two cell lines) cluster together, although the tamoxifen-responsive MCF7 replicates cluster closer to them than to the other tamoxifen responsive samples. Comparing \refsf{tamox-aff-corhm}, which uses all 1,654 consensus binding sites, with \refsf{tamox-sdb-corhm}, which uses only the 224 differentially bound sites, demonstrates how the differential binding analysis isolates sites that help distinguish between the Resistant and Responsive sample groups. 
+
+%The fact that an ideal clustering is not apparent even when considering only the differentially bound sites indicates that there may be a confounding factor we are not taking into %account in this analysis. See Section 5 for a more sophisticated analysis that takes this factor (the presence of MCF7 cell lines in both the responsive and resistant groups) into %account, resulting in a more ideal clustering plot.
 
 \subsection{Retrieving the differentially bound sites}
 The final step is to retrieve the differentially bound sites as follows:
@@ -279,7 +281,7 @@ While the correlation heatmaps already seen are good for showing clustering, plo
 A PCA plot corresponding to \refsf{tamox-aff-corhm}, which includes normalized read counts for all the binding sites, can be obtained as follows:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
-dba.plotPCA(tamoxifen)
+dba.plotPCA(tamoxifen,DBA_CONDITION)
 @
 
 This draws the plot and returns a color legend. The resulting plot (\refsf{tamox-aff-pca}) shows the four Resistant samples (black) not separable from the Responsive samples (red) in either the first (horizontal) or the second (vertical) components when looking at all the binding sites.
@@ -312,7 +314,7 @@ Seeing the first three principal components can be a useful exploratory exercise
 
 \subsection{Boxplots}
 
-Boxplots provide a way to view how read distributions differ between classes of binding sites. Consider the example, where the 235 differentially bound sites are identified. The MA plot (\reff{tamox-sdb-ma}) shows that these are not distributed evenly between those that increase binding affinity in the Responsive group vs. those that increase binding affinity in the Resistant groups. This can be seen quantitatively using the sites returned in the report:
+Boxplots provide a way to view how read distributions differ between classes of binding sites. Consider the example, where the 224 differentially bound sites are identified. The MA plot (\reff{tamox-sdb-ma}) shows that these are not distributed evenly between those that increase binding affinity in the Responsive group vs. those that increase binding affinity in the Resistant groups. This can be seen quantitatively using the sites returned in the report:
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 sum(tamoxifen.DB$Fold<0)
@@ -348,7 +350,7 @@ pvals
 %  Responsive.DB- 5.842724e-01  2.526501e-08  2.141676e-10   2.268808e-18  5.719333e-20   1.000000e+00
 
 
-The significance of the overall difference in distribution of concentrations amongst the differentially bound sites in the two groups is shown to be p-value=9.673496e-15, while those between the Resistant and Responsive groups in the individual cases (increased in Responsive or Resistant) have p-values computed as 1.644677e-27 and 1.715161e-14.
+The significance of the overall difference in distribution of concentrations amongst the differentially bound sites in the two groups is shown to be p-value=8.011987e-13, while those between the Resistant and Responsive groups in the individual cases (increased in Responsive or Resistant) have p-values computed as 1.055207e-25 and 1.715161e-14.
 
 \subsection{Heatmaps}
 
@@ -357,7 +359,7 @@ The significance of the overall difference in distribution of concentrations amo
 corvals = dba.plotHeatmap(tamoxifen)
 @
 
-The effect of different scoring methods (normalization) can be examined in these plots by setting the \texttt{score} parameter to a different value.  The default value, \texttt{DBA\_SCORE\_TMM\_MINUS\_FULL}, uses the TMM normalization procedure from \edgeR, with control reads subtracted first and using the full library size. Another scoring method is to use RPKM fold (RPKM of the ChIP reads divided by RPKM of the control reads; a correlation heatmap for all the data using this scoring method can be obtained by typing \texttt{dba.plotHeatmap(tamoxifen, score=DBA\_SCORE\_RPKM\_FOLD)}.
+The effect of different scoring methods (normalization) can be examined in these plots by setting the \texttt{score} parameter to a different value.  The default value, \texttt{DBA\_SCORE\_TMM\_MINUS\_EFFECTIVE}, uses the TMM normalization procedure from \edgeR, with control reads subtracted first and using the effective library size (reads in peaks). Another scoring method is to use RPKM fold (RPKM of the ChIP reads divided by RPKM of the control reads; a correlation heatmap for all the data using this scoring method can be obtained by typing \texttt{dba.plotHeatmap(tamoxifen, score=DBA\_SCORE\_RPKM\_FOLD)}.
 
 Another way to view the patterns of binding affinity directly in the differentially bound sites is via a binding affinity heatmap. This can be plotted for the example case as follows:
 
@@ -377,7 +379,7 @@ Generated by: \texttt{dba.plotHeatmap(tamoxifen, contrast=1, correlations=FALSE)
 
 \section{Example: differential binding analysis using  a blocking factor}
      
-The previous example showed how to perform a differential binding analysis using a single factor with two values; that is, finding the significantly differentially bound sites between two sets of samples. This section extends the example by including a second factor, potentially with multiple values, that represents a confounding condition. Examples of experiments where it is appropriate to use a blocking factor include one where there are potential batch effects, with samples from the two conditions prepared together, or a matched design (e.g. matched normal and tumor pairs, where the primary factor of interest is to discover sites consistently differentially bound between normal and tumor samples. In the current example, the confounding effect we want to control for is the presence of two sets of samples, one tamoxifen responsive and one resistant, that are both derived from the same MCF7 cell line.
+The previous example showed how to perform a differential binding analysis using a single factor with two values; that is, finding the significantly differentially bound sites between two sets of samples. This section extends the example by including a second factor, potentially with multiple values, that represents a confounding condition. Examples of experiments where it is appropriate to use a blocking factor include ones where there are potential batch effects, with samples from the two conditions prepared together, or a matched design (e.g. matched normal and tumor pairs, where the primary factor of interest is to discover sites consistently differentially bound between normal and tumor samples. In the current example, the confounding effect we want to control for is the presence of two sets of samples, one tamoxifen responsive and one resistant, that are both derived from the same MCF7 cell line.
 
 In the previous analysis, the two MCF7-derived cell lines tended to cluster together. While the differential binding analysis was able to identify sites that could be used to separate the resistance from the responsive samples, the confounding effect of the common ancestry could still be seen even when considering only the significantly differentially bound sites (\reff{tamox-aff-corhm}).
 
@@ -396,7 +398,7 @@ tamoxifen = dba.analyze(tamoxifen)
 tamoxifen
 @
 
-This indicates that where the standard, single-factor \edgeR analysis identifies 235 differentially bound sites, the analysis using the blocking factor finds 416 such sites. An MA plot shows how the analysis has changed:
+This indicates that where the standard, single-factor \edgeR analysis identifies 224 differentially bound sites, the analysis using the blocking factor finds 431 such sites. An MA plot shows how the analysis has changed:
 
 <<eval=TRUE,echo=TRUE,results=hide>>=
 dba.plotMA(tamoxifen,method=DBA_EDGER_BLOCK)
@@ -410,7 +412,7 @@ dba.plotMA(tamoxifen,method=DBA_EDGER_BLOCK)
   \label{fig:tamox-block-ma}
 \end{figure}
 
-The resulting plot is shown in \reff{tamox-block-ma}. Comparing this to \reff{tamox-sdb-ma}, at least two differences can be observed. The analysis has become more sensitive, with sites being identified as significantly differentially bound with lower magnitude fold changes (as low as twofold, as this plot is on a log2 scale). But it is not merely lowering a fold threshold: many sites with higher fold changes are no longer found to be significant. These were included in the earlier analysis because the confounding factor was not being modelled.
+The resulting plot is shown in \reff{tamox-block-ma}. Comparing this to \reff{tamox-sdb-ma}, at least two differences can be observed. The analysis has become more sensitive, with sites being identified as significantly differentially bound with lower magnitude fold changes (as low as twofold, as this plot is on a log2 scale). But it is not merely lowering a fold threshold: some sites with higher fold changes are no longer found to be significant. These were identified as significantly differentially bound in the earlier analysis because the confounding factor was not being modelled.
 
 Consider the resulting separation and clustering using the newly discovered differentially bound sites:
 
@@ -434,11 +436,11 @@ dba.plotPCA(tamoxifen,contrast=1,method=DBA_EDGER_BLOCK,
 \begin{figure}
   \centering
   \includegraphics[width=11cm]{tamox_block_pca.png}
-  \caption{Plot of first two principal components, using scores for significantly differentially bound sites for the Resistant-Responsive contrast, using MCF7 origin as a blocking factor. Generated by: \texttt{dba.plotPCA(tamoxifen,contrast=1,method=DBA\_EDGER\_BLOCK, attributes=c(DBA\_TISSUE,DBA\_CONDITION))}}
+  \caption{Plot of first two principal components, using scores for significantly differentially bound sites for the Resistant-Responsive contrast, using MCF7 origin as a blocking factor. Resistant samples in black and red; MCF7 samples in red and blue.Generated by: \texttt{dba.plotPCA(tamoxifen,contrast=1,method=DBA\_EDGER\_BLOCK, attributes=c(DBA\_TISSUE,DBA\_CONDITION))}}
   \label{fig:tamox-block-pca}
 \end{figure}
 
-Frequently, as more sites are included in these plots, the result is often worse clustering/separation along the grouping of primary interest. With this analysis, however, clustering and separation are improved, even though many more sites have been identified. The correlation heatmap (\reff{tamox-block-corhm}, compare to \reff{tamox-sdb-corhm}) shows the tamoxifen resistant cell lines clustering together, with the tamoxifen responsive MCF7 sample clustering with the other responsive cell lines. Likewise, the PCA plot (\reff{tamox-block-pca}, compare to \reff{tamox-sdb-pca}) shows a cleaner separation of the MCF7 samples, particularly in the second component.
+Frequently, as more sites are included in these plots, the result is often worse clustering/separation along the grouping of primary interest. As the correlations used for the heatmap and the count scores used for the PCA plots do not take the blocking factor into account, the separation seen in these plots will not necessarily sharpen after completing a successful block analysis. Compare the resulting correlation heatmap (\reff{tamox-block-corhm} to \reff{tamox-sdb-corhm}).  The PCA plot (\reff{tamox-block-pca}, compared to \reff{tamox-sdb-pca}), shows less distance between the two sample groups along the first component, as more binding sites common tot he two MCF7 cell lines are able to be identified as being significantly differentially bound between the Resistant and Responsive sample groups.
 
 It is also interesting to compare the performance of \edgeR with that of \DESeq on this dataset:
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
@@ -526,9 +528,9 @@ tamoxifen
 @
 
 This adds a new consensus peakset for each set of samples that share the same Tissue and Condition values. The exact effect could be obtained by calling    
-\texttt{tamoxifen = dba.peakset(tamoxifen, consensus = -DBA\_REPLICATE)} on the original set of peaks; this tells \DiffBind to generate a consensus peakset for every set of samples that have the same metadata values \emph{except} the Replicate number.
+\texttt{tamoxifen = dba.peakset(tamoxifen, consensus = -DBA\_REPLICATE)} on the original set of peaks; this tells \DiffBind to generate a consensus peakset for every set of samples that have identical metadata values \emph{except} the Replicate number.
 
-From this, a new DBA object can be generated using only the five consensus peaksets (the \$Consensus mask filters peaksets previously formed using \texttt{dba.peakset}) :
+From this, a new DBA object can be generated consisting of only the five consensus peaksets (the \$Consensus mask filters peaksets previously formed using \texttt{dba.peakset}) :
 
 <<eval=TRUE,echo=TRUE,results=verbatim>>=
 tamoxifen_consensus = dba(tamoxifen, mask = tamoxifen$masks$Consensus)
@@ -536,10 +538,7 @@ tamoxifen_consensus
 @
 
 Alternatively, a master consensus peakset could be generated, and reads counted, directly using \texttt{dba.count}:
-
-<<eval=FALSE,echo=TRUE,results=hide>>=
-tamoxifen = dba.count(tamoxifen, peaks=tamoxifen$masks$Consensus) 
-@
+\texttt{tamoxifen = dba.count(tamoxifen, peaks=tamoxifen\$masks\$Consensus)}
 
 Finally, consider an analysis where we wished to treat all five MCF7 samples together to look for binding sites specific to that cell line irrespective of tamoxifien resistant/responsive status. We can create consensus peaksets for each cell type, and look at how the resultant peaks overlap (\reff{tamox-lines-venn}):
 
@@ -621,7 +620,7 @@ tamoxifen = dba.peakset(tamoxifen,!tamoxifen$masks$Consensus,
 dba.plotVenn(tamoxifen,14:15)
 @
 
-\reff{tamox-compare-venn} shows that the two sets agree on about 85\% of their sites, so the results should be directly comparable between the differing parameters used to establish the  consensus peaksets.\footnote{Alternatively, we could re-run the analysis using the newly derived consensus peakset by passing it into the counting function: \texttt{> tamoxifen = dba.count(tamoxifen, peaks = tamoxifen$masks$Consensus)}}
+\reff{tamox-compare-venn} shows that the two sets agree on about 85\% of their sites, so the results should be directly comparable between the differing parameters used to establish the  consensus peaksets.\footnote{Alternatively, we could re-run the analysis using the newly derived consensus peakset by passing it into the counting function: \texttt{> tamoxifen = dba.count(tamoxifen, peaks = tamoxifen\$masks\$Consensus)}}
 
 \begin{figure}
   \centering
@@ -676,7 +675,7 @@ sum(bothGroups)
 %[1] 54
 
 
-There are a number of notable differences in the results. First there are many fewer sites identified as differentially bound (232) than are unique to one condition (704). Indeed, most of the sites identified in the occupancy analysis as unique to a sample group are not found to be significantly differentially bound using the affinity data. While partly this is a result of the stringency of the statistical tests, it shows how the affinity analysis can discriminate between sites where peak callers are making occupancy decisions that do not reflect significant differences in read densities at these sites. Note that about 16\% of unique sites are significantly differential bound (113 out of 704). Secondly, differentially bound sites are as likely to be called in the consensus of both response groups as they are to be unique to one group, as  \emph{nearly half of the sites identified as significantly differentially bound are called as peaks in both response groups}. Indeed, sites identified in both sample groups are almost as likely to be identified as significantly differentially bound as sites identified in only one sample group (14.5\%, or 119 out of 821). Finally, the differentially bound peaks identified using the affinity analysis are associated with significance statistics (p-value and FDR) that can be used to rank them for further examination, while the occupancy analysis yields a relatively unordered list of peaks, as the peak caller statistics refer only to the significance of occupancy, and not of differential binding.
+There are a number of notable differences in the results. First there are many fewer sites identified as differentially bound (39+114+69 = 222) than are unique to one condition (313+391 = 704). Indeed, most of the sites identified in the occupancy analysis as unique to a sample group are not found to be significantly differentially bound using the affinity data. While partly this is a result of the stringency of the statistical tests, it shows how the affinity analysis can discriminate between sites where peak callers are making occupancy decisions that do not reflect significant differences in read densities at these sites. Note that only about 22\% of  sites unique to one condition are identifiable as significantly differentially bound (39+114 = 153 out of 704). Secondly, differentially bound sites are as likely to be called in the consensus of both response groups as they are to be unique to one group, as  \emph{nearly one third of the sites identified as significantly differentially bound are called as peaks in both response groups}. Indeed, sites identified in both sample groups are almost as likely to be identified as significantly differentially bound  (8\%, or 69 out of 821) as sites identified only in the Resistant sample group (12\%, or 39 out of 313). The final advantage of a quantitative analysis is that the differentially bound peaks identified using the affinity analysis are associated with significance statistics (p-value and FDR) that can be used to rank them for further examination, while the occupancy analysis yields a relatively unordered list of peaks, as the peak caller statistics refer only to the significance of occupancy, and not of differential binding.
 
 \section{Technical notes}
 This section includes some technical notes explaining some of the  technical details of \DBA processing.

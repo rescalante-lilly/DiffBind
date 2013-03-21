@@ -156,12 +156,13 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
        DESeq1 = T 
     }   
   } else if (method == 'DESeq2') {
-    if (length(find.package(package='DESeq2',quiet=T))>0) {
-       require(DESeq2)
-       DESeq2 = T 
-    } else {
-       stop("Package DESeq2 not installed")
-    }    
+  	stop('DESeq2 not supported in this release',call.=F)
+    #if (length(find.package(package='DESeq2',quiet=T))>0) {
+    #   require(DESeq2)
+    #   DESeq2 = T 
+    #} else {
+    #   stop("Package DESeq2 not installed")
+    #}    
   } else {
     warning('Invalid method: ',method,call.=FALSE)
     return(NULL)
@@ -227,9 +228,9 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
      if(DESeq2) {
   	    colnames(counts) = NULL
   	    if(is.null(targets)) {     	
-     	   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(groups),formula(~ groups))
+     	#   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(groups),formula(~ groups))
      	} else {
-     	   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(targets),formula(~ targets))     		
+     	#   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(targets),formula(~ targets))     		
      	}
      }
   }                

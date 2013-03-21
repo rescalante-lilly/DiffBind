@@ -115,6 +115,11 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
 	      }
 	      
 	      pv$allvectors[,4:ncol(pv$allvectors)] = pv.normTMM(pv,bMinus=bMinus,bFullLib=bFullLib)
+	      
+	      for(i in 1:length(pv$peaks)) {
+		     colnum = 3+i
+	         pv$peaks[[i]]$Score = pv$allvectors[,colnum]
+	      }
 	   
 	   } else {	
 	   	

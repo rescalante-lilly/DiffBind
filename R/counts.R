@@ -456,17 +456,19 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          data = res$allvectors[,4:ncol(res$allvectors)]
          maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,filterFun)
          tokeep = maxs>=minMaxval
-         if(sum(tokeep)>1) {
-            res$allvectors = res$allvectors[tokeep,]
-            rownames(res$allvectors) = 1:sum(tokeep)
-            res$vectors    = res$allvectors
-            for(i in 1:length(res$peaks)) {
-               res$peaks[[i]] = res$peaks[[i]][tokeep,]
-               rownames(res$peaks[[i]]) = 1:sum(tokeep)
-            } 
-            res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
-         } else {
-            stop('No sites have activity greater than minMaxval')
+         if(sum(tokeep)<length(tokeep)) {
+	         if(sum(tokeep)>1) {
+	            res$allvectors = res$allvectors[tokeep,]
+	            rownames(res$allvectors) = 1:sum(tokeep)
+	            res$vectors    = res$allvectors
+	            for(i in 1:length(res$peaks)) {
+	               res$peaks[[i]] = res$peaks[[i]][tokeep,]
+	               rownames(res$peaks[[i]]) = 1:sum(tokeep)
+	            } 
+	            res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
+	         } else {
+	            stop('No sites have activity greater than minMaxval')
+	         }
          }
       }
       if(bCalledMasks && missing(peaks)) {
