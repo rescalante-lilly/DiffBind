@@ -35,7 +35,7 @@
 ## dba -- construct DBA object, e.g. from sample sheet ##
 #########################################################
 DBA_VERSION1  = 1
-DBA_VERSION2  = 4
+DBA_VERSION2  = 6
 DBA_VERSION3  = 0
 
 DBA_GROUP     = PV_GROUP
@@ -64,10 +64,11 @@ DBA_DESEQ_GLM     = 'DESeqGLM'
 DBA_DESEQ2        = 'DESeq2'
 DBA_DESEQ         = DBA_DESEQ_GLM
 
-DBA_DATA_FRAME      = 0
-DBA_DATA_RANGEDDATA = 1
-DBA_DATA_GRANGES    = 2
-DBA_DATA_DEFAULT    = DBA_DATA_GRANGES
+DBA_DATA_FRAME                    = 0
+DBA_DATA_RANGEDDATA               = 1
+DBA_DATA_GRANGES                  = 2
+DBA_DATA_SUMMARIZED_EXPERIMENT    = 3
+DBA_DATA_DEFAULT                  = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
@@ -142,8 +143,12 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
         peaks = pv.check(peaks)	
      }
    }
+
+   if(missing(DataType)) {
+      DataType = DBA_DATA_DEFAULT
+   }
    
-   if(bRetrieve==TRUE || !missing(writeFile)) { ## RETRIEVE/WRITE PEAKSETS
+   if(bRetrieve==TRUE || !missing(writeFile) || DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) { ## RETRIEVE/WRITE PEAKSETS
    
       if(missing(writeFile)) {
          writeFile = NULL
@@ -171,7 +176,12 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
          }	
       }
       
-      res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
+      if(DataType == DBA_DATA_SUMMARIZED_EXPERIMENT) {
+         res = pv.DBA2SummarizedExperiment(DBA)
+         return(res)	
+      } else {
+         res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
+      }
       
       if(DataType!=DBA_DATA_FRAME) {
          res = pv.peaks2DataType(res,DataType)

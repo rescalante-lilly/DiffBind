@@ -1184,6 +1184,20 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
    return(res)
 }
 
+pv.DBA2SummarizedExperiment = function(DBA) {
+   peaks = pv.peaks2DataType(pv.writePeakset(DBA,peaks=1,numCols=3),DBA_DATA_GRANGES)
+   meta  = t(DBA$class)
+   meta[meta==""]=NA
+   meta = meta[,apply(meta,2,function(x) {sum(is.na(x))!=length(x)})]
+   meta = DataFrame(meta[,-1])
+   counts = as.matrix(DBA$allvectors[,4:ncol(DBA$allvectors)])
+   res = SummarizedExperiment(assays=SimpleList(counts=counts),
+                              rowData = peaks,
+                              colData = meta)
+   colnames(res) = colnames(DBA$class)                           
+   return(res)                           
+}
+
 
 
 

@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.8}{
+   \itemize{
+      \item{Add DBA_DATA_SUMMARIZED_EXPERIMENT option to dba.peakset}
+   }
+}
+
 \section{Version 1.5.5}{
    \itemize{
       \item{Add bLowMem option to dba.count for low memory counting}

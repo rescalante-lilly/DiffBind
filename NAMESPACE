@@ -53,7 +53,8 @@ export(dba,
        DBA_DESEQ_CLASSIC,
        DBA_DATA_FRAME,
        DBA_DATA_RANGEDDATA,
-       DBA_DATA_GRANGES)
+       DBA_DATA_GRANGES,
+       DBA_DATA_SUMMARIZED_EXPERIMENT)
 
 exportClasses("DBA")
 

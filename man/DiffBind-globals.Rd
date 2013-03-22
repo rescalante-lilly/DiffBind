@@ -34,6 +34,7 @@
 \alias{DBA_DATA_FRAME}
 \alias{DBA_DATA_GRANGES}
 \alias{DBA_DATA_RANGEDDATA}
+\alias{DBA_DATA_SUMMARIZED_EXPERIMENT}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -84,6 +85,7 @@ DBA_DESEQ_GLM
 DBA_DATA_FRAME
 DBA_DATA_GRANGES
 DBA_DATA_RANGEDDATA
+DBA_DATA_SUMMARIZED_EXPERIMENT
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -199,6 +201,9 @@ Use RangedData class for peaksets and reports. Can be set as default (DBA$config
 }
 \item{DBA_DATA_FRAME}{
 Use data.frame class for peaksets and reports. Can be set as default (DBA$config$DataType = DBA_DATA_FRAME).
+}
+\item{DBA_DATA_SUMMARIZED_EXPERIMENT}{
+Used in \code{\link{dba.peakset}} to convert a \code{DBA} object to a \code{\link{SummarizedExperiment}} object.
 }
 }
 %\details{
