@@ -155,7 +155,6 @@ The class of object for returned peaksets:
 \item DBA_DATA_RANGEDDATA
 \item DBA_DATA_FRAME
 }
-If \code{DataType} is set to \code{DBA_DATA_SUMMARIZED_EXPERIMENT}, an object of type \code{\link{SummarizedExperiment}} is returned based on the passed \code{DBA} object. In this case, only the \code{peaks} and \code{minOverlap} parameters are valid -- all others will be ignored.
 Can be set as default behavior by setting DBA$config$DataType.
 }
 }
@@ -183,11 +182,6 @@ dba.peakset(DBA, peaks, bRetrieve=T)
 MODE: Write a peakset out to a file:
 
 dba.peakset(DBA, peaks, bRetrieve=T,  writeFile, numCols)
-
-MODE: Convert a \code{DBA} object to a \code{\link{SummarizedExperiment}} object:
-
-dba.peakset(DBA, peaks, minOverlap, 
-                        DataType=DBA_DATA_SUMMARIZED_EXPERIMENT)
 }
 \value{
 DBA object when adding a peakset.

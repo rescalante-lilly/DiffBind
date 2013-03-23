@@ -1184,20 +1184,63 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
    return(res)
 }
 
-pv.DBA2SummarizedExperiment = function(DBA) {
-   peaks = pv.peaks2DataType(pv.writePeakset(DBA,peaks=1,numCols=3),DBA_DATA_GRANGES)
+pv.DBA2SummarizedExperiment = function(DBA, bAssays=T, report) {
+   peaks = pv.writePeakset(DBA, peaks = DBA$allvectors[,1:3], numCols = 3)
+   if(!missing(report)){
+      report = pv.peaksort(report)
+      peaks  = cbind(peaks,report[,4:(ncol(report)-length(DBA$peaks))])
+   }
+   peaks = pv.peaks2DataType(peaks,DBA_DATA_GRANGES)
    meta  = t(DBA$class)
    meta[meta==""]=NA
    meta = meta[,apply(meta,2,function(x) {sum(is.na(x))!=length(x)})]
    meta = DataFrame(meta[,-1])
    counts = as.matrix(DBA$allvectors[,4:ncol(DBA$allvectors)])
-   res = SummarizedExperiment(assays=SimpleList(counts=counts),
+   assays = SimpleList(scores=counts)
+   if(bAssays) {
+      extra = pv.assaysFromPeaks(DBA) 
+      if(!is.null(extra)){
+         for(newassay in extra) {
+            assays = pv.listadd(assays,newassay)
+         }   
+         names(assays) = c("scores",names(extra))
+      }  
+   }
+   res = SummarizedExperiment(assays=assays,
                               rowData = peaks,
                               colData = meta)
    colnames(res) = colnames(DBA$class)                           
    return(res)                           
 }
 
+pv.assaysFromPeaks = function(DBA) {
+   peaks = DBA$peaks
+   numpeaks  = nrow(peaks[[1]])
+   numfields = ncol(peaks[[1]])
+   if(numfields <= 4) {
+      return(NULL)
+   }
+   fields  = colnames(peaks[[1]])
+   samples = length(peaks)
+   assays = NULL
+   for(i in 5:numfields) {
+      toadd = matrix(0,numpeaks,samples)
+      rownames(toadd) = 1:numpeaks
+      colnames(toadd) = colnames(DBA$class)
+      assays = DiffBind:::pv.listadd(assays,toadd)
+   }   
+   names(assays) = fields[5:numfields]
+   for(sampnum in 1:samples) {
+      peak = peaks[[sampnum]]
+      if(numpeaks!=nrow(peak) || numfields!=ncol(peak)) {
+         return(NULL)
+      }
+      for(i in 5:numfields) {
+         assays[[i-4]][,sampnum] = peak[,i]
+      }
+   }
 
+   return(assays)
+}
 
 

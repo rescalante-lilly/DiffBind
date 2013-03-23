@@ -2,15 +2,16 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
-\section{Version 1.5.8}{
+\section{Version 1.5.9}{
    \itemize{
-      \item{Add DBA_DATA_SUMMARIZED_EXPERIMENT option to dba.peakset}
+      \item{Add bSummarizedExperiment option to dba() to convert DBA object}
+      \item{Add DataType = DBA_DATA_SUMMARIZED_REPORT option to dba.report() to return SummarizedExperiment}
    }
 }
 
 \section{Version 1.5.5}{
    \itemize{
-      \item{Add bLowMem option to dba.count for low memory counting}
+      \item{Add bLowMem option to dba.count for low memory counting using summarizeOverlaps}
    }
 }
 

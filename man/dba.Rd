@@ -12,7 +12,7 @@ dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
     config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
     peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, 
-    bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, 
+    bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
     bCorPlot=FALSE, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -91,10 +91,13 @@ add a consensus peakset for each sample with more than one peakset (i.e. differe
   \item{bRemoveM}{
 logical indicating whether to remove peaks on chrM (mitochondria) when constructing a new DBA object from a sample sheet.
 }
- \item{bRemoveRandom}{
+\item{bRemoveRandom}{
 logical indicating whether to remove peaks on chrN_random when constructing a new DBA object from a sample sheet.
 }
 
+\item{bSummarizedExperiment}{
+logical indicating whether to return resulting object as a \code{\link{SummarizedExperiment}}.
+}
 \item{bCorPlot}{
 logical indicating that a correlation heatmap should be plotted before returning
 }
@@ -124,6 +127,10 @@ dba(sampleSheet, config,
 MODE: Construct a DBA object based on an existing one:
 
 dba(DBA, mask, attributes)
+
+MODE: Convert a DBA object to a SummarizedExperiment object:
+
+dba(DBA, bSummarizedExperiment=TRUE)
 }
 \value{
 DBA object
@@ -165,6 +172,11 @@ Responsive
 setwd(system.file("extra", package="DiffBind"))
 tamoxifen = dba(sampleSheet="tamoxifen.csv", peakCaller="macs", peakFormat="raw")
 dba.show(tamoxifen, attributes=c(DBA_TISSUE,DBA_CONDITION,DBA_REPLICATE,DBA_CALLER))
+
+# Convert DBA object to SummarizedExperiment
+data(tamoxifen_counts)
+sset = dba(tamoxifen,bSummarizedExperiment=TRUE)
+sset
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

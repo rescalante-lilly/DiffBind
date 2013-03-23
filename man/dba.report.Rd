@@ -72,13 +72,15 @@ The class of object for returned report:
 \item DBA_DATA_RANGEDDATA
 \item DBA_DATA_FRAME
 }
+If set to \code{DBA_DATA_SUMMARIZED_EXPERIMENT}, the result will be a \code{\link{SummarizedExperiment}} object, with all the count data and sample metadata for the experiment. The contrast statistics will be included as metadata columns in the \code{rowData} of the object.
+
 Can be set as default behavior by setting DBA$config$DataType.
 }
 }
 %\details{
 %}
 \value{
-A report dataframe or RangedData object, with a row for each binding site within the thresholding parameters, and the following columns:
+A report dataframe, GRanges, or RangedData object, with a row for each binding site within the thresholding parameters, and the following columns:
 \item{Chr}{Chromosome of binding site}
 \item{Start}{Starting base position of binding site}
 \item{End}{End base position of binding site}
@@ -121,7 +123,7 @@ tamoxifen.DB = dba.report(tamoxifen)
 tamoxifen.DB
 
 #Retrieve DB sites with p-value <  0.05 and Fold > 2
-tamoxifen.DB = dba.report(tamoxifen,th=.05,bUsePval=TRUE,fold=2)
+tamoxifen.DB = dba.report(tamoxifen, th=.05, bUsePval=TRUE, fold=2)
 tamoxifen.DB
 
 #Retrieve all sites with confidence stats
@@ -130,12 +132,16 @@ tamoxifen.DB = dba.report(tamoxifen, th=1, bCalled=TRUE)
 tamoxifen.DB
 
 #Retrieve all sites with confidence stats and normalized counts
-tamoxifen.DB = dba.report(tamoxifen,th=1,bCounts=TRUE)
+tamoxifen.DB = dba.report(tamoxifen, th=1, bCounts=TRUE)
 tamoxifen.DB
 
 #Retrieve all sites with confidence stats and raw counts
-tamoxifen.DB = dba.report(tamoxifen,th=1,bCounts=TRUE,bNormalized=FALSE)
+tamoxifen.DB = dba.report(tamoxifen, th=1, bCounts=TRUE,bNormalized=FALSE)
 tamoxifen.DB
+
+#Retrieve report as a SummarizedObject
+tamoxifen.sset = dba.report(tamoxifen, DataType=DBA_DATA_SUMMARIZED_EXPERIMENT)
+tamoxifen.sset
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

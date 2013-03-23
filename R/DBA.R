@@ -74,7 +74,7 @@ dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
                config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
                peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, bAddCallerConsensus=FALSE, 
-               bRemoveM=TRUE, bRemoveRandom=TRUE, 
+               bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
                bCorPlot=FALSE, attributes) 
 {
    if(!missing(DBA)){
@@ -120,6 +120,10 @@ dba = function(DBA,mask, minOverlap=2,
       dba.plotHeatmap(res)
    }
     
+   if(bSummarizedExperiment) {
+      res = pv.DBA2SummarizedExperiment(res)
+   }
+   
    return(res)                 
 }
 
@@ -148,7 +152,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
       DataType = DBA_DATA_DEFAULT
    }
    
-   if(bRetrieve==TRUE || !missing(writeFile) || DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) { ## RETRIEVE/WRITE PEAKSETS
+   if(bRetrieve==TRUE || !missing(writeFile)) { ## RETRIEVE/WRITE PEAKSETS
    
       if(missing(writeFile)) {
          writeFile = NULL
@@ -176,12 +180,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
          }	
       }
       
-      if(DataType == DBA_DATA_SUMMARIZED_EXPERIMENT) {
-         res = pv.DBA2SummarizedExperiment(DBA)
-         return(res)	
-      } else {
-         res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
-      }
+      res = pv.writePeakset(DBA, fname=writeFile, peaks=peaks, numCols=numCols)     
       
       if(DataType!=DBA_DATA_FRAME) {
          res = pv.peaks2DataType(res,DataType)
@@ -472,9 +471,20 @@ dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, 
 
    DBA = pv.check(DBA) 
 
+   if(DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) {
+      bCounts=T
+   }
+
    res = pv.DBAreport(pv=DBA,contrast=contrast,method=method,th=th,bUsePval=bUsePval,
                       bCalled=bCalled,bCounts=bCounts,bCalledDetail=bCalledDetail,
                       file=file,initString=initString,bNormalized=bNormalized,ext=ext,minFold=fold) 
+
+   if(DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) {
+      DBA = pv.getPlotData(DBA,contrast=contrast,report=res,
+                           method=method,th=th,bUsePval=bUsePval,bNormalized=T)
+      res = pv.DBA2SummarizedExperiment(DBA,report=res)
+      return(res)
+   }
 
    if(DataType!=DBA_DATA_FRAME) {
       res = pv.peaks2DataType(res,DataType)

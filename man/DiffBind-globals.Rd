@@ -203,7 +203,7 @@ Use RangedData class for peaksets and reports. Can be set as default (DBA$config
 Use data.frame class for peaksets and reports. Can be set as default (DBA$config$DataType = DBA_DATA_FRAME).
 }
 \item{DBA_DATA_SUMMARIZED_EXPERIMENT}{
-Used in \code{\link{dba.peakset}} to convert a \code{DBA} object to a \code{\link{SummarizedExperiment}} object.
+Return report as a \code{\link{SummarizedExperiment}}.
 }
 }
 %\details{

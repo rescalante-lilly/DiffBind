@@ -94,9 +94,9 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
          temp[mask] = T
          mask = temp
       }
-   	  sites = as.numeric(rownames(report))
-   	  group1 = con$group1 & mask
-   	  group2 = con$group2 & mask
+      sites = as.numeric(rownames(report))
+      group1 = con$group1 & mask
+      group2 = con$group2 & mask
       extra = mask & !(group1 | group2)
       allsamps = c(which(group1), which(group2), which(extra))
       numsamps = length(allsamps)
@@ -114,9 +114,13 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
       colnames(domap) = pv$class[PV_ID,allsamps] 
       con$group1 = group1
       con$group2 = group2
+      peaks = pv$peaks[allsamps]
+      for(i in 1:length(peaks)){
+         peaks[[i]] = peaks[[i]][sites,]
+      }  
    } else {   
-   	  allsamps = c(which(con$group1),which(con$group2))
-   	  extra = rep(F,ncol(pv$class)) 
+      allsamps = c(which(con$group1),which(con$group2))
+      extra = rep(F,ncol(pv$class)) 
       repcols = colnames(report)
       numsamps = sum(con$group1)+sum(con$group2)
       if(length(repcols) < (numsamps+9)) {
@@ -136,11 +140,16 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
       group2[1:sum(con$group1)] = F
       con$group1 = group1
       con$group2 = group2
-            
+
+      sites = as.numeric(rownames(report))
+      peaks = pv$peaks[allsamps]
+      for(i in 1:length(peaks)){
+         peaks[[i]] = peaks[[i]][sites,]
+      }  
    }
    
    if(bLog) {
-   	  domap[domap<=0]=1
+      domap[domap<=0]=1
       domap = log2(domap)
       if(missing(minval)) {
          minval = 0
@@ -159,6 +168,8 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
    pv$vectors = cbind(report[,1:3],domap)
    pv$allvectors = pv$vectors
    pv$class = pv$class[,allsamps]
+   pv$peaks = peaks
+   pv$sites = sites
    pv$contrasts = list(pv$contrasts[[contrast]])
    pv$contrasts[[1]]$group1 = rep(F,ncol(pv$class))
    pv$contrasts[[1]]$group2 = rep(F,ncol(pv$class))
