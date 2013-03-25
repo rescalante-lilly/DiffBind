@@ -2,6 +2,13 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.5.10}{
+   \itemize{
+      \item{Add alias for DBA in man page for print.DBA}
+      \item{Add tamoxifen_GEO.R and tamoxifen_GEO.csv to extras; update vignette to explain how to use them to obtain all of the experimental data for the vignette from GEO}
+   }
+}
+
 \section{Version 1.5.9}{
    \itemize{
       \item{Add bSummarizedExperiment option to dba() to convert DBA object}

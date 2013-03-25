@@ -36,7 +36,7 @@ Gordon Brown \\ \texttt{gordon.brown@cruk.cam.ac.uk}
 
 % Please increment date when working on this document, so that
 % date shows genuine change date, not merely date of compile.
-\date{21 February 2013}
+\date{25 March 2013}
 \maketitle
 
 \tableofcontents
@@ -177,7 +177,7 @@ The resulting plot (\reff{tamox-occ-corhm}) shows that while the replicates for 
 
 
 \subsection{Counting reads}
-The next step is to calculate a binding matrix with scores based on read counts for every sample (affinity scores), rather than confidence scores for only those peaks called in a specific sample (occupancy scores). These reads are obtained using the \texttt{dba.count} function:\footnote{Note that due to space limitations the reads are not shipped with the package. We hope to make them easily available in the future. Alternatively, you can get the result of the \texttt{dba.count} call by loading the supplied \R object by invoking \texttt{data(tamoxifen\_counts)}}
+The next step is to calculate a binding matrix with scores based on read counts for every sample (affinity scores), rather than confidence scores for only those peaks called in a specific sample (occupancy scores). These reads are obtained using the \texttt{dba.count} function:\footnote{Note that due to space limitations the reads are not shipped with the package. See Section 8 for options to obtains the full dataset. Alternatively, you can get the result of the \texttt{dba.count} call by loading the supplied \R object by invoking \texttt{data(tamoxifen\_counts)}}
 
 <<eval=FALSE,echo=TRUE,results=hide>>=
 tamoxifen = dba.count(tamoxifen, minOverlap=3) 
@@ -752,6 +752,26 @@ If a blocking factor has been added to the contrast, an additional \DESeq analys
 This follows the \texttt{DBA\_DESEQ\_GLM} case detailed above, except a more complex design is generated when \texttt{newCountDataSet} is called that includes all the unique values for the blocking factor. These coefficients are all included in the \texttt{fitNbinomGLMs} calls.  The resultant object is accessible as
 
 \texttt{DBA\$contrasts[[n]]\$DESeq\$block}. 
+
+
+\section{Vignette Data}
+Due to space limitations, the aligned reads associated with the cell line data use dint his vignette are not included as part of the \DiffBind package. 
+
+If you would like to get access to the reads, you can email \texttt{rory.stark@cruk.cam.ac.uk} and ask to be added to the Dropbox containing the vignette data.
+
+Alternatively, you can use all of the original data archived at GEO. A script is included with the package that will download the data. This can be run by executing:
+
+<<eval=FALSE,echo=TRUE,results=hide>>=
+source(file.path(system.file("extra", package="DiffBind"),"tamoxifen_GEO.R"))
+@
+
+Note that this script can take a very long time to run (it took me about 12 hours). You may have a more efficient way to download these files from GEO.
+
+Also included is a sample sheet that uses the downloaded data. This sample sheet can also be examined to see which GEO accession IDs correspond to which samples. The sample sheet will be copied into your working directory when you execute the above script; otherwise it can be found at:
+
+<<eval=FALSE,echo=TRUE,results=hide>>=
+cat(file.path(system.file("extra", package="DiffBind"),"tamoxifen_GEO.csv"))
+@
 
 \section{Acknowledgements}
 
