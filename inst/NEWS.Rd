@@ -2,48 +2,30 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
-\section{Version 1.5.10}{
+\section{Version 1.6.0}{
    \itemize{
-      \item{Add alias for DBA in man page for print.DBA}
-      \item{Add tamoxifen_GEO.R and tamoxifen_GEO.csv to extras; update vignette to explain how to use them to obtain all of the experimental data for the vignette from GEO}
-   }
-}
-
-\section{Version 1.5.9}{
-   \itemize{
-      \item{Add bSummarizedExperiment option to dba() to convert DBA object}
-      \item{Add DataType = DBA_DATA_SUMMARIZED_REPORT option to dba.report() to return SummarizedExperiment}
-   }
-}
-
-\section{Version 1.5.5}{
-   \itemize{
-      \item{Add bLowMem option to dba.count for low memory counting using summarizeOverlaps}
-   }
-}
-
-\section{Version 1.5.4}{
-   \itemize{
-      \item{Add ability to add externally derived counts via dba.peakset and a sample sheet}
-   }
-}
-
-\section{Version 1.5.2}{
-   \itemize{
-      \item{add features to dba.count to deal with filtering}
-      \itemize{
-         \item{Change parameter name: maxFilter -> filter}
-         \item{Allow maxFilter to be a numerical vector to retrieve filtering rate}
-         \item{Add parameter: filterFun to control filtering method}
-         \item{Fix bug so SN gets recomputed after filtering}
-         \item{Update documentation with example}
-      }
-   }
-}
-
-\section{Version 1.5.1}{
-   \itemize{
-      \item{Roll up bugfixes for 1.4.0}
+      \item{New: Low memory counting of bam files using Rsamtools and summarizeOverlaps (bLowMem in dba.count)}
+      \item{New: Ability to read in externally derived counts (e.g. from htSeq) (dba.count)}
+      \item{Improved: Features to deal with filtering intervals based on read scores (dba.count)}
+         \itemize{
+            \item{Change parameter name: maxFilter -> filter}
+            \item{Allow maxFilter to be a numerical vector to retrieve filtering rate}
+            \item{Add parameter: filterFun to control filtering method}
+        }
+      \item{New: Support for SummarizedExperiment objects (dba and dba.report)} 
+          \itemize{
+            \item{Add bSummarizedExperiment option to dba() to convert DBA object}
+            \item{Add DataType = DBA_DATA_SUMMARIZED_REPORT option to dba.report() to return SummarizedExperiment}
+         }
+      \item{Documentation: Add section to vignette showing how to obtain full tamoxifen resistance dataset}  
+         \itemize{
+            \item{Add section to vignette showing how to obtains full tamoxifen dataset}
+            \item{Add script (tamoxifen_GEO.R) and sample sheet (tamoxifen_GEO.csv) to extras for full tamoxifen dataset}
+            \item{Add examples to man page for dba.count to show filtering}
+            \item{Add examples to man pages for dba and dba.report to show retrieval of SummarizedExperiment objects}
+            \item{Update and cleanup vignette and man pages}
+         }
+      \item{Various bugfixes and improved warnings}      
    }
 }
 
@@ -99,11 +81,6 @@
    }
  }
 
-\section{version 1.2.3:(2012-09-01)}{
- \itemize{
-   \item{more informative warnings and minor bug fixes.}
- }
-}
 
 \section{version 1.2.0:(2012-03-30)}{
  \itemize{
@@ -113,7 +90,7 @@
 
    \item{Blocking factors (for two-factor analysis) can be specified flexibly such that arbitrary blocking factors can be used. }
 
-   \item{Section added to vignette showing an ananalysis using a blocking factor.}
+   \item{Section added to vignette showing an an analysis using a blocking factor.}
 
    \item{Added new metadata type, DBA_TREATMENT.}
 
@@ -125,5 +102,11 @@
    \item{More efficient use of memory when analyzing (controlled by bReduceObjects parameter in dba.analyze).}
 
    \item{various bugs fixed, man pages updated, and warning messages added.}
+  }
+}
+
+\section{version 1.0.0}{
+   \itemize{
+     \item{Initial release}
   }
 }
