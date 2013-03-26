@@ -765,7 +765,7 @@ Alternatively, you can use all of the original data archived at GEO. A script is
 source(file.path(system.file("extra", package="DiffBind"),"tamoxifen_GEO.R"))
 @
 
-Note that this script can take a very long time to run (it took me about 12 hours). You may have a more efficient way to download these files from GEO.
+Note that the data are more than 20 GB in size, and that this script can take a very long time to run (it took me about 12 hours). You may have a more efficient way to download these files from GEO.
 
 Also included is a sample sheet that uses the downloaded data. This sample sheet can also be examined to see which GEO accession IDs correspond to which samples. The sample sheet will be copied into your working directory when you execute the above script; otherwise it can be found at:
 
