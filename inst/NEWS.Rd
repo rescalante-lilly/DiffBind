@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.7.1}{
+   \itemize{
+     \item{Fix to track change in edgeR interface}
+  }
+}
+
 \section{Version 1.6.0}{
    \itemize{
       \item{New: Low memory counting of bam files using Rsamtools and summarizeOverlaps (bLowMem in dba.count)}

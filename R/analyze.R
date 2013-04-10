@@ -205,7 +205,7 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
   if(bFullLibrarySize) {
      libsize = as.numeric(pv$class[PV_READS,c(g1,g2)])
   } else {
-     libsize = NULL
+     libsize = colSums(counts)
   }
   if(!bRawCounts) {
      if(edgeR) {
