@@ -55,7 +55,7 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 }
 \item {PeakFormat:}	{string indicating format for peak files; see PeakCaller and  \code{\link{dba.peakset}}}
 \item {ScoreCol:}	{column in peak files that contains peak scores}
-\item {bLowerBetter:}	{logical indicating that lower scores signify better peaks}
+\item {LowerBetter:}	{logical indicating that lower scores signify better peaks}
 \item{Counts:} {file path for externally computed read counts; see \code{\link{dba.peakset}} (\code{counts} parameter)}
 }
 }

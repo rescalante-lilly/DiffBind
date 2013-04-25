@@ -137,23 +137,31 @@ pv.model = function(model,mask,minOverlap=2,
    	  } else if(is.na(samples$ScoreCol[i])) {
    	     peakscores  = scorecol
       } else {
-   	     peakscores = as.integer(samples$ScoreCol[i])
+      	 if(is.factor(samples$ScoreCol[i])) {
+      	  peakscores = as.integer(as.character(samples$ScoreCol[i]))	
+      	 } else {
+   	        peakscores = as.integer(samples$ScoreCol[i])
+   	     }
    	  }
    	  
    	  if(is.null(samples$LowerBetter[i])) {
-   	     bLowerBetter  = bLowerBetter
+   	     peaksLowerBetter  = bLowerBetter
    	  } else if(is.na(samples$LowerBetter[i])) {
-   	     bLowerBetter  = bLowerBetter
+   	     peaksLowerBetter  = bLowerBetter
       } else {
-   	     bLowerBetter = as.logical(samples$LowerBetter[i])
+   	     peaksLowerBetter = as.logical(samples$LowerBetter[i])
    	  }
 	  
 	   if(is.null(samples$Filter[i])) {
-		   filter  = filter
+		   peakfilter  = filter
 	   } else if(is.na(samples$Filter[i])) {
-		   filter  = filter
+		   peakfilter  = filter
 	   } else {
-		   filter = as.numeric(samples$Filter[i])
+      	 if(is.factor(samples$Filter[i])) {
+      	    peakfilter = as.integer(as.character(samples$Filter[i]))	
+      	 } else {
+   	        peakfilter = as.integer(samples$Filter[i])
+   	     }
 	   } 
 
    	  if(is.null(samples$ControlID[i])) {
@@ -192,15 +200,15 @@ pv.model = function(model,mask,minOverlap=2,
                          treatment   = as.character(samples$Treatment[i]),
                          consensus   = F,
                          peak.caller = peakcaller,
-                         peak.format = format,
+                         peak.format = peakformat,
                          scoreCol    = peakscores,
-                         bLowerScoreBetter = bLowerBetter,
+                         bLowerScoreBetter = peaksLowerBetter,
                          control     = controlid,
                          reads       = NA,
                          replicate   = as.integer(samples$Replicate[i]),
                          readBam     = as.character(samples$bamReads[i]),
                          controlBam  = as.character(samples$bamControl[i]),
-						 filter      = filter,
+						 filter      = peakfilter,
 						 counts      = counts,
                          bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,skipLines=skipLines)
       }
@@ -312,10 +320,14 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    yieldSize = 5000000
    mode      = "IntersectionNotEmpty"
    singleEnd = TRUE
+   
+   scanbamparam = NULL
+   addfuns = NULL
    if(bLowMem){
    	  
    	  require(Rsamtools)
-   	     
+   	  
+   	  addfuns = c("BamFileList","summarizeOverlaps","ScanBamParam","scanBamFlag","countBam","SummarizedExperiment")   
       if (insertLength !=0) {
          stop("Can not specify insert size when bLowMem is TRUE in dba.count",call.=FALSE)
       }
@@ -347,7 +359,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    if(!bUseLast) {
       pv = dba.parallel(pv)
       if((pv$config$parallelPackage>0) && bParallel) {   	     
-   	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug"))            
+   	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
          results = dba.parallel.lapply(pv$config,params,todo,
                                        pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
                                        bLowMem,yieldSize,mode,singleEnd,scanbamparam)
