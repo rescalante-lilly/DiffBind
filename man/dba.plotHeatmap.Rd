@@ -62,8 +62,10 @@ analysis method (used in conjunction with contrast):
 \itemize{ 
 \item DBA_EDGER
 \item DBA_DESEQ
+\item DBA_DESEQ2
 \item DBA_EDGER_BLOCK
 \item DBA_DESEQ_BLOCK
+\item DBA_DESEQ2_BLOCK
 }
 }
 

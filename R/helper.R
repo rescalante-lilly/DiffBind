@@ -38,6 +38,11 @@ pv.check = function(pv) {
          } 
       }
    }
+   
+   if(is.null(pv$config$bCorPlot)) {
+      pv$config$bCorPlot=TRUE
+   }
+   
    if(nrow(pv$class)<PV_TREATMENT) {
      pv$class = rbind(pv$class,'')
      rownames(pv$class)[PV_TREATMENT]='Treatment'	
@@ -66,6 +71,15 @@ pv.version = function(pv,v1,v2,v3){
    
    if(warn) {
       warning('Loading DBA object from a previous version -- updating...',call.=F)
+   }
+   
+   if(!is.null(pv$contrasts)) {
+      for(i in 1:length(pv$contrasts)) {
+        if(!is.null(pv$contrasts[[i]]$DESeq) & is.null(pv$contrasts[[i]]$DESeq1) & is.null(pv$contrasts[[i]]$DESeq2)) {
+          pv$contrasts[[i]]$DESeq1 = pv$contrasts[[i]]$DESeq
+          pv$contrasts[[i]]$DESeq  = NULL
+        }
+      }   
    }
    
    if(nrow(pv$class)<PV_TREATMENT) {

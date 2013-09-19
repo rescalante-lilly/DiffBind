@@ -199,9 +199,9 @@ pv.get_reads = function(pv,peaksets,bSubControl=T){
    }
    reads = NULL
    for(peakset in peaksets) {
-      reads = cbind(reads,pv$peaks[[peakset]][,PV_CHIP_READS])
+      reads = cbind(reads,pv$peaks[[peakset]]$Reads)
       if(bSubControl) {
-         reads[,ncol(reads)] = reads[,ncol(reads)] - pv$peaks[[peakset]][,PV_CONTROL_READS]
+         reads[,ncol(reads)] = reads[,ncol(reads)] - pv$peaks[[peakset]]$cReads
       }
    }
 
@@ -337,18 +337,18 @@ pv.getOverlapData = function(pv,contrast,report) {
    return(pv)     
 }
 
-PV_CHIP_RPKM      = 5
-PV_CHIP_READS     = 6
-PV_CONTROL_RPKM   = 7
-PV_CONTROL_READS  = 8
+#PV_CHIP_RPKM      = 6
+#PV_CHIP_READS     = 7
+#PV_CONTROL_RPKM   = 8
+#PV_CONTROL_READS  = 9
 
 
 pv.get_scores = function(pv,peaksets){
    control = rep(0,nrow(pv$peaks[[peaksets[1]]]))
    scores = NULL
    for(peakset in peaksets) {
-      control = control + pv$peaks[[peakset]][,PV_CONTROL_RPKM]
-      scores = cbind(scores,pv$peaks[[peakset]][,PV_CHIP_RPKM])
+      control = control + pv$peaks[[peakset]]$cRPKM
+      scores = cbind(scores,pv$peaks[[peakset]]$RPKM)
    }
    control = control/length(peaksets)
    for(i in 1:ncol(scores)) {

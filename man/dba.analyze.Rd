@@ -9,8 +9,8 @@ Performs differential binding affinity analysis
 }
 \usage{
 dba.analyze(DBA, method=DBA$config$AnalysisMethod, 
-            bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
-            bCorPlot=TRUE,  bReduceObjects=T, bParallel=DBA$config$RunParallel)
+            bSubControl=TRUE, bFullLibrarySize=TRUE, bTagwise=TRUE,
+            bCorPlot=DBA$config$bCorPlot,  bReduceObjects=T, bParallel=DBA$config$RunParallel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,23 +21,28 @@ dba.analyze(DBA, method=DBA$config$AnalysisMethod,
 DBA object. If no contrasts are specified (DBA$contrast is NULL), default contrasts will be added via a call to \code{\link{dba.contrast}}.
 }
 %\subsection{Optional/defaulted arguments}{}
-  \item{method}{
+\item{method}{
 method, or vector of methods, by which to analyze differential binding affinity. Supported methods:
 \itemize{ 
 \item DBA_EDGER
 \item DBA_DESEQ
-\item DBA_EDGER_CLASSIC
-\item DBA_DESEQ_CLASSIC
+\item DBA_DESEQ2
+}
+also, for backward compatibility:
+\itemize{
 \item DBA_EDGER_GLM
 \item DBA_DESEQ_GLM
+\item DBA_EDGER_CLASSIC
+\item DBA_DESEQ_CLASSIC
 }
+Additionally, if this value is set to \code{DBA_ALL_METHODS}, this is equivalent to specifying \code{c(DBA_EDGER,DBA_DESEQ,DBA_DESEQ2)}.
 }
 
 \item{bSubControl}{
 logical indicating whether Control read counts are subtracted for each site in each sample before performing analysis.
 }
 \item{bFullLibrarySize}{
-logical indicating if the full library size (total number of reads in BAM/SAM/BED file) for each sample is used for scaling normalization. If FALSE, the total number of reads present in the peaks for each sample is used (generally preferable).
+logical indicating if the full library size (total number of reads in BAM/SAM/BED file) for each sample is used for scaling normalization. If FALSE, the total number of reads present in the peaks for each sample is used (generally preferable if overall biding levels are expected to be similar between samples).
 }
 \item{bTagwise}{
 logical indicating if dispersion should be calculated on a tagwise (or per-condition) basis. If there are only a very few members of each group in a contrast (e.g. no replicates), this should be set to FALSE.
@@ -81,7 +86,9 @@ data(tamoxifen_counts)
 tamoxifen = dba.analyze(tamoxifen)
 tamoxifen
 
-tamoxifen = dba.analyze(tamoxifen,method=c(DBA_EDGER,DBA_DESEQ))
+data(tamoxifen_counts)
+tamoxifen = dba.contrast(tamoxifen,categories=DBA_CONDITION,block=tamoxifen$masks$MCF7)
+tamoxifen = dba.analyze(tamoxifen,method=DBA_ALL_METHODS)
 tamoxifen
 }
 

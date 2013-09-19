@@ -403,10 +403,12 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       return(NULL)
    }
    res = NULL
-   edger   = F
-   deseq   = F
-   edgerlm = F
-   deseqlm = F
+   edger    = F
+   deseq1   = F
+   deseq2   = F
+   edgerlm  = F
+   deseq1lm = F
+   deseq2lm = F
    maxbvals = 0
    for(crec in clist) {
       newrec = c(crec$name1,sum(crec$group1),crec$name2,sum(crec$group2))
@@ -424,11 +426,17 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       if(!is.null(crec$edgeR$block)) {
          edgerlm = T
       }
-      if(!is.null(crec$DESeq)) {
-         deseq = T
+      if(!is.null(crec$DESeq1)) {
+         deseq1 = T
       }
-      if(!is.null(crec$DESeq$block)) {
-         deseqlm = T
+      if(!is.null(crec$DESeq1$block)) {
+         deseq1lm = T
+      }
+      if(!is.null(crec$DESeq2)) {
+        deseq2 = T
+      }
+      if(!is.null(crec$DESeq2$block)) {
+        deseq2lm = T
       }
       if(!is.null(res)) {
          if(length(newrec)>ncol(res)) {
@@ -494,13 +502,13 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
    }
    
    eres = NULL
-   if(deseq) {
+   if(deseq1) {
       for(crec in clist) {
-         if(!is.null(names(crec$DESeq)) && (class(crec$DESeq) != "try-error") ){
+         if(!is.null(names(crec$DESeq1)) && (class(crec$DESeq1) != "try-error") ){
             if(bUsePval) {
-               eres = c(eres,sum(crec$DESeq$de$pval<=th,na.rm=T))
+               eres = c(eres,sum(crec$DESeq1$de$pval<=th,na.rm=T))
             } else {
-               eres = c(eres,sum(crec$DESeq$de$padj<=th,na.rm=T))
+               eres = c(eres,sum(crec$DESeq1$de$padj<=th,na.rm=T))
             }
          } else {
             eres = c(eres,"-")   
@@ -511,13 +519,13 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
    }
    
    eres = NULL
-   if(deseqlm) {
+   if(deseq1lm) {
       for(crec in clist) {
-         if(!is.null(names(crec$DESeq$block)) && (class(crec$DESeq) != "try-error") ){
+         if(!is.null(names(crec$DESeq1$block)) && (class(crec$DESeq1) != "try-error") ){
             if(bUsePval) {
-               eres = c(eres,sum(crec$DESeq$block$de$pval<=th,na.rm=T))
+               eres = c(eres,sum(crec$DESeq1$block$de$pval<=th,na.rm=T))
             } else {
-               eres = c(eres,sum(crec$DESeq$block$de$padj<=th,na.rm=T))
+               eres = c(eres,sum(crec$DESeq1$block$de$padj<=th,na.rm=T))
             }
          } else {
             eres = c(eres,"-")   
@@ -525,7 +533,42 @@ pv.listContrasts = function(pv,th=0.1,bUsePval=F) {
       }
       res = cbind(res,eres)
       cvec = c(cvec,'DB DESeq-block')
-   }      
+   }
+   
+   eres = NULL
+   if(deseq2) {
+     for(crec in clist) {
+       if(!is.null(names(crec$DESeq2)) && (class(crec$DESeq2) != "try-error") ){
+         if(bUsePval) {
+           eres = c(eres,sum(crec$DESeq2$de$pval<=th,na.rm=T))
+         } else {
+           eres = c(eres,sum(crec$DESeq2$de$padj<=th,na.rm=T))
+         }
+       } else {
+         eres = c(eres,"-")   
+       }
+     }
+     res = cbind(res,eres)
+     cvec = c(cvec,'DB DESeq2')
+   }
+   
+   eres = NULL
+   if(deseq2lm) {
+     for(crec in clist) {
+       if(!is.null(names(crec$DESeq2$block)) && (class(crec$DESeq2) != "try-error") ){
+         if(bUsePval) {
+           eres = c(eres,sum(crec$DESeq2$block$de$pval<=th,na.rm=T))
+         } else {
+           eres = c(eres,sum(crec$DESeq2$block$de$padj<=th,na.rm=T))
+         }
+       } else {
+         eres = c(eres,"-")   
+       }
+     }
+     res = cbind(res,eres)
+     cvec = c(cvec,'DB DESeq2-block')
+   }  
+   
    colnames(res) = cvec
    rownames(res) = 1:nrow(res)
    return(data.frame(res))
@@ -575,3 +618,132 @@ pv.design = function(DBA,categories=c(DBA_CONDITION,DBA_TREATMENT,DBA_TISSUE,DBA
    
    return(design)   	
 }
+
+pv.resultsDBA = function(DBA,contrasts,methods=DBA$config$AnalysisMethod,th=0.1,bUsePval=F,fold=0,bDB=T,bNotDB=F,bUp=F,bDown=F,bAll=T) {
+
+   if(missing(contrasts)) {
+      contrasts = 1:length(DBA$contrasts)
+   }
+   
+   res = NULL
+   for(contrast in contrasts) {
+      for(method in methods) {
+         res = pv.doResults(res,DBA,contrast,method,th,bUsePval,fold,bDB=bDB,bNotDB=bNotDB,bUp=bUp,bDown=bDown,bAll=bAll)		
+      }
+   }
+   
+   if(is.null(res)) {
+      warning('No valid contrasts/methods specified.',call.=F)	
+   }
+   
+   return(res)	
+	
+}
+
+pv.doResults = function(res,DBA,contrast,method,th,bUsePval,fold=0,bDB=T,bNotDB=F,bAll=F,bUp=F,bDown=F) {
+
+    if(method=='edgeR' || method=="edgeRGLM") {
+       if(is.null(DBA$contrasts[[contrast]]$edgeR)) {
+          return(res)	
+       }
+       methname = "edgeR"
+       block = ""
+    }
+    if (method=='edgeRlm') {
+       if(is.null(DBA$contrasts[[contrast]]$edgeR$block)) {
+          return(res)	
+       }
+       methname="edgeR"
+       block="block"	
+    }
+    if(method=='DESeq1' || method=='DESeq1GLM') {
+       if(is.null(DBA$contrasts[[contrast]]$DESeq1)) {
+          return(res)	
+       }      
+       methname = "DESeq1"
+       block = ""
+    }
+    if (method=='DESeq1Block') {
+       if(is.null(DBA$contrasts[[contrast]]$DESeq1$block)) {
+          return(res)	
+       }           
+       methname="DESeq1"
+       block="block"	
+    }
+    if(method=='DESeq2' || method=='DESeq2GLM') {
+      if(is.null(DBA$contrasts[[contrast]]$DESeq2)) {
+        return(res)  
+      }      
+      methname = "DESeq2"
+      block = ""
+    }
+    if (method=='DESeq2Block') {
+      if(is.null(DBA$contrasts[[contrast]]$DESeq2$block)) {
+        return(res)	
+      }           
+      methname="DESeq2"
+      block="block"	
+    }
+    
+    if(bNotDB) {
+     useth = 1
+    } else {
+     useth = th
+    }
+    
+    rep = suppressWarnings(dba.report(DBA,contrast=contrast,method=method,th=useth,bUsePval=bUsePval,fold=0,DataType=DBA_DATA_FRAME))
+    
+    if(is.null(rep)) {
+       return(res)	
+    }
+    
+    id = sprintf("%s_vs_%s",DBA$contrast[[contrast]]$name1,DBA$contrast[[contrast]]$name2)
+    
+    if(bUsePval) {
+    	scores = rep$"p-value"
+    } else {
+    	scores = rep$FDR
+    }    
+    
+    db = (scores <= th) & (abs(rep$Fold) >= fold)
+    up = rep$Fold >= 0
+    peaks = cbind(rep[,1:3],abs(rep$Fold))
+           
+    if(bDB) {
+       if(bAll) {
+          if(sum(db)) {
+             res = dba.peakset(res,peaks=peaks[db,],sampID=id,factor="DB",tissue="all",condition=methname,treatment=block)	
+          }
+       }
+       if(bUp) {
+          if(sum(db&up)) {	
+             res = dba.peakset(res,peaks=peaks[db&up,],sampID=id, factor ="DB", tissue ="up",condition=methname,treatment=block)	
+          }
+       }
+       if(bDown) {
+       	  if(sum(db&!up)) {
+             res = dba.peakset(res,peaks=peaks[db&!up,],sampID=id, factor ="DB", tissue ="down",condition=methname,treatment=block)	
+          }
+       }		
+    }
+    if(bNotDB) {
+       if(bAll) {
+       	  if(sum(!db)) {
+             res = dba.peakset(res,peaks=peaks[!db,],sampID=id, factor ="!DB", tissue ="all",condition=methname,treatment=block)	
+          }
+       }
+       if(bUp) {
+       	  if(sum(!db&up)) {
+             res = dba.peakset(res,peaks=peaks[!db&up,],sampID=id, factor ="!DB", tissue ="up",condition=methname,treatment=block)	
+          }
+       }
+       if(bDown) {
+       	  if(sum(!db&!up)) {
+             res = dba.peakset(res,peaks=peaks[!db&!up,],sampID=id, factor ="!DB", tissue ="down",condition=methname,treatment=block)	
+          }
+       }		
+    }    
+    
+    return(res)	
+}
+

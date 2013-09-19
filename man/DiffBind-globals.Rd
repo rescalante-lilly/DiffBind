@@ -25,12 +25,15 @@
 \alias{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 \alias{DBA_EDGER}
 \alias{DBA_DESEQ}
+\alias{DBA_DESEQ2}
 \alias{DBA_EDGER_BLOCK}
 \alias{DBA_DESEQ_BLOCK}
+\alias{DBA_DESEQ2_BLOCK}
 \alias{DBA_EDGER_CLASSIC}
 \alias{DBA_DESEQ_CLASSIC}
 \alias{DBA_EDGER_GLM}
 \alias{DBA_DESEQ_GLM}
+\alias{DBA_ALL_METHODS}
 \alias{DBA_DATA_FRAME}
 \alias{DBA_DATA_GRANGES}
 \alias{DBA_DATA_RANGEDDATA}
@@ -75,12 +78,15 @@ DBA_SCORE_TMM_MINUS_EFFECTIVE
 
 DBA_EDGER
 DBA_DESEQ
+DBA_DESEQ2
 DBA_EDGER_BLOCK
 DBA_DESEQ_BLOCK
+DBA_DESEQ2_BLOCK
 DBA_EDGER_CLASSIC
 DBA_DESEQ_CLASSIC
 DBA_EDGER_GLM
 DBA_DESEQ_GLM
+DBA_ALL_METHODS
 
 DBA_DATA_FRAME
 DBA_DATA_GRANGES
@@ -173,7 +179,18 @@ differential analysis method: edgeR (default: DBA_EDGER_GLM)
 \item{DBA_DESEQ}{
 differential analysis method: DESeq (default: DBA_DESEQ_CLASSIC)
 }
-
+\item{DBA_DESEQ2}{
+differential analysis method: DESeq2 (using a single-factor GLM)
+}
+\item{DBA_EDGER_BLOCK}{
+differential analysis method: edgeR with blocking factors (GLM)
+}
+\item{DBA_DESEQ_BLOCK}{
+differential analysis method: DESeq with blocking factors (GLM)
+}
+\item{DBA_DESEQ2_BLOCK}{
+differential analysis method: DESeq2 with blocking factors (GLM)
+}
 \item{DBA_EDGER_CLASSIC}{
 differential analysis method: "classic" edgeR for two-group comparisons
 }
@@ -186,11 +203,8 @@ differential analysis method: use GLM in edgeR for two-group comparisons
 \item{DBA_DESEQ_GLM}{
 differential analysis method: use GLM in DESeq for two-group comparisons
 }
-\item{DBA_EDGER_BLOCK}{
-differential analysis method: edgeR with blocking factors (GLM)
-}
-\item{DBA_DESEQ_BLOCK}{
-differential analysis method: DESeq with blocking factors (GLM)
+\item{DBA_ALL_METHODS}{
+use all three analysis methods: c(DBA_EDGER, DBA_DESEQ, DBA_DESEQ2)
 }
 
 \item{DBA_DATA_GRANGES}{

@@ -125,7 +125,7 @@ Logical indicating that lower scores indicate higher confidence peaks; default i
 Numeric indicating a filter value for peaks. If present, any peaks with a score less than this value (or higher if \code{bLowerScoreBetter==TRUE}) will be removed from the peakset. 
 }
   \item{counts}{
-Used for adding externally computed peak counts. Can be a filename or a dataframe. Can consist of a single column (or vector) with the counts, or two columns, with an ID for each interval int he first column and the counts int he second column, or four columns (chr, start, end, counts). When \code{counts} is specified, \code{peaks} and related parameters are ignored, and all peaksets in the DBA object must be specified in this way, all with exactly the same number of intervals.
+Used for adding externally computed peak counts. Can be a filename or a dataframe. Can consist of a single column (or vector) with the counts, or two columns, with an ID for each interval in the first column and the counts in the second column, or four columns (chr, start, end, counts). When \code{counts} is specified, \code{peaks} and related parameters are ignored, and all peaksets in the DBA object must be specified in this way, all with exactly the same number of intervals.
 }
   \item{bRemoveM}{
 logical indicating whether to remove peaks on chrM when adding a peakset

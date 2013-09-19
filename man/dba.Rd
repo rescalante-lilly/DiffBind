@@ -10,10 +10,11 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 \usage{
 dba(DBA,mask, minOverlap=2,
     sampleSheet="dba_samples.csv", 
-    config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
+    config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,
+                      AnalysisMethod=DBA_EDGER,bCorPlot=TRUE),
     peakCaller='raw', peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, 
     bAddCallerConsensus=FALSE, bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
-    bCorPlot=FALSE, attributes) 
+    bCorPlot, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -99,7 +100,7 @@ logical indicating whether to remove peaks on chrN_random when constructing a ne
 logical indicating whether to return resulting object as a \code{\link{SummarizedExperiment}}.
 }
 \item{bCorPlot}{
-logical indicating that a correlation heatmap should be plotted before returning
+logical indicating that a correlation heatmap should be plotted before returning. If \code{DBA} is \code{NULL} (a new DBA object is being created), and \code{bCorPlot} is missing, then this will take the default value (\code{TRUE}). However if \code{DBA} is \code{NULL} (a new DBA object is being created), and \code{bCorPlot} is specified, then the specified value will become the default value of \code{bCorPlot} for the resultant \code{DBA} object.
 }
 \item{attributes}{
 vector of attributes to use subsequently as defaults when generating labels in plotting functions:

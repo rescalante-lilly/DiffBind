@@ -453,20 +453,22 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    
    j = ncol(res)
    if (nrow(res)>1) {	
-	   for(i in j:1) {
-		  x = unique(res[,i])
-		  if(colnames(res)[i]=='Peak caller') {
-			 if(all.equal(attributes,pv.deflist) == TRUE) {
-				if(length(x)==1) {
-				   res = res[,-i]	
-				}
-			 }
-		  } else {
-			 if(length(x)==1 && x[1]=="") {
-				res = res[,-i]	
-			 }    	
-		  }
-	   }
+     for(i in j:1) {
+       x = unique(res[,i])
+       if(colnames(res)[i]=='Peak caller') {
+         if(all.equal(attributes,pv.deflist) == TRUE) {
+           if(length(x)==1) {
+             res = res[,-i]	
+           }
+         } 
+       } else if(length(x)==1) {
+         if (is.na(x)) {
+           res = res[,-i]
+         } else if(x[1]=="") {
+           res = res[,-i]	
+         }    	
+       }
+     }
    }
 	
    return(data.frame(res))
@@ -522,7 +524,7 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
          }
          return(res)
       } else {
-         tmp = pv.vectors(tmp,bKeepAll=T,bAnalysis=F)
+         tmp = pv.vectors(tmp,bKeepAll=T,bAnalysis=F,minOverlap=minOverlap)
          tmp$vectors = tmp$allvectors
       }
    }
@@ -900,7 +902,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    if(b3D) {
     if (length(find.package(package='rgl',quiet=T))>0) {
        library(rgl)
-       plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
+       rgl::plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
               xlab=sprintf('PC #%d [%2.0f%%]',startComp,c1p),
               ylab=sprintf('PC #%d [%2.0f%%]',startComp+2,c3p),
               zlab=sprintf('PC #%d [%2.0f%%]',startComp+1,c2p),

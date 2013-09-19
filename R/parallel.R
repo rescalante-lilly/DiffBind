@@ -2,6 +2,7 @@
 
 DBA_PARALLEL_MULTICORE = 1
 DBA_PARALLEL_RLSF      = 2
+DBA_PARALLEL_LSFR      = 3
 
 ### INITIALIZE ###
 dba.parallel = function(DBA) {
@@ -14,6 +15,12 @@ dba.parallel = function(DBA) {
    
    if(DBA$config$parallelPackage==DBA_PARALLEL_RLSF) {
       DBA$config =  dba.Rlsf.init(DBA$config)
+      DBA$config$parallelInit = TRUE
+      return(DBA)
+   }
+   
+   if(DBA$config$parallelPackage==DBA_PARALLEL_LSFR) {
+      DBA$config =  dba.lsfR.init(DBA$config)
       DBA$config$parallelInit = TRUE
       return(DBA)
    }
@@ -53,15 +60,21 @@ dba.parallel.wait4jobs = function(config,joblist) {
 
 dba.Rlsf.init = function(config){
    if (length(find.package(package="DiffBindCRI",quiet=T))>0) {
-      #library(DiffBindCRI)
-      #if(!exists("dba.Rlsf.init","package:DiffBindCRI")) {
-      #   warning('Rlsf interface not supported in this version')
-      #} else {
-         config = dba.CRI.Rlsf.init(config)
-      #}     
-  } else {
+    config = dba.CRI.Rlsf.init(config)    
+   } else {
     warning('Rlsf interface not supported in this version')
   }
+  
+   return(config)
+}
+
+dba.lsfR.init = function(config){
+   if (length(find.package(package="DiffBindCRI",quiet=T))>0) {
+    config = dba.CRI.lsfR.init(config)    
+   } else {
+    warning('lsfR interface not supported in this version')
+  }
+  
    return(config)
 }
 
@@ -99,7 +112,7 @@ dba.multicore.init = function(config) {
    config$wait4jobsFun = dba.multicore.wait4jobs
 
    if(is.null(config$cores)) {
-      config$cores = parallel:::detectCores(logical=FALSE)
+      config$cores = parallel::detectCores(logical=FALSE)
    }
 	
    return(config)

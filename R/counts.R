@@ -287,6 +287,9 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          }
       } else {
          pv$chrmap = unique(as.character(peaks[,1]))
+         if(is.character(peaks[1,1])){
+           peaks[,1] = factor(peaks[,1],pv$chrmap)
+         }
       }
       if(is.null(bed)) {
          colnames(peaks)[1:3] = c("CHR","START","END")

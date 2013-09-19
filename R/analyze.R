@@ -1,3 +1,4 @@
+
 pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
                   minMembers=3,bParallel=F, block) {
   
@@ -74,7 +75,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
      }
   }
   
-   if('DESeq' %in% method) {
+   if('DESeq1' %in% method) {
       if (length(find.package(package='DESeq',quiet=T))>0) {
         require(DESeq)
       } else {
@@ -93,7 +94,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
       }
    }
 
-   if('DESeqGLM' %in% method) {
+   if('DESeq1GLM' %in% method) {
       if (length(find.package(package='DESeq',quiet=T))>0) {
         require(DESeq)
       } else {
@@ -111,6 +112,25 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
                               bTagwise=bTagwise,bGLM=T,bParallel=setParallel))
       }
    }
+   
+   if('DESeq2' %in% method) {
+     if (length(find.package(package='DESeq2',quiet=T))>0) {
+       require(DESeq2)
+     } else {
+       stop("Package DESeq2 not installed")
+     }
+     if(bParallel && (pv$config$parallelPackage > 0)) {
+       numjobs = numjobs + 1
+       params = dba.parallel.params(pv$config,c('pv.DESeq2'))
+       jobs = pv.listadd(jobs,dba.parallel.addjob(pv$config,params,pv.allDESeq2,pv,
+                                                  bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
+                                                  bTagwise=bTagwise,bGLM=F,
+                                                  bParallel=T))
+     } else {
+       results = pv.listadd(results,pv.allDESeq2(pv,bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,
+                                                bTagwise=bTagwise,bGLM=F,bParallel=setParallel))
+     }
+   }
         
   
   if(bParallel && (pv$config$parallelPackage > 0)) {
@@ -125,13 +145,21 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
      }
      jnum = jnum+1
   }
-  if( ('DESeq' %in% method) || ('DESeqGLM' %in% method) ) {
+  if( ('DESeq1' %in% method) || ('DESeq1GLM' %in% method) ) {
      deseq = results[[jnum]]
      for(i in 1:length(deseq)){
-        pv$contrasts[[i]]$DESeq = deseq[[i]]
+        pv$contrasts[[i]]$DESeq1 = deseq[[i]]
      }
      jnum = jnum+1
   }
+   
+   if( ('DESeq2' %in% method) || ('DESeq2GLM' %in% method) ) {
+     deseq2 = results[[jnum]]
+     for(i in 1:length(deseq2)){
+       pv$contrasts[[i]]$DESeq2 = deseq2[[i]]
+     }
+     jnum = jnum+1
+   } 
 
   fdebug(sprintf('Exit pv.DBA: %f',pv$contrasts[[1]]$edgeR$counts[7,1]))
   return(pv)
@@ -150,19 +178,19 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
   if(method == 'edgeR') {
      #require('edgeR')
      edgeR = T   
-  } else if (method == 'DESeq'|| method=='DESeqGLM') {
+  } else if (method == 'DESeq1'|| method=='DESeq1GLM') {
     if (length(find.package(package='DESeq',quiet=T))>0) {
        require(DESeq)
        DESeq1 = T 
     }   
   } else if (method == 'DESeq2') {
-  	stop('DESeq2 not supported in this release',call.=F)
-    #if (length(find.package(package='DESeq2',quiet=T))>0) {
-    #   require(DESeq2)
-    #   DESeq2 = T 
-    #} else {
-    #   stop("Package DESeq2 not installed")
-    #}    
+  	#stop('DESeq2 not supported in this release',call.=F)
+    if (length(find.package(package='DESeq2',quiet=T))>0) {
+       require(DESeq2)
+       DESeq2 = T 
+    } else {
+       stop("Package DESeq2 not installed")
+    }    
   } else {
     warning('Invalid method: ',method,call.=FALSE)
     return(NULL)
@@ -222,16 +250,19 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
            res = newCountDataSet(counts,targets)	
         }
         if(bFullLibrarySize) {
-           sizeFactors(res) = libsize/min(libsize)
+           DESeq::sizeFactors(res) = libsize/min(libsize)
         }
      }
      if(DESeq2) {
   	    colnames(counts) = NULL
   	    if(is.null(targets)) {     	
-     	#   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(groups),formula(~ groups))
+     	   res = DESeq2::DESeqDataSetFromMatrix(counts,data.frame(groups),formula(~ groups))
      	} else {
-     	#   res = DESeqSummarizedExperimentFromMatrix(counts,data.frame(targets),formula(~ targets))     		
+     	   res = DESeq2::DESeqDataSetFromMatrix(counts,data.frame(targets),formula(~ group))     		
      	}
+  	    if(bFullLibrarySize) {
+  	      DESeq2::sizeFactors(res) = libsize/min(libsize)
+  	    }  
      }
   }                
   return(res)
@@ -351,84 +382,84 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
   	     return(res)	
   	  }
    } 
-   res$DEdata = pv.DEinit(pv,group1,group2,label1,label2,method='DESeq',
+   res$DEdata = pv.DEinit(pv,group1,group2,label1,label2,method='DESeq1',
 	                      bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,targets=targets)
-   res$counts = counts(res$DEdata)
+   res$counts = DESeq::counts(res$DEdata)
    if(!bFullLibrarySize) {
-      res$DEdata = estimateSizeFactors(res$DEdata)
+      res$DEdata = DESeq::estimateSizeFactors(res$DEdata)
    }
-   res$facs = sizeFactors(res$DEdata)
-   if(sum(group1)+sum(group2)==2){
-      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='blind',sharingMode='fit-only')
-	} else {
-	   if(bTagwise && !bGLM && is.null(blockList)) {
-	      res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='per-condition')
-	   } else {
-	   	  if(bGLM && is.null(blockList)) {
-	         res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled')
-	      }
-	      #if(bTagwise && is.null(blockList)) {
-	      #  warning('Unable to use tagwise dispersion estimates with GLM',call.=FALSE)	
-	      #}
-	   }
-   }
-   if(bGLM && is.null(blockList)){
-      res$fullFit      = fitNbinomGLMs(res$DEdata,count ~ condition)
-	  res$reducedFit   = fitNbinomGLMs(res$DEdata,count ~ 1)
-	  res$de           = nbinomGLMTest(res$fullFit,res$reducedFit)
-	  res$de           = cbind(1:length(res$de),res$de,p.adjust(res$de,method="BH"))
-	  colnames(res$de) = c('id','pval','padj')
-	  res$de           = data.frame(res$de)
-	} else if (!is.null(blockList)) {
-	   message('DESeq multi-factor analysis')
-       attr =  blockList[[1]]$attribute
-       if(attr=='Replicate') {
-	   	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Replicate)       	
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Replicate)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Replicate)
-       } else if(attr=='Tissue') {
-	   	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Tissue)          	
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Tissue)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Tissue)
-       } else if(attr=='Factor') {
-       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Factor)  
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Factor)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Factor)
-       } else if(attr=='Condition') {
-       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Condition)  
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Condition)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Condition)
-       } else if(attr=='Caller') {
-       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Caller)  
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Caller)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Caller)
-       } else if(attr=='Treatment') {
-       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Treatment)  
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Treatment)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Treatment)
-       } else if(attr=='Block') {
-       	  res$DEdata = estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
-	   	  	                                 modelFormula = count ~ group + Block)  
-          res$fullFit    = fitNbinomGLMs(res$DEdata,count ~ group + Block)
-          res$reducedFit = fitNbinomGLMs(res$DEdata,count ~ Block)
-       } else {
-          warning('Unsupported blocking attribute: ',attr,call.=FALSE)
-          return(NULL)	
-       }
-      res$de           = nbinomGLMTest(res$fullFit,res$reducedFit)
-	  res$de           = cbind(1:length(res$de),res$de,p.adjust(res$de,method="BH"))
-	  colnames(res$de) = c('id','pval','padj')
-	  res$de           = data.frame(res$de)
-	  fdebug(sprintf('pv.DESeq blocking analysis: %d db (%s/%s)',sum(res$de$padj<.1),label1,label2))
+   res$facs = DESeq::sizeFactors(res$DEdata)
+    if(sum(group1)+sum(group2)==2){
+      res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='blind',sharingMode='fit-only')
     } else {
-	   res$de = nbinomTest(res$DEdata,label1,label2)[,c(1,7:8)]
-	}
+      if(bTagwise && !bGLM && is.null(blockList)) {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='per-condition')
+      } else {
+        if(bGLM && is.null(blockList)) {
+          res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled')
+        }
+        #if(bTagwise && is.null(blockList)) {
+        #  warning('Unable to use tagwise dispersion estimates with GLM',call.=FALSE)	
+        #}
+      }
+    }
+    if(bGLM && is.null(blockList)){
+      res$fullFit      = DESeq::fitNbinomGLMs(res$DEdata,count ~ condition)
+      res$reducedFit   = DESeq::fitNbinomGLMs(res$DEdata,count ~ 1)
+      res$de           = DESeq::nbinomGLMTest(res$fullFit,res$reducedFit)
+      res$de           = cbind(1:length(res$de),res$de,p.adjust(res$de,method="BH"))
+      colnames(res$de) = c('id','pval','padj')
+      res$de           = data.frame(res$de)
+    } else if (!is.null(blockList)) {
+      message('DESeq multi-factor analysis')
+      attr =  blockList[[1]]$attribute
+      if(attr=='Replicate') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Replicate)       	
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Replicate)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Replicate)
+      } else if(attr=='Tissue') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Tissue)          	
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Tissue)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Tissue)
+      } else if(attr=='Factor') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Factor)  
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Factor)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Factor)
+      } else if(attr=='Condition') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Condition)  
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Condition)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Condition)
+      } else if(attr=='Caller') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Caller)  
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Caller)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Caller)
+      } else if(attr=='Treatment') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Treatment)  
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Treatment)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Treatment)
+      } else if(attr=='Block') {
+        res$DEdata = DESeq::estimateDispersions(res$DEdata,fitType='local',method='pooled-CR',
+                                                modelFormula = count ~ group + Block)  
+        res$fullFit    = DESeq::fitNbinomGLMs(res$DEdata,count ~ group + Block)
+        res$reducedFit = DESeq::fitNbinomGLMs(res$DEdata,count ~ Block)
+      } else {
+        warning('Unsupported blocking attribute: ',attr,call.=FALSE)
+        return(NULL)	
+      }
+      res$de           = DESeq::nbinomGLMTest(res$fullFit,res$reducedFit)
+      res$de           = cbind(1:length(res$de),res$de,p.adjust(res$de,method="BH"))
+      colnames(res$de) = c('id','pval','padj')
+      res$de           = data.frame(res$de)
+      fdebug(sprintf('pv.DESeq blocking analysis: %d db (%s/%s)',sum(res$de$padj<.1),label1,label2))
+    } else {
+      res$de = DESeq::nbinomTest(res$DEdata,label1,label2)[,c(1,7:8)]
+    }
 	  
    res$de = res$de[order(res$de$padj),]
 
@@ -439,6 +470,74 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 
 }
 
+pv.DESeq2 = function(pv,group1,group2,label1="Group 1",label2="Group 2",
+                    bSubControl=T,bFullLibrarySize=F,bTagwise=T,bGLM=T,blockList=NULL){
+  if (length(find.package(package='DESeq2',quiet=T))>0) {
+    require(DESeq2)
+  } else {
+    stop("Package DESeq2 not installed")
+  }
+  res = NULL
+  
+  targets=NULL
+  if(!is.null(blockList)) {
+    targets = pv.blockFactors(pv,group1,group2,label1,label2,blockList)
+    if(is.null(targets)){
+      return(res)	
+    }
+  } 
+  res$DEdata = pv.DEinit(pv,group1,group2,label1,label2,method='DESeq2',
+                         bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,targets=targets)
+  res$counts = DESeq2::counts(res$DEdata)
+
+  if (!is.null(blockList)) {
+    message('DESeq2 multi-factor analysis')
+    attr =  blockList[[1]]$attribute
+    if(attr=='Replicate') {
+      DESeq2::design(res$DEdata) = formula(~Replicate + group)
+    } else if(attr=='Tissue') {
+      DESeq2::design(res$DEdata) = formula(~Tissue + group)    
+    } else if(attr=='Factor') {
+      DESeq2::design(res$DEdata) = formula(~Factor + group)
+    } else if(attr=='Condition') {
+      DESeq2::design(res$DEdata) = formula(~Condition + group)
+    } else if(attr=='Caller') {
+      DESeq2::design(res$DEdata) = formula(~Caller + group)
+    } else if(attr=='Treatment') {
+      DESeq2::design(res$DEdata) = formula(~Treatment + group)
+    } else if(attr=='Block') {
+      DESeq2::design(res$DEdata) = formula(~Block + group)
+    } else {
+      warning('Unsupported blocking attribute: ',attr,call.=FALSE)
+      return(NULL)  
+    }
+    fdebug(sprintf('pv.DESeq blocking analysis: %d db (%s/%s)',sum(res$de$padj<.1),label1,label2))
+  } 
+  
+  if(!bFullLibrarySize) {
+    res$DEdata = DESeq2::estimateSizeFactors(res$DEdata)
+  }
+  
+  res$facs   = DESeq2::sizeFactors(res$DEdata)
+  res$DEdata = DESeq2::estimateDispersions(res$DEdata,fitType='local')
+  res$DEdata = DESeq2::nbinomWaldTest(res$DEdata)
+  res$de     = DESeq2::results(res$DEdata)
+  
+  res$de$pvalue[is.na(res$de$pvalue)]=1
+  res$de$padj[is.na(res$de$padj)]=1
+  
+  res$de = res$de[order(res$de$padj),]
+  res$de = cbind(as.numeric(rownames(res$de)),res$de$pvalue,res$de$padj)
+  colnames(res$de) = c("id","pval","padj")
+  rownames(res$de) = res$de[,1]
+  res$de = data.frame(res$de)
+  
+  res$bSubControl      = bSubControl
+  res$bFullLibrarySize = bFullLibrarySize
+  
+  return(res)
+  
+}
 pv.DEedgeR_parallel = function(contrast,pv,blockList,bSubControl,bFullLibrarySize,bTagwise,bGLM) {
    crec = pv$contrasts[[contrast]]
    if(!is.null(blockList)) {
@@ -592,6 +691,78 @@ pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bTagwise=T,bGLM
    return(reslist)
 }
 
+pv.DESeq2_parallel = function(contrast,pv,blockList,bSubControl,bFullLibrarySize,bTagwise=T,bGLM=F) {
+  crec = pv$contrasts[[contrast]]
+  if(!is.null(blockList)) {
+    blockList = crec$blocklist
+  }
+  res = pv.DESeq2(pv,crec$group1,crec$group2,crec$name1,crec$name2,
+                 bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagwise=bTagwise,bGLM=bGLM,blockList=blockList)
+  return(res)
+}
+
+pv.allDESeq2 = function(pv,block,bSubControl=F,bFullLibrarySize=F,bTagwise=T,bGLM=F,bParallel=F) {
+  
+  if (length(find.package(package='DESeq2',quiet=T))>0) {
+    require(DESeq2)
+  } else {
+    stop("Package DESeq2 not installed")
+  }
+  
+  if(is.null(pv$contrasts)) {
+    if(missing(block)) {
+      pv = pv.contrast(pv)
+    } else {
+      pv = pv.contrast(pv,block=block)
+    }
+  }
+  
+  if(bParallel) {
+    pv = dba.parallel(pv)
+    jobs = NULL
+    blocks = NULL
+  }
+  
+  fdebug('pv.allDESeq2: for each contrast')
+  reslist = NULL
+  
+  if(bParallel && (pv$config$parallelPackage > 0)) {   
+    params = dba.parallel.params(pv$config,c('pv.DESeq2_parallel','pv.DESeq2'))
+    
+    reslist  = dba.parallel.lapply(pv$config,params,1:length(pv$contrasts),pv.DESeq2_parallel,pv,NULL, 
+                                   bSubControl,bFullLibrarySize,bTagwise=bTagwise,bGLM=bGLM)
+    blist = NULL
+    for(i in 1:length(pv$contrasts)) {
+      if(!is.null(pv$contrasts[[i]]$blocklist)) {
+        blist = c(blist,i)
+      }
+    }
+    if(length(blist > 0)) {
+      bres =  dba.parallel.lapply(pv$config,params,blist,pv.DESeq2_parallel,pv,TRUE, 
+                                  bSubControl,bFullLibrarySize,bTagwise=bTagwise,bGLM=bGLM)
+      for(i in 1:length(blist)) {
+        fdebug(sprintf('pv.allDESeq2: contrast %d gets bres %d (%d db)',blist[i],i,sum(bres[[i]]$de$padj<.1)))
+        reslist[[blist[i]]]$block = bres[[i]]
+      }    
+    }     
+  } else { # SERIAL
+    for(i in 1:length(pv$contrast)) { 	
+      res = pv.DESeq2(pv,pv$contrasts[[i]]$group1,pv$contrasts[[i]]$group2,
+                     pv$contrasts[[i]]$name1,pv$contrasts[[i]]$name2,
+                     bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagwise=bTagwise,bGLM=bGLM)
+      
+      if(!is.null(pv$contrasts[[i]]$blocklist)) {
+        res$block = pv.DESeq2(pv,pv$contrasts[[i]]$group1,pv$contrasts[[i]]$group2,
+                             pv$contrasts[[i]]$name1,pv$contrasts[[i]]$name2,
+                             bSubControl=bSubControl,bFullLibrarySize=bFullLibrarySize,bTagwise=bTagwise,
+                             blockList=pv$contrasts[[i]]$blocklist)   
+      }
+      reslist = pv.listadd(reslist,res)   
+    }
+  }  
+  
+  return(reslist)
+}
 
 pv.blockFactors = function(pv,group1,group2,label1,label2,blockList) {
 	 samples = group1 | group2
@@ -683,30 +854,30 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       	 counts = t(t(counts)/sizes)
       	 counts = counts * con$edgeR$pseudo.lib.size
       } 
-   } else if (method=='DESeq' || method=='DESeqGLM' || method=='DESeqBlock') {
+   } else if (method=='DESeq1' || method=='DESeq1GLM' || method=='DESeq1Block') {
       if (length(find.package(package='DESeq',quiet=T))>0) {
          require(DESeq)
       } else {
          stop("Package DESeq not installed")
       }
-   	  if(is.null(con$DESeq) || class(con$DESeq)=="try-error") {
+   	  if(is.null(con$DESeq1) || class(con$DESeq1)=="try-error") {
          stop('DESeq analysis has not been run for this contrast') 
          return(NULL) 
       }
       siteCol = 1
       pvCol   = 2
       fdrCol =  3
-      counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='DESeq',
-	                     bSubControl=con$DESeq$bSubControl,bFullLibrarySize=con$DESeq$bFullLibrarySize,bRawCounts=T)
-      if(method=='DESeqBlock') {
-         data = con$DESeq$block$de
+      counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='DESeq1',
+	                     bSubControl=con$DESeq1$bSubControl,bFullLibrarySize=con$DESeq1$bFullLibrarySize,bRawCounts=T)
+      if(method=='DESeq1Block') {
+         data = con$DESeq1$block$de
          if(bNormalized){
-      	    counts = t(t(counts)/con$DESeq$block$facs)
+      	    counts = t(t(counts)/con$DESeq1$block$facs)
          }      	
       } else {
-         data = con$DESeq$de
+         data = con$DESeq1$de
          if(bNormalized){
-      	    counts = t(t(counts)/con$DESeq$facs)
+      	    counts = t(t(counts)/con$DESeq1$facs)
          }
       }   
    } else if(method=='edgeRlm'){
@@ -728,6 +899,32 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
       	 counts = t(t(counts)/sizes)
       	 counts = counts * con$edgeR$pseudo.lib.size
       } 
+   } else if (method=='DESeq2' || method=='DESeq2Block') {
+     if (length(find.package(package='DESeq2',quiet=T))>0) {
+       require(DESeq2)
+     } else {
+       stop("Package DESeq2 not installed")
+     }
+     if(is.null(con$DESeq2) || class(con$DESeq2)=="try-error") {
+       stop('DESeq2 analysis has not been run for this contrast') 
+       return(NULL) 
+     }
+     siteCol = 1
+     pvCol   = 2
+     fdrCol =  3
+     counts = pv.DEinit(pv,con$group1,con$group2,con$label1,con$label2,method='DESeq2',
+                        bSubControl=con$DESeq2$bSubControl,bFullLibrarySize=con$DESeq2$bFullLibrarySize,bRawCounts=T)
+     if(method=='DESeq2Block') {
+       data = con$DESeq2$block$de
+       if(bNormalized){
+         counts = t(t(counts)/con$DESeq2$block$facs)
+       }      	
+     } else {
+       data = con$DESeq2$de
+       if(bNormalized){
+         counts = t(t(counts)/con$DESeq2$facs)
+       }
+     }   
    } else {
       stop('Unknown DE method: ',method)
       return(NULL)
@@ -976,8 +1173,9 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
 }
 
 pv.stripDBA = function(conrec) {
-   conrec$edgeR = pv.stripEdgeR(conrec$edgeR)
-   conrec$DESeq = pv.stripDESeq(conrec$DESeq)
+   conrec$edgeR  = pv.stripEdgeR(conrec$edgeR)
+   conrec$DESeq1 = pv.stripDESeq1(conrec$DESeq1)
+   conrec$DESeq2 = pv.stripDESeq2(conrec$DESeq2)
    return(conrec)
 }
 
@@ -1031,7 +1229,7 @@ pv.stripEdgeRLRT = function(lrec) {
    return(lrec)
 }      
    
-pv.stripDESeq = function(drec) {
+pv.stripDESeq1 = function(drec) {
 	if(!is.null(drec)) {
 	   drec$counts     = NULL
 	   drec$DEdata     = NULL
@@ -1039,10 +1237,24 @@ pv.stripDESeq = function(drec) {
 	   drec$reducedFit = NULL
 	   
 	   if(!is.null(drec$block)) {
-	      drec$block = pv.stripDESeq(drec$block)	
+	      drec$block = pv.stripDESeq1(drec$block)	
 	   }	
 	}
 	return(drec)
+}
+
+pv.stripDESeq2 = function(drec) {
+  if(!is.null(drec)) {
+    drec$counts     = NULL
+    drec$DEdata     = NULL
+    drec$fullFit    = NULL
+    drec$reducedFit = NULL
+    
+    if(!is.null(drec$block)) {
+      drec$block = pv.stripDESeq2(drec$block)	
+    }	
+  }
+  return(drec)
 }
 
 

@@ -2,6 +2,22 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.7.4}{
+   \itemize{
+     \item{Add support for DESeq2}
+     \item{Change defaults to use Full library size instead of Effective library size (dba.count, dba.analyze)}
+     \item{Vignette updated to us einline expressions instead of numerical constants, added technical details section for DESeq2}
+     \item{Expanded warnings}
+  }
+}
+
+\section{version 1.7.3}{
+   \itemize{
+     \item{Add generation of result-based DBA object using dba.report}
+     \item{Warnings}
+  }
+}
+
 \section{version 1.7.1}{
    \itemize{
      \item{Fix to track change in edgeR interface}

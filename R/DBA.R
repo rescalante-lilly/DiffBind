@@ -35,7 +35,7 @@
 ## dba -- construct DBA object, e.g. from sample sheet ##
 #########################################################
 DBA_VERSION1  = 1
-DBA_VERSION2  = 6
+DBA_VERSION2  = 8
 DBA_VERSION3  = 0
 
 DBA_GROUP     = PV_GROUP
@@ -58,11 +58,14 @@ DBA_EDGER_BLOCK   = 'edgeRlm'
 DBA_EDGER_GLM     = 'edgeRGLM'
 DBA_EDGER         = DBA_EDGER_GLM
 
-DBA_DESEQ_CLASSIC = 'DESeq'
-DBA_DESEQ_BLOCK   = 'DESeqBlock'
-DBA_DESEQ_GLM     = 'DESeqGLM'
+DBA_DESEQ_CLASSIC = 'DESeq1'
+DBA_DESEQ_BLOCK   = 'DESeq1Block'
+DBA_DESEQ_GLM     = 'DESeq1GLM'
 DBA_DESEQ2        = 'DESeq2'
+DBA_DESEQ2_BLOCK  = 'DESeq2Block'
 DBA_DESEQ         = DBA_DESEQ_GLM
+
+DBA_ALL_METHODS = c(DBA_EDGER,DBA_DESEQ,DBA_DESEQ2)
 
 DBA_DATA_FRAME                    = 0
 DBA_DATA_RANGEDDATA               = 1
@@ -72,12 +75,15 @@ DBA_DATA_DEFAULT                  = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
-               config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER),
+               config=data.frame(RunParallel=TRUE,reportInit="DBA",DataType=DBA_DATA_GRANGES,AnalysisMethod=DBA_EDGER,bCorPlot=TRUE),
                peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
-               bCorPlot=FALSE, attributes) 
+               bCorPlot, attributes) 
 {
    if(!missing(DBA)){
+   	  if(class(DBA)=="character") {
+   	     stop("DBA object is a character string; perhaps meant to be argument \'sampleSheet\'?")	
+   	  }
       DBA = pv.check(DBA)	
    }
    
@@ -103,6 +109,13 @@ dba = function(DBA,mask, minOverlap=2,
    if(is.null(res$config$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
    }
+   if(is.null(res$config$bCorPlot)){
+     if(missing(bCorPlot)){
+       res$config$bCorPlot=TRUE
+     } else {
+       res$config$bCorPlot=bCorPlot   
+     }
+   }
 
    if(missing(DBA)){
       DBA=NULL
@@ -116,8 +129,10 @@ dba = function(DBA,mask, minOverlap=2,
       class(res) = "DBA"
    }
    
-   if(bCorPlot) {
-      dba.plotHeatmap(res)
+   if(missing(bCorPlot)) {
+     dba.plotHeatmap(res)
+   } else if(bCorPlot) {
+     dba.plotHeatmap(res)      
    }
     
    if(bSummarizedExperiment) {
@@ -229,6 +244,9 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
       if(is.null(res$config$AnalysisMethod)){
          res$config$AnalysisMethod=DBA_EDGER
       }
+   	  if(is.null(res$config$bCorPlot)){
+   	    res$config$bCorPlot=TRUE
+   	  } 
             
       if(bMerge) {
          res = pv.check(res)
@@ -328,11 +346,15 @@ DBA_SCORE_TMM_MINUS_EFFECTIVE = PV_SCORE_TMM_MINUS_EFFECTIVE
 DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
-dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
+dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
                      insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bLowMem=FALSE, bParallel=DBA$config$RunParallel) 
+                     bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, bLowMem=FALSE, bParallel=DBA$config$RunParallel) 
 {
-   DBA = pv.check(DBA)            
+   DBA = pv.check(DBA)
+   
+   if(minOverlap > length(DBA$peaks)) {
+      stop(sprintf("minOverlap can not be greater than the number of peaksets [%s]",length(DBA$peaks)))	
+   }           
    
    bUseLast = F
   
@@ -412,8 +434,8 @@ dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="grou
 ###################################################################
 
 dba.analyze = function(DBA, method=DBA$config$AnalysisMethod, 
-                       bSubControl=TRUE, bFullLibrarySize=FALSE, bTagwise=TRUE,
-                       bCorPlot=TRUE, bReduceObjects=T, bParallel=DBA$config$RunParallel)
+                       bSubControl=TRUE, bFullLibrarySize=TRUE, bTagwise=TRUE,
+                       bCorPlot=DBA$config$bCorPlot, bReduceObjects=T, bParallel=DBA$config$RunParallel)
 {
    
    #if(bParallel && DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
@@ -462,9 +484,10 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
 ## dba.report -- generate report for a contrast analysis ##
 ###########################################################
 
-dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
+dba.report = function(DBA, contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
                       fold=0, bNormalized=TRUE,
                       bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
+                      bDB=FALSE, bNotDB=FALSE, bAll=FALSE, bUp=FALSE, bDown=FALSE,
                       file,initString=DBA$config$reportInit,ext='csv',DataType=DBA$config$DataType) 
                      
 {
@@ -473,6 +496,17 @@ dba.report = function(DBA, contrast=1, method=DBA$config$AnalysisMethod, th=.1, 
 
    if(DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) {
       bCounts=T
+   }
+   
+   if(bDB|bNotDB) {
+      res = pv.resultsDBA(DBA,contrasts=contrast,methods=method,th=th,bUsePval=bUsePval,fold=fold,
+                          bDB=bDB,bNotDB=bNotDB,bUp=bUp,bDown=bDown,bAll=bAll)
+                          
+      return(res)                    
+   }
+   
+   if(missing(contrast)) {
+      contrast=1
    }
 
    res = pv.DBAreport(pv=DBA,contrast=contrast,method=method,th=th,bUsePval=bUsePval,
@@ -872,6 +906,10 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
    }
    if(is.null(res$AnalysisMethod)){
       res$config$AnalysisMethod=DBA_EDGER
+   }
+   
+   if(is.null(res$bCorPlot)){
+     res$config$bCorPlot=TRUE
    }
    
    res$config$lsfInit      = NULL

@@ -8,9 +8,10 @@ Generate a report for a differential binding affinity analysis
 Generates a report for a differential binding affinity analysis
 }
 \usage{
-dba.report(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
+dba.report(DBA, contrast, method=DBA$config$AnalysisMethod, 
            th=.1, bUsePval=FALSE, fold=0,  bNormalized=TRUE,  
            bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
+           bDB=FALSE, bNotDB=FALSE, bAll=FALSE, bUp=FALSE, bDown=FALSE,
            file,initString=DBA$config$reportInit,ext='csv',
            DataType=DBA$config$DataType)
 }
@@ -25,14 +26,17 @@ DBA object. A differential binding affinity analysis needs to have been previous
 }
 %\subsection{Optional/defaulted arguments}{}
   \item{contrast}{
-contrast number to report on. See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers.
+contrast number to report on. When generating a report-based DBA object, this can be a vector of contrast numbers. If missing, defaults to first contrast for reports, and all contrasts when generating a report-based DBA object.  See  \code{\link{dba.show}(DBA, bContrast=T)} to get contrast numbers.
 }
   \item{method}{
 method used for analysis:
 \itemize{ 
 \item DBA_EDGER
 \item DBA_DESEQ
+\item DBA_DESEQ2
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
+\item DBA_DESEQ2_BLOCK
 }
 }
 \item{th}{
@@ -55,6 +59,21 @@ logical indicating that count data for individual samples should be reported as 
 }
 \item{bCalledDetail}{
 logical indicating that peak caller status should be included for each sample (if available).  Columns are added for each sample in the first group, followed by columns for each sample in the second group.
+}
+\item{bDB}{
+logical indicating that a report-based DBA object should be generated, and that it should include Differentially Bound (DB) sites (respecting the \code{th}, \code{bUsePval}, and \code{fold} parameters).
+}
+\item{bNotDB}{
+logical indicating that a report-based DBA object should be generated, and that it should include non-Differentially Bound (non-DB) sites (respecting the \code{th}, \code{bUsePval}, and \code{fold} parameters).
+}
+\item{bAll}{
+logical indicating that a report-based DBA object should be generated, and that it should include peaksets combining peaks with both positive and negative fold changes.
+}
+\item{bUp}{
+logical indicating that a report-based DBA object should be generated, and that it should include peaksets with only positive fold changes.
+}
+\item{bDown}{
+logical indicating that a report-based DBA object should be generated, and that it should include peaksets with only ngeative fold changes.
 }
   \item{file}{
 if present, also save the report to a comma separated value (csv) file, using this filename.
@@ -142,7 +161,17 @@ tamoxifen.DB
 #Retrieve report as a SummarizedObject
 tamoxifen.sset = dba.report(tamoxifen, DataType=DBA_DATA_SUMMARIZED_EXPERIMENT)
 tamoxifen.sset
+
+#Retrieve report-based DBA object
+data(tamoxifen_counts)
+tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION, block=tamoxifen$masks$MCF7)
+tamoxifen = dba.analyze(tamoxifen,bCorPlot=FALSE)
+tamoxifen.DB = dba.report(tamoxifen,method=c(DBA_EDGER,DBA_EDGER_BLOCK),
+                          bDB=TRUE, bUp=TRUE, bDown=TRUE)
+dba.plotVenn(tamoxifen.DB,1:4,label1="Single Factor UP",label2="Single Factor DOWN",
+                             label3="Blocking Factor UP",label4="Blocking Factor DOWN")
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 %\keyword{ ~kwd1 }

@@ -32,7 +32,10 @@ number of contrast to report on. See  \code{\link{dba.show}(DBA, bContrast=T)} t
 \itemize{ 
 \item DBA_EDGER
 \item DBA_DESEQ
+\item DBA_DESEQ2
 \item DBA_EDGER_BLOCK
+\item DBA_DESEQ_BLOCK
+\item DBA_DESEQ2_BLOCK
 }
 }
 

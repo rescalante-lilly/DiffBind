@@ -10,9 +10,9 @@ bed and gzip-compressed bed.  File suffixes must be ".bam", ".bed", or ".bed.gz"
 respectively.
 }
 \usage{
-dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_EFFECTIVE, bLog=FALSE,
+dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
           insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          bCalledMasks=TRUE, filterFun=max, bCorPlot=TRUE, bLowMem=FALSE,
+          bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, bLowMem=FALSE,
           bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
