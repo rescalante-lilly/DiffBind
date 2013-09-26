@@ -19,6 +19,7 @@ class BedReader: public Reader {
     static BedReader *open(std::string const &filename);
 
   private:
+    bool isBed(std::string const &filename);
     static int const maxLine = 1024;
     gzFile _fd;
     Interval *_bseq;

@@ -8,7 +8,7 @@ class Croi {
   public:
     Croi(void);
     ~Croi(void);
-    int load(const char *filename,int insertLength);
+    int load(const char *filename,int insertLength,int filetype);
     int count(const char *chrom,int left,int right,int withoutDupes);
     int size();
   private:

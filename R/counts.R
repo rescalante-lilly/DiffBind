@@ -17,7 +17,7 @@ pv.model = function(model,mask,minOverlap=2,
    if(missing(scorecol))     scorecol     = NULL
    if(missing(bLowerBetter)) bLowerBetter = NULL
    if(missing(filter))       filter       = NULL
-   						
+   
    if(!missing(model)) {
    	  if(missing(attributes)) {
          if(is.null(model$attributes)) {   
@@ -114,75 +114,67 @@ pv.model = function(model,mask,minOverlap=2,
    model$config = config
    
    for(i in 1:nrow(samples)) {
-   	
-   	  
-   	  if(is.null(samples$PeakCaller[i])) {
-   	     peakcaller  = caller
-   	  } else if(is.na(samples$PeakCaller[i])) {
-   	     peakcaller  = caller
+      if(is.null(samples$PeakCaller[i])) {
+         peakcaller  = caller
+      } else if(is.na(samples$PeakCaller[i])) {
+         peakcaller  = caller
       } else {
-   	     peakcaller = as.character(samples$PeakCaller[i])
-   	  }
-   	  
-   	  if(is.null(samples$PeakFormat[i])) {
-   	     peakformat  = format
-   	  } else if(is.na(samples$PeakFormat[i])) {
-   	     peakformat  = format
+         peakcaller = as.character(samples$PeakCaller[i])
+      }
+      if(is.null(samples$PeakFormat[i])) {
+         peakformat  = format
+      } else if(is.na(samples$PeakFormat[i])) {
+         peakformat  = format
       } else {
-   	     peakformat = as.character(samples$PeakFormat[i])
-   	  }
-   	  
-   	  if(is.null(samples$ScoreCol[i])) {
-   	     peakscores  = scorecol
-   	  } else if(is.na(samples$ScoreCol[i])) {
-   	     peakscores  = scorecol
+         peakformat = as.character(samples$PeakFormat[i])
+      } 
+      if(is.null(samples$ScoreCol[i])) {
+         peakscores  = scorecol
+      } else if(is.na(samples$ScoreCol[i])) {
+         peakscores  = scorecol
       } else {
-      	 if(is.factor(samples$ScoreCol[i])) {
-      	  peakscores = as.integer(as.character(samples$ScoreCol[i]))	
-      	 } else {
-   	        peakscores = as.integer(samples$ScoreCol[i])
-   	     }
-   	  }
-   	  
-   	  if(is.null(samples$LowerBetter[i])) {
-   	     peaksLowerBetter  = bLowerBetter
-   	  } else if(is.na(samples$LowerBetter[i])) {
-   	     peaksLowerBetter  = bLowerBetter
+         if(is.factor(samples$ScoreCol[i])) {
+            peakscores = as.integer(as.character(samples$ScoreCol[i]))	
+         } else {
+            peakscores = as.integer(samples$ScoreCol[i])
+         }
+      }
+      if(is.null(samples$LowerBetter[i])) {
+         peaksLowerBetter  = bLowerBetter
+      } else if(is.na(samples$LowerBetter[i])) {
+         peaksLowerBetter  = bLowerBetter
       } else {
-   	     peaksLowerBetter = as.logical(samples$LowerBetter[i])
-   	  }
-	  
-	   if(is.null(samples$Filter[i])) {
-		   peakfilter  = filter
-	   } else if(is.na(samples$Filter[i])) {
-		   peakfilter  = filter
-	   } else {
-      	 if(is.factor(samples$Filter[i])) {
-      	    peakfilter = as.integer(as.character(samples$Filter[i]))	
-      	 } else {
-   	        peakfilter = as.integer(samples$Filter[i])
-   	     }
-	   } 
-
-   	  if(is.null(samples$ControlID[i])) {
-   	     controlid  = ''
-   	  } else if(is.na(samples$ControlID[i])) {
-   	     controlid  = ''
+         peaksLowerBetter = as.logical(samples$LowerBetter[i])
+      }
+      if(is.null(samples$Filter[i])) {
+         peakfilter  = filter
+      } else if(is.na(samples$Filter[i])) {
+         peakfilter  = filter
       } else {
-   	     controlid = as.character(samples$ControlID[i])
-   	  }
-   	  
-     counts = samples$Counts[i]
-     if(!is.null(counts)) {
-        if(is.na(counts)) {
-           counts =NULL
-        } else if (counts == "") {
-           counts =NULL
-        }
-     }
-     if(!is.null(counts)) {
-        peakcaller = 'counts'
-     }
+         if(is.factor(samples$Filter[i])) {
+            peakfilter = as.integer(as.character(samples$Filter[i]))	
+         } else {
+            peakfilter = as.integer(samples$Filter[i])
+         }
+      } 
+      if(is.null(samples$ControlID[i])) {
+         controlid  = ''
+      } else if(is.na(samples$ControlID[i])) {
+         controlid  = ''
+      } else {
+         controlid = as.character(samples$ControlID[i])
+      }
+      counts = samples$Counts[i]
+      if(!is.null(counts)) {
+         if(is.na(counts)) {
+            counts =NULL
+         } else if (counts == "") {
+            counts =NULL
+         }
+      }
+      if(!is.null(counts)) {
+         peakcaller = 'counts'
+      }
      
      message(as.character(samples$SampleID[i]),' ',
          as.character(samples$Tissue[i]),' ',
@@ -208,8 +200,8 @@ pv.model = function(model,mask,minOverlap=2,
                          replicate   = as.integer(samples$Replicate[i]),
                          readBam     = as.character(samples$bamReads[i]),
                          controlBam  = as.character(samples$bamControl[i]),
-						 filter      = peakfilter,
-						 counts      = counts,
+						       filter      = peakfilter,
+						       counts      = counts,
                          bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,skipLines=skipLines)
       }
 
@@ -261,13 +253,16 @@ PV_SCORE_TMM_MINUS_EFFECTIVE  = 7
 PV_SCORE_TMM_READS_FULL       = 8
 PV_SCORE_TMM_READS_EFFECTIVE  = 9
 
+PV_READS_DEFAULT   = 0
+PV_READS_BAM       = 3
+PV_READS_BED       = 1
+
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,filterFun=max,
                      bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T,
-                     bLowMem=F) {
+                     bLowMem=F, readFormat=PV_READS_DEFAULT) {
    
    pv = pv.check(pv)
-   
    
    if(minOverlap >0 && minOverlap <1) {
       minOverlap = ceiling(length(pv$peaks) * minOverlap)	
@@ -365,13 +360,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
          results = dba.parallel.lapply(pv$config,params,todo,
                                        pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam)
+                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat)
       } else {
          results = NULL
          for(job in todo) {
       	    message('Sample: ',job)
             results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam))
+                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat))
          }	
       }
       if(PV_DEBUG){
@@ -389,7 +384,20 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       redoScore = defaultScore
       defaultScore = PV_SCORE_READS_MINUS	
    } else redoScore = 0
-      
+   
+   errors = vapply(results,function(x) if(is.list(x)) return(FALSE) else return(TRUE),TRUE)
+   if(sum(errors)) {
+      errors = which(errors)
+      for(err in errors) {
+         if(class(results[[err]])=="try-error") {
+            warning(strsplit(results[[err]][1],'\n')[[1]][2],call.=FALSE)   
+         } else {
+            warning(results[[err]],call.=FALSE)
+         }
+      }
+      stop("Error processing one or more read files. Check warnings().",call.=FALSE)
+   }
+   
    allchips = unique(pv$class[c(PV_BAMREADS,PV_BAMCONTROL),])
    numAdded = 0
    for(chipnum in 1:numChips) {
@@ -543,7 +551,8 @@ pv.checkExists = function(filelist){
 }
 
 pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
-                        bLowMem=F,yieldSize,mode,singleEnd,scanbamparam) {
+                        bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
+                        fileType=0) {
 
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
    
@@ -553,7 +562,7 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
    }
    
    fdebug("Starting croi_load_reads...")
-   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength))
+   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
    fdebug("Loaded...")
    libsize.croi <- .Call("croi_tree_size",bamtree)
    fdebug("Starting croi_count_reads...")

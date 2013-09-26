@@ -23,6 +23,9 @@
 \alias{DBA_SCORE_TMM_READS_EFFECTIVE}
 \alias{DBA_SCORE_TMM_MINUS_FULL}
 \alias{DBA_SCORE_TMM_MINUS_EFFECTIVE}
+\alias{DBA_READS_DEFAULT}
+\alias{DBA_READS_BAM}
+\alias{DBA_READS_BED}
 \alias{DBA_EDGER}
 \alias{DBA_DESEQ}
 \alias{DBA_DESEQ2}
@@ -75,6 +78,10 @@ DBA_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE
 DBA_SCORE_TMM_MINUS_FULL
 DBA_SCORE_TMM_MINUS_EFFECTIVE
+
+DBA_READS_DEFAULT
+DBA_READS_BAM
+DBA_READS_BED
 
 DBA_EDGER
 DBA_DESEQ
@@ -171,6 +178,16 @@ dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Co
 }
 \item{DBA_SCORE_TMM_MINUS_EFFECTIVE}{
 dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Effective Library size
+}
+
+\item{DBA_READS_DEFAULT}{
+When counting read files, use the file extension to determine the file type.
+}
+\item{DBA_READS_BAM}{
+When counting read files, assume the file type is BAM, regardless of the file extension.
+}
+\item{DBA_READS_BED}{
+When counting read files, assume the file type is BED (or zipped BED), regardless of the file extension.
 }
 
 \item{DBA_EDGER}{

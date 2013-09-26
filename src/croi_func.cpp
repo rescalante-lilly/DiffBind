@@ -8,11 +8,11 @@ Croi::Croi(void) {
   iv = new bode::Interval();
 }
 
-int Croi::load(const char *filename,int insertLength) {
+int Croi::load(const char *filename,int insertLength,int ftype) {
   int read_count;
   std::string fn(filename);
   bode::Interval *read_iv;
-  bode::Reader *rdr = bode::Reader::open(fn);
+  bode::Reader *rdr = bode::Reader::open(fn,ftype);
 
   read_count = 0;
   while ((read_iv = rdr->next())) {

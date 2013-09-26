@@ -12,7 +12,8 @@ respectively.
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
           insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, bLowMem=FALSE,
+          bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+          bLowMem=FALSE, readFormat = DBA_READS_DEFAULT, 
           bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -82,6 +83,15 @@ DBA$config$intersectMode \tab mode indicating which overlap algorithm to use; de
 DBA$config$singleEnd \tab logical indicating if reads are single end; default is \code{TRUE}\cr 
 DBA$config$scanbamparam \tab \code{ScanBamParam} object to pass to \code{\link{summarizeOverlaps}}. If present, \code{bRemoveDuplicates} is ignored.\cr 
 }
+}
+\item{readFormat}{
+Specify the file type of the read files, over-riding the file extension. Possible values:
+\tabular{ll}{
+DBA_READS_DEFAULT \tab use file extension (.bam, .bed, .bed.gz) to determine file type\cr
+DBA_READS_BAM \tab assume the file type is BAM, regardless of the file extension\cr
+DBA_READS_BED \tab assume the file type is BED (or zipped BED), regardless of the file extension.
+}
+Note that if \code{readFormat} is anything other than \code{DBA_READS_DEFAULT}, all the read files must be of the same file type.
 }
 \item{bParallel}{
 if TRUE, use multicore to get counts for each read file in parallel

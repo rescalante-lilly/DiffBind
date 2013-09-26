@@ -3,13 +3,65 @@
 #include <fstream>
 #include <zlib.h>
 #include <iostream>
+#include <ctype.h>
+#include <R.h>
 
 #include "interval.h"
 #include "util.h"
 #include "bedReader.h"
 
+bool isDigits(char *s) {
+  int slen = strlen(s);
+  bool okay = true;
+  for (int i=0;i<slen;i++) {
+    if (!isdigit(s[i])) {
+      okay = false;
+      break;
+    }
+  }
+  return okay;
+}
+
+bool bode::BedReader::isBed(std::string const &filename) {
+  char *res;
+  gzFile fd;
+  char buffer[maxLine];
+  bool okay = true;
+  int count,lines;
+  char *fields[12];
+  bool digits;
+
+  fd = gzopen(filename.c_str(),"r");
+  for (lines = 0;lines < 10; lines++) { // check first 10 lines
+    res = gzgets(fd,buffer,maxLine);
+    if (res == NULL) {
+      okay = false;
+      break;
+    }
+    if (lines == 0 && strncmp(buffer,"track",5) == 0) {
+      continue;
+    }
+    bode::trimTrailing(buffer);
+    count = bode::splits(buffer,fields,12);
+    if (count < 3 || (count > 6 && count != 12)) {
+      okay = false;
+      break;
+    };
+    if (!isDigits(fields[1]) || !isDigits(fields[2])) {
+      okay = false;
+      break;
+    }
+  }
+  gzclose(fd);
+  return okay;
+}
+
 bode::BedReader::BedReader(std::string const &filename) {
   char *res;
+
+  if (!isBed(filename)) {
+    error("file '%s' does not appear to be a BED file (coordinates are not integers)",filename.c_str());
+  }
   _fd = gzopen(filename.c_str(),"r");
   _buffer = new char[maxLine];
 

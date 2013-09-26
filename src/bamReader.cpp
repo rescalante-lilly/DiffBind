@@ -1,11 +1,30 @@
+#include <stdio.h>
 #include <string>
+#include <zlib.h>
 #include <samtools/sam.h>
 #include <samtools/bam.h>
+#include <R.h>
 
 #include "interval.h"
 #include "bamReader.h"
 
+bool bode::BamReader::isBam(std::string const &filename) {
+  gzFile fd;
+  char buf[5];
+  int rd;
+  int x;
+
+  fd = gzopen(filename.c_str(),"r");
+  rd = gzread(fd,buf,4);
+  gzclose(fd);
+  return (buf[0] == 'B' && buf[1] == 'A' && buf[2] == 'M' && buf[3] == '\1');
+}
+
+
 bode::BamReader::BamReader(std::string const &filename) {
+  if (!isBam(filename)) {
+    error("file '%s' does not appear to be a BAM file (bad magic number)",filename.c_str());
+  }
   _fd = samopen(filename.c_str(),"rb",0);
   _seq = bam_init1();
   _bseq = new Interval();

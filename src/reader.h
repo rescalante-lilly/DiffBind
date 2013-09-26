@@ -13,7 +13,7 @@ class Reader {
     virtual Interval *next(void) = 0;
     virtual void close(void) = 0;
     virtual bool eof(void) = 0;
-    static Reader *open(std::string const &filename);
+    static Reader *open(std::string const &filename, int const &filetype);
 };
 
 }

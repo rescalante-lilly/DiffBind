@@ -12,16 +12,17 @@ extern "C" {
     R_ClearExternalPtr(tree_r);
   }
 
-  SEXP croi_load_reads(SEXP filename_r,SEXP insertLength_r) {
+  SEXP croi_load_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r) {
     Croi *tree;
     SEXP tree_r;
     const char *filename;
-    int insertLength;
+    int insertLength,filetype;
  
     insertLength = INTEGER(insertLength_r)[0];
+    filetype = INTEGER(filetype_r)[0];
     filename = CHAR(STRING_ELT(filename_r,0));
     tree = new Croi();
-    tree->load(filename,insertLength);
+    tree->load(filename,insertLength,filetype);
     tree_r = R_MakeExternalPtr((void *)tree,R_NilValue,R_NilValue);
     R_RegisterCFinalizerEx(tree_r,croi_free_tree,TRUE);
     return tree_r;

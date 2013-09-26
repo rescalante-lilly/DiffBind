@@ -346,9 +346,15 @@ DBA_SCORE_TMM_MINUS_EFFECTIVE = PV_SCORE_TMM_MINUS_EFFECTIVE
 DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
 
+DBA_READS_DEFAULT = PV_READS_DEFAULT
+DBA_READS_BAM     = PV_READS_BAM
+DBA_READS_BED     = PV_READS_BED
+
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
                      insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, bLowMem=FALSE, bParallel=DBA$config$RunParallel) 
+                     bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+                     bLowMem=FALSE, readFormat=DBA_READS_DEFAULT,
+                     bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)
    
@@ -385,7 +391,8 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
    res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
                    bCalledMasks=bCalledMasks, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
-                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,bLowMem=bLowMem)
+                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
+                   bLowMem=bLowMem,readFormat=readFormat)
    
    if(length(res$contrasts)>0) {
       for(i in 1:length(res$contrasts)) {

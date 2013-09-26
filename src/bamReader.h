@@ -19,6 +19,7 @@ class BamReader: public Reader {
     static BamReader *open(std::string const &filename);
 
   private:
+    bool isBam(std::string const &filename);
     samfile_t *_fd;
     bam1_t *_seq;
     Interval *_bseq;

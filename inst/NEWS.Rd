@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.7.5}{
+   \itemize{
+     \item{Add support in dba.count to specify read file type (instead of using file suffix) }
+  }
+}
+
 \section{version 1.7.4}{
    \itemize{
      \item{Add support for DESeq2}
