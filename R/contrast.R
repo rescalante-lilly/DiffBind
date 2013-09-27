@@ -660,14 +660,14 @@ pv.doResults = function(res,DBA,contrast,method,th,bUsePval,fold=0,bDB=T,bNotDB=
        if(is.null(DBA$contrasts[[contrast]]$DESeq1)) {
           return(res)	
        }      
-       methname = "DESeq1"
+       methname = "DESeq"
        block = ""
     }
     if (method=='DESeq1Block') {
        if(is.null(DBA$contrasts[[contrast]]$DESeq1$block)) {
           return(res)	
        }           
-       methname="DESeq1"
+       methname="DESeq"
        block="block"	
     }
     if(method=='DESeq2' || method=='DESeq2GLM') {

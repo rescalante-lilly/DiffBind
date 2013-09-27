@@ -37,6 +37,7 @@
 \alias{DBA_EDGER_GLM}
 \alias{DBA_DESEQ_GLM}
 \alias{DBA_ALL_METHODS}
+\alias{DBA_ALL_BLOCK}
 \alias{DBA_DATA_FRAME}
 \alias{DBA_DATA_GRANGES}
 \alias{DBA_DATA_RANGEDDATA}
@@ -94,6 +95,7 @@ DBA_DESEQ_CLASSIC
 DBA_EDGER_GLM
 DBA_DESEQ_GLM
 DBA_ALL_METHODS
+DBA_ALL_BLOCK
 
 DBA_DATA_FRAME
 DBA_DATA_GRANGES
@@ -222,6 +224,9 @@ differential analysis method: use GLM in DESeq for two-group comparisons
 }
 \item{DBA_ALL_METHODS}{
 use all three analysis methods: c(DBA_EDGER, DBA_DESEQ, DBA_DESEQ2)
+}
+\item{DBA_ALL_BLOCK}{
+report on block results for all three analysis methods: c(DBA_EDGER_BLOCK, DBA_DESEQ_BLOCK, DBA_DESEQ2_BLOCK)
 }
 
 \item{DBA_DATA_GRANGES}{

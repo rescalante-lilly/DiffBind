@@ -38,6 +38,11 @@ method used for analysis:
 \item DBA_DESEQ_BLOCK
 \item DBA_DESEQ2_BLOCK
 }
+When generating a report-based DBA object (see \code{bDB} and \code{bNotDB} parameters below), a list of methods may be supplied, including the shortcuts
+\itemize{ 
+\item DBA_ALL_METHODS
+\item DBA_ALL_BLOCK
+}
 }
 \item{th}{
 significance threshold; all sites with FDR (or p-values, see bUsePval) less than or equal to this value will be included in the report. A value of 1 will include all binding sites in the report.
@@ -99,7 +104,7 @@ Can be set as default behavior by setting DBA$config$DataType.
 %\details{
 %}
 \value{
-A report dataframe, GRanges, or RangedData object, with a row for each binding site within the thresholding parameters, and the following columns:
+if neither \code{bDB} or \code{bNotDB} is set to \code{TRUE}, a report dataframe, GRanges, or RangedData object is returned, with a row for each binding site within the thresholding parameters, and the following columns:
 \item{Chr}{Chromosome of binding site}
 \item{Start}{Starting base position of binding site}
 \item{End}{End base position of binding site}
@@ -117,6 +122,8 @@ If bCalled is TRUE and caller status is available, two more columns will follow:
 If bCounts is TRUE, a column will be present for each sample in group 1, followed by each sample in group 2. The Sample ID will be used as the column header. This column contains the read counts for the sample.
 
 If bCalledDetail is TRUE, a column will be present for each sample in group 1, followed by each sample in group 2. The Sample ID will be used as the column header. This column contains a "+" to indicate for which sites the sample was called as a peak, and a "-" if it was not so identified.
+
+If  \code{bDB} or \code{bNotDB} is set to \code{TRUE}, a special \code{DBA object} is returned,containing peaksets based on sites determined to be differentiall bound (or not) as spcified using the \code{bDB}, \code{bNotDB}, \code{bUp}, \code{Down}, and \code{bAll} parameters. In this \code{DBA object}, the \code{Tissue} value will specify the direction of the change (\code{up} for positive fold changes, \code{down} for negative fold changes, and \code{all} both any fold change). The \code{Factor} value specifies if the peaks are differnetially bound (\code{DB}) or not (\code{!DB}). The \code{Condition} value specifies the analysis method (e.g. \code{edgeR}), and the \code{Treatment} value is blank for unblocked analyses and set to \code{block} for blocked analyses.
 }
 %\references{
 %% ~put references to the literature/web site here ~

@@ -2,6 +2,14 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.7.6}{
+   \itemize{
+     \item{Add DBA_ALL_BLOCK}
+     \item{update dba.report man page}
+     \item{change vignette to compare edgeR, DESeq, and DESeq2}
+  }
+}
+
 \section{version 1.7.5}{
    \itemize{
      \item{Add support in dba.count to specify read file type (instead of using file suffix) }
