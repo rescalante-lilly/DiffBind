@@ -1102,7 +1102,7 @@ pv.Signal2Noise = function(pv) {
 		rip = sum(pv$peaks[[i]]$Reads)
 		treads = as.integer(pv$class[PV_READS,i])
 		if(treads) {
-            sn  = rip / treads
+            sn  = (rip-sum(pv$peaks[[i]]$Reads==1))/treads
             sns[i] = sprintf("%1.2f",sn)
 		}	
 	}
