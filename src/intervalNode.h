@@ -9,8 +9,8 @@ namespace bode {
 
 class IntervalNode {
   public:
-    IntervalNode(int left,int right,int s);
-    ~IntervalNode();
+//    ~IntervalNode();
+    void init(int left,int right,int s);
     void incrementCountF()          { countFwd++; };
     void incrementCountR()          { countRev++; };
     int getCount()                  { return countFwd+countRev; };

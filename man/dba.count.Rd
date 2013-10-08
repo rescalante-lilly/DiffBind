@@ -13,7 +13,7 @@ respectively.
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
           insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
           bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
-          bLowMem=FALSE, readFormat = DBA_READS_DEFAULT, 
+          bLowMem, bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
           bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -22,10 +22,9 @@ dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
 %\subsection{Required arguments}{}
 
 
-\item{DBA}{
+ \item{DBA}{
 DBA object
 }
-%\subsection{Optional/defaulted arguments}{}
  \item{peaks}{
 If GRanges, RangedData, dataframe, or matrix, this parameter contains the intervals to use for counting. If character string, it specifies a file containing the intervals to use (with the first three columns specifying chromosome, startpos, endpos).If missing or a mask, generates a consensus peakset using minOverlap parameter (after applying the mask if present). If NULL, changes the score used in the global binding matrix to the score type specified in the score parameter without re-counting.
 }
@@ -62,6 +61,7 @@ If filter is a vector of values, \code{dba.count} will return a vector of the sa
 }
 \item{bRemoveDuplicates}{
 logical indicating if duplicate reads (ones that map to exactly the same genomic position) should be removed. If TRUE, any location where multiple reads map will  be counted as a single read. Note that if \code{bLowMem} is set, duplicates needs to have been already marked in all of the BAM files.
+The built-in counting code may not correctly handle certain cases when the \code{bRemoveDuplicates} paramter is set to \code{TRUE}. These cases include paried-end data and datasets where the read length may differ within a single BAM file. In these cases, see the \code{bUseSummarizeOverlaps} parameter.
 }
 \item{bScaleControl}{
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
@@ -76,7 +76,14 @@ function that will be invoked for each interval with a vector of scores for each
 logical indicating whether to plot a correlation heatmap for the counted data
 }
 \item{bLowMem}{
-logical indicating that the low-memory options should be used for counting (using \code{\link{summarizeOverlaps}}). This option is slower but memory use does not increase with the number of reads to count. If \code{TRUE}, all read files must be BAM (.bam extension), with associated index files (.bam.bai extension). \code{insertLength} must absent. Two additional parameters for \code{\link{summarizeOverlaps}} may be specified in \code{DBA$config}:
+DEPRECATED. See \code{bUseSummarizeOverlaps}.
+}
+\item{bUseSummarizeOverlaps}{
+logical indicating that \code{\link{summarizeOverlaps}} should be used for counting instead of the built-in counting code. This option is slower but uses the more standard counting function. If \code{TRUE}, all read files must be BAM (.bam extension), with associated index files (.bam.bai extension). The \code{insertLength} parameter must absent. 
+
+See notes for when the \code{bRemoveDuplicates} parameter is set to \code{TRUE}, where the built-in counting code may not correctly handle certain cases and \code{bUseSummarizeOverlaps} should be set to \code{TRUE}.
+
+Four additional parameters for \code{\link{summarizeOverlaps}} may be specified in \code{DBA$config}:
 \tabular{ll}{
 DBA$config$yieldSize \tab yieldSize indicating how many reads to process at one time; default is 5000000. The lower this value, the less memory will be used, but the more time it will take to complete the count operation.\cr
 DBA$config$intersectMode \tab mode indicating which overlap algorithm to use; default is \code{"IntersectionNotEmpty"}\cr 

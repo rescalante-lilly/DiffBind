@@ -17,12 +17,12 @@ bode::IntervalSet::~IntervalSet() {
   delete chroms;
 }
 
-void bode::IntervalSet::insert(Interval const *inter) {
+void bode::IntervalSet::insert(Interval const *inter,bode::NodeGroup* ng) {
   const string chrom = inter->chrom();
   if (chroms->count(chrom) == 0) {
     (*chroms)[chrom] = new IntervalTree();
   }
-  (*chroms)[chrom]->insert(inter->left(),inter->right(),inter->strand());
+  (*chroms)[chrom]->insert(inter->left(),inter->right(),inter->strand(),ng);
 }
 
 int bode::IntervalSet::coverage(std::string const &chrom,int point) const {
@@ -70,4 +70,8 @@ int bode::IntervalSet::realCount() const {
 
 std::map<std::string,bode::IntervalTree *,bode::chromComp>::iterator bode::IntervalSet::chromIter() {
   return chroms->begin();
+}
+
+void bode::IntervalSet::clear(void) {
+  chroms->clear();
 }

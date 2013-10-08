@@ -554,6 +554,7 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                         bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
                         fileType=0) {
 
+   bufferSize = 1e6
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
    
    if(bLowMem) {
@@ -561,17 +562,23 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
       return(res)
    }
    
-   fdebug("Starting croi_load_reads...")
-   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
-   fdebug("Loaded...")
-   libsize.croi <- .Call("croi_tree_size",bamtree)
+#   fdebug("Starting croi_load_reads...")
+#   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
+#   fdebug("Loaded...")
+#   libsize.croi <- .Call("croi_tree_size",bamtree)
    fdebug("Starting croi_count_reads...")
-   counts.croi <- .Call("croi_count_reads",bamtree,
-                                           as.character(intervals[[1]]),
-                                           as.integer(intervals[[2]]),
-                                           as.integer(intervals[[3]]),
-                                           as.integer(length(intervals[[1]])),
-                                           as.logical(bWithoutDupes))
+   icount <- length(intervals[[1]])
+   counts.croi <- vector(mode="integer",length=icount)
+   libsize.croi <- .Call("croi_count_reads",bamfile,
+                                            as.integer(insertLength),
+                                            as.integer(fileType),
+                                            as.integer(bufferSize),
+                                            as.character(intervals[[1]]),
+                                            as.integer(intervals[[2]]),
+                                            as.integer(intervals[[3]]),
+                                            as.integer(icount),
+                                            as.logical(bWithoutDupes),
+                                            counts.croi)
    fdebug("Done croi_count_reads...")
    counts.croi[counts.croi==0]=1
    fdebug(sprintf("Counted %d reads...",libsize.croi))

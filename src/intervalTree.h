@@ -2,6 +2,7 @@
 #define __INTERVALTREE_H
 
 #include "intervalNode.h"
+#include "nodeGroup.h"
 
 namespace bode {
 
@@ -9,8 +10,8 @@ class IntervalTree {
 
   public:
     IntervalTree(void);
-    virtual ~IntervalTree(void);
-    void insert(int left,int right,int strand);
+//    virtual ~IntervalTree(void);
+    void insert(int left,int right,int strand,bode::NodeGroup *ng);
     int coverage(int point);
     int reads(int left,int right,int withoutDupes);
     int summit(int left,int right);

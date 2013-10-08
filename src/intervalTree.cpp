@@ -15,11 +15,13 @@ bode::IntervalTree::IntervalTree(void) {
   count = 0;
 }
 
+/*
 bode::IntervalTree::~IntervalTree(void) {
   if (root != NULL) {
     delete root;
   }
 }
+*/
 
 bode::IntervalNode *bode::IntervalTree::raw_insert(IntervalNode *node) {
   bode::IntervalNode *x,*y;
@@ -184,14 +186,17 @@ int bode::IntervalTree::i_realCount(bode::IntervalNode *n) {
 
 /******************************************************************************/
 
-void bode::IntervalTree::insert(int left,int right,int strand) {
-  bode::IntervalNode *x = new bode::IntervalNode(left,right,strand);
+void bode::IntervalTree::insert(int left,int right,int strand,bode::NodeGroup *ng) {
+/*  bode::IntervalNode *x = new bode::IntervalNode(left,right,strand); */
+  bode::IntervalNode *x = ng->get();
+  x->init(left,right,strand);
   bode::IntervalNode *y;
   y = raw_insert(x);
   if (y != x) { // this means we found a duplicate interval and just incremented
                 // its counter instead of inserting the new interval
-    delete x;
+//    delete x;
     count++;
+    ng->pop();
     return;
   }
   rebalance(x);

@@ -29,7 +29,6 @@ bool bode::BedReader::isBed(std::string const &filename) {
   bool okay = true;
   int count,lines;
   char *fields[12];
-  bool digits;
 
   fd = gzopen(filename.c_str(),"r");
   for (lines = 0;lines < 10; lines++) { // check first 10 lines

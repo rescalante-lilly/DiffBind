@@ -354,10 +354,14 @@ DBA_READS_BED     = PV_READS_BED
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
                      insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
                      bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
-                     bLowMem=FALSE, readFormat=DBA_READS_DEFAULT,
+                     bLowMem, bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
                      bParallel=DBA$config$RunParallel) 
 {
    DBA = pv.check(DBA)
+   
+   if(!missing(bLowMem)) {
+      stop("parameter bLowMem deprecated, replaced with bUseSummarizeOverlaps")   
+   }
    
    if(minOverlap > length(DBA$peaks)) {
       stop(sprintf("minOverlap can not be greater than the number of peaksets [%s]",length(DBA$peaks)))	
@@ -393,7 +397,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                    defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
                    bCalledMasks=bCalledMasks, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                    bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
-                   bLowMem=bLowMem,readFormat=readFormat)
+                   bLowMem=bUseSummarizeOverlaps,readFormat=readFormat)
    
    if(length(res$contrasts)>0) {
       for(i in 1:length(res$contrasts)) {

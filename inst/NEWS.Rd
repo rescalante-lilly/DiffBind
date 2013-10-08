@@ -2,6 +2,13 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.7.8}{
+   \itemize{
+     \item{Optimize dba.count to use much less memory and go faster}
+     \item{in dba.count, deprecate bLowMem and change to bUseSummarizeOverlaps}
+  }
+}
+
 \section{version 1.7.6}{
    \itemize{
      \item{Add DBA_ALL_BLOCK}

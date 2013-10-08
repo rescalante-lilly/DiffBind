@@ -28,7 +28,8 @@ class IntervalSet {
   public:
     IntervalSet();
     ~IntervalSet();
-    virtual void insert(Interval const *inter);
+    virtual void insert(Interval const *inter,bode::NodeGroup* ng);
+    void clear(void);
     int coverage(std::string const &chrom,int point) const;
     int overlapping(Interval const *inter,int withoutDupes) const;
     int count() const;
