@@ -2,46 +2,40 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
-\section{version 1.7.8}{
-   \itemize{
-     \item{Optimize dba.count to use much less memory and go faster}
-     \item{in dba.count, deprecate bLowMem and change to bUseSummarizeOverlaps}
-  }
-}
+\section{version 1.8.0}{
 
-\section{version 1.7.6}{
-   \itemize{
-     \item{Add DBA_ALL_BLOCK}
-     \item{update dba.report man page}
-     \item{change vignette to compare edgeR, DESeq, and DESeq2}
-  }
-}
+Changes since last release:
 
-\section{version 1.7.5}{
-   \itemize{
-     \item{Add support in dba.count to specify read file type (instead of using file suffix) }
-  }
-}
+\itemize{
 
-\section{version 1.7.4}{
-   \itemize{
-     \item{Add support for DESeq2}
-     \item{Change defaults to use Full library size instead of Effective library size (dba.count, dba.analyze)}
-     \item{Vignette updated to us einline expressions instead of numerical constants, added technical details section for DESeq2}
-     \item{Expanded warnings}
-  }
-}
-
-\section{version 1.7.3}{
-   \itemize{
-     \item{Add generation of result-based DBA object using dba.report}
-     \item{Warnings}
-  }
-}
-
-\section{version 1.7.1}{
-   \itemize{
-     \item{Fix to track change in edgeR interface}
+     \item{Add support for DESeq2:}{
+     \itemize{
+      \item{New: Add DBA_DESEQ2, DBA_ALL_METHODS and DBA_ALL_BLOCK method constants}     
+      \item{Change: dba.analyze can analyze using DESeq2}
+      \item{Change: all reporting and plotting functions support DESeq2 results}
+      \item{Change: vignette includes comparison of edgeR, DESeq, and DESeq2}
+     }
+   }
+    
+     \item{Changes to counting using dba.count:}{
+       \itemize{
+        \item{Change: optimize built-in counting code to use much less memory and run faster}
+        \item{Change: deprecate bLowMem, replaced with bUseSummarizeOverlaps}
+        \item{New: add readFormat parameter to specify read file type (instead of using file suffix)}
+       }
+     }
+     
+   \item{New: generation of result-based DBA object using dba.report (makes it easier to work with differentially bound peaksets)}{}
+     
+    \item{Changes to defaults:}{
+      \itemize{
+        \item{Change: default score is now DBA_SCORE_TMM_MINUS_FULL instead of DBA_SCORE_TMM_MINUS_EFFECTIVE in dba.count}
+       \item{Change: default value for bFullLibrarySize is now TRUE in dba.analyze}
+        \item{New: add bCorPlot option to DBA$config to turn off CorPlot by default}
+      }
+    }
+    
+   \item{Various bugfixes, improved warnings, updated documentation}{}
   }
 }
 
