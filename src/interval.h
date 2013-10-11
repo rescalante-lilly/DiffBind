@@ -22,6 +22,7 @@ class Interval {
     bool isMapped(void) const                              { return _mapped; };
     int strand(void) const                                 { return _strand; };
 
+    virtual void updatecstr(const char *c_str,int l,int r);
     virtual void update(std::string const &chr,int l,int r);
     virtual void update(std::string const &chr,int l,int r,int s);
     virtual std::string format(void) const;

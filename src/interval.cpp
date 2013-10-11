@@ -51,6 +51,13 @@ bool bode::operator<(Interval const &l,Interval const &r) {
           (l._chrom == r._chrom && l._left == r._left && l._right == r._right && l._strand > r._strand));
 }
 
+void bode::Interval::updatecstr(const char *c_str,int l,int r) {
+  _chrom.assign(c_str);
+  _left = l;
+  _right = r;
+  _mapped = true;
+}
+
 void bode::Interval::update(std::string const &chr,int l,int r) {
   _chrom = chr;
   _left = l;

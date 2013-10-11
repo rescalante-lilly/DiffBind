@@ -5,22 +5,25 @@
 #include "nodeGroup.h"
 #include "interval.h"
 #include "intervalSet.h"
+#include "iBucket.h"
 
 class Croi {
   public:
     Croi(void);
     ~Croi(void);
     void open(const char *filename,int insertLength,int filetype);
-    int load(int maxReads,bode::NodeGroup *ng);
+    int load(int maxReads,bode::NodeGroup *ng,IBucket *intervals);
     void close(void);
     int count(const char *chrom,int left,int right,int withoutDupes);
     int size(void);
     void clearCounts(void);
+    int getIlength(void);
   private:
     bode::IntervalSet *isets;
     bode::Interval *iv;
     bode::Reader *rdr;
     int iLength;
+    int getReadLength(const char *filename,int ftype);
 };
 
 #endif

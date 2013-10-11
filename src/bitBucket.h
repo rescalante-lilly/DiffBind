@@ -1,8 +1,6 @@
 #ifndef __BITBUCKET_H
 #define __BITBUCKET_H
 
-namespace bode {
-
 class BitBucket {
   public:
     BitBucket(const int n);
@@ -16,7 +14,5 @@ class BitBucket {
     int size;
     unsigned char *bits;
 };
-
-}
 
 #endif

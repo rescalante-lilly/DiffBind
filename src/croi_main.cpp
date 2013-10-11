@@ -1,8 +1,10 @@
+#include <unistd.h>
 #include <R.h>
 #include <Rinternals.h>
 
 #include "nodeGroup.h"
 #include "croi_func.h"
+#include "iBucket.h"
 
 extern "C" {
 
@@ -17,7 +19,9 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
     int *left,*right,*counts;
     int i,readCount,loadedReadCount;
     SEXP rv;
+    IBucket *intervals;
  
+    intervals = NULL;
     filename = CHAR(STRING_ELT(filename_r,0));
     insertLength = INTEGER(insertLength_r)[0];
     filetype = INTEGER(filetype_r)[0];
@@ -33,7 +37,10 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
     readCount = 0;
     loadedReadCount = 0;
     tree.open(filename,insertLength,filetype);
-    loadedReadCount = tree.load(bufferSize,ng);
+    if (withoutDupes) {
+      intervals = new IBucket(intervalCount,tree.getIlength(),chrom_r,left,right);
+    }
+    loadedReadCount = tree.load(bufferSize,ng,intervals);
     readCount = loadedReadCount;
     for (i=0;i<intervalCount;i++) {
       chrom = CHAR(STRING_ELT(chrom_r,i));
@@ -43,7 +50,7 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
 
     while (loadedReadCount == bufferSize) {
       tree.clearCounts();
-      loadedReadCount = tree.load(bufferSize,ng);
+      loadedReadCount = tree.load(bufferSize,ng,intervals);
       readCount += loadedReadCount;
       for (i=0;i<intervalCount;i++) {
         chrom = CHAR(STRING_ELT(chrom_r,i));
@@ -51,7 +58,9 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
       }
       ng->clear();
     }
-
+    if (intervals != NULL) {
+      delete intervals;
+    }
     PROTECT(rv = allocVector(INTSXP,1));
     INTEGER(rv)[0] = readCount;
     UNPROTECT(1);
