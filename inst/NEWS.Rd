@@ -2,6 +2,10 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.8.1}{
+  \item{Fix: longstanding bug in dba.count that could case reads mapped to chrN_random to be counted aginst intervals on chrN.}
+}
+
 \section{version 1.8.0}{
 
 Changes since last release:
