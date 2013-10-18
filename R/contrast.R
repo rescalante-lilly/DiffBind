@@ -712,34 +712,34 @@ pv.doResults = function(res,DBA,contrast,method,th,bUsePval,fold=0,bDB=T,bNotDB=
     if(bDB) {
        if(bAll) {
           if(sum(db)) {
-             res = dba.peakset(res,peaks=peaks[db,],sampID=id,factor="DB",tissue="all",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[db,],sampID=id,factor="DB",tissue="All",condition=methname,treatment=block)	
           }
        }
        if(bUp) {
           if(sum(db&up)) {	
-             res = dba.peakset(res,peaks=peaks[db&up,],sampID=id, factor ="DB", tissue ="up",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[db&up,],sampID=id, factor ="DB", tissue ="Gain",condition=methname,treatment=block)	
           }
        }
        if(bDown) {
        	  if(sum(db&!up)) {
-             res = dba.peakset(res,peaks=peaks[db&!up,],sampID=id, factor ="DB", tissue ="down",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[db&!up,],sampID=id, factor ="DB", tissue ="Loss",condition=methname,treatment=block)	
           }
        }		
     }
     if(bNotDB) {
        if(bAll) {
        	  if(sum(!db)) {
-             res = dba.peakset(res,peaks=peaks[!db,],sampID=id, factor ="!DB", tissue ="all",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[!db,],sampID=id, factor ="!DB", tissue ="All",condition=methname,treatment=block)	
           }
        }
        if(bUp) {
        	  if(sum(!db&up)) {
-             res = dba.peakset(res,peaks=peaks[!db&up,],sampID=id, factor ="!DB", tissue ="up",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[!db&up,],sampID=id, factor ="!DB", tissue ="Gain",condition=methname,treatment=block)	
           }
        }
        if(bDown) {
        	  if(sum(!db&!up)) {
-             res = dba.peakset(res,peaks=peaks[!db&!up,],sampID=id, factor ="!DB", tissue ="down",condition=methname,treatment=block)	
+             res = dba.peakset(res,peaks=peaks[!db&!up,],sampID=id, factor ="!DB", tissue ="Loss",condition=methname,treatment=block)	
           }
        }		
     }    

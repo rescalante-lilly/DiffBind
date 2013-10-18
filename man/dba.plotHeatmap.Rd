@@ -10,9 +10,10 @@ Draws a binding site heatmap
 \usage{
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                 contrast, method=DBA$config$AnalysisMethod, 
-                th=.1, bUsePval=FALSE, report, score,
-                mask, sites, sortFun,
-                correlations=TRUE, olPlot=DBA_COR, ColAttributes,RowAttributes, colSideCols, rowSideCols = colSideCols,
+                th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
+                report, score, mask, sites, sortFun,
+                correlations=TRUE, olPlot=DBA_COR, 
+                ColAttributes,RowAttributes, colSideCols, rowSideCols=colSideCols,
                 margin=10, colScheme="Greens", distMethod="pearson",
                 ...)
 }
@@ -31,15 +32,14 @@ DBA object.
 \item{attributes}{
 attribute or vector of attributes to use for column labels:
 \itemize{ 
-\item DBA_ID
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_TREATMENT
-\item DBA_REPLICATE
-\item DBA_CONSENSUS
-\item DBA_CALLER
-\item DBA_CONTROL
+\item \link{DBA_ID}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CONSENSUS}
+\item \link{DBA_CALLER}
 }
 }
 
@@ -60,12 +60,12 @@ number of contrast to report on; if present, draws a heatmap based on a differen
 \item{method}{
 analysis method (used in conjunction with contrast):
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_DESEQ2
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
-\item DBA_DESEQ2_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 }
 
@@ -81,15 +81,15 @@ report (obtained from \code{\link{dba.report}} specifying the data to be used . 
 \item{score}{
 Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:
 \itemize{
-\item DBA_SCORE_READS
-\item DBA_SCORE_READS_MINUS
-\item DBA_SCORE_READS_FOLD
-\item DBA_SCORE_RPKM
-\item DBA_SCORE_RPKM_FOLD
-\item DBA_SCORE_TMM_READS_FULL
-\item DBA_SCORE_TMM_READS_EFFECTIVE
-\item DBA_SCORE_TMM_MINUS_FULL
-\item DBA_SCORE_TMM_MINUS_EFFECTIVE
+\item \link{DBA_SCORE_READS}
+\item \link{DBA_SCORE_READS_MINUS}
+\item \link{DBA_SCORE_READS_FOLD}
+\item \link{DBA_SCORE_RPKM}
+\item \link{DBA_SCORE_RPKM_FOLD}
+\item \link{DBA_SCORE_TMM_READS_FULL}
+\item \link{DBA_SCORE_TMM_READS_EFFECTIVE}
+\item \link{DBA_SCORE_TMM_MINUS_FULL}
+\item \link{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 }
 }
 
@@ -111,21 +111,21 @@ logical indicating that a correlation heatmap should be plotted (TRUE). If FALSE
  \item{olPlot}{
 if correlations is specified as a dataframe returned by  \code{\link{dba.overlap}}, indicates which statistic to plot. One of:
 \itemize{
-\item{DBA_COR}  {Correlation}
-\item{DBA_OLAP}  {Percentage overlap}
-\item{DBA_INALL}  {number of peaks common to both samples}
+\item{\link{DBA_COR}}  {Correlation}
+\item{\link{DBA_OLAP}}  {Percentage overlap}
+\item{\link{DBA_INALL}}  {number of peaks common to both samples}
 }
 }
 \item{ColAttributes}{
 Attribute or vector of attributes to plot for column color bars. If missing, all attributes with two or more unique non-NA values will be plotted. (For correlation heatmaps, DBA_GROUP will be plotted in the column color bar by default when a  contrast is specified). A value of NULL indicates that no column color bar should be drawn. Allowable attribute values include:
 \itemize{ 
-\item DBA_GROUP
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_TREATMENT
-\item DBA_REPLICATE
-\item DBA_CALLER
+\item \link{DBA_GROUP}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CALLER}
 }
 }
 \item{RowAttributes}{

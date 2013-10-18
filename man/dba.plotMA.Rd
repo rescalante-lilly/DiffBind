@@ -9,8 +9,9 @@ Generates MA and scatter plots of differential binding analysis results.
 }
 \usage{
 dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
-           th=.1, bUsePval=FALSE,  fold=0,
-           bNormalized=TRUE, factor="", bXY=FALSE, dotSize=.33,
+           th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
+           fold=0, bNormalized=TRUE,
+           factor="", bXY=FALSE, dotSize=.33, 
            bSignificant=TRUE, bSmooth=TRUE, ...)
 }
 
@@ -30,12 +31,12 @@ number of contrast to report on. See  \code{\link{dba.show}(DBA, bContrast=T)} t
 \item{method}{
  method or vector of methods to plot results for:
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_DESEQ2
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
-\item DBA_DESEQ2_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 }
 

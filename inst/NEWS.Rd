@@ -2,8 +2,36 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.2}{
+\itemize{
+  \item{Finalize deprecation of bLowMem in dba.count.}
+  \item{add new constants: DBA_ALL_ATTRIBUTES, DBA_ALL_METHODS_BLOCK}
+  \item{add config options th and bUsePval to set default thresholds on a per-DBA object basis.}
+  \item{redo report-based DBA object interface}
+  \itemize{
+    \item{bDown is now bLoss}
+    \item{bUp is now bGain}
+    \item{default values changed}
+    \item{in resulting object, all is now All, down us now Loss, and up is now Gain}
+  }
+  \item{pv.plotVenn changes/improvements}
+  \itemize{
+     \item{labelAttributes parameter added for generaiton of default labels}
+     \item{more checks for consistency of masks}
+     \item{default main and sub titles added}
+     \item{added plotting of DB sites by specifying contrasts and other parameters similar to report-dbased DBA objects in dba.report}
+     \item{added bReturnPeaksets to enable all peaksets in the Venn diagram ot be returned}
+     \item{added DataType to control clas of returned peaskets, including DBA_DATA_DBAOBJECT to retrieve a DBa object made up of DB sites}
+  }
+  \item{prevent dba.plotHeatmap from plotting column vector for attributes where every sample has a different value}
+  \item{warning and errors; fix non-expoerted constants}
+ }
+}
+
 \section{version 1.9.1}{
+ \itemize{
   \item{Fix: longstanding bug in dba.count that could case reads mapped to chrN_random to be counted aginst intervals on chrN.}
+ }
 }
 
 \section{version 1.8.0}{

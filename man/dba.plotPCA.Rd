@@ -9,10 +9,10 @@ Principal Component Analysis plot
 }
 \usage{
 dba.plotPCA(DBA, attributes, minval, maxval,
-            contrast, method=DBA$config$AnalysisMethod, 
-            th=.1, bUsePval=FALSE, report, score,
-            mask, sites, cor=FALSE,
-            b3D=FALSE, vColors, dotSize, ...)
+           contrast, method=DBA$config$AnalysisMethod, 
+           th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
+           report, score, mask, sites, cor=FALSE,
+           b3D=FALSE, vColors, dotSize, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,16 +30,15 @@ DBA object.
 \item{attributes}{
 attribute or vector of attributes to use to color plotted points. Each unique combination of attribute values will be assigned a color. Chosen from:
 \itemize{ 
-\item DBA_GROUP
-\item DBA_ID
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_TREATMENT
-\item DBA_REPLICATE
-\item DBA_CONSENSUS
-\item DBA_CALLER
-\item DBA_CONTROL
+\item \link{DBA_GROUP}
+\item \link{DBA_ID}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CONSENSUS}
+\item \link{DBA_CALLER}
 }
 Note that DBA_GROUP is a special attribute which will result in samples from each group in a contrast being colored separately.
 }
@@ -57,12 +56,12 @@ number of contrast to use for PCA; if present, plots a PCA based on a differenti
 \item{method}{
 method used for analysis (used in conjunction with contrast):
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_DESEQ2
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
-\item DBA_DESEQ2_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 }
 
@@ -79,15 +78,15 @@ report (obtained from  \code{\link{dba.report}}) specifying the data to be used 
 \item{score}{
 Score to use for count data. Only used when plotting the global binding matrix (no contrast specified). One of:
 \itemize{
-\item DBA_SCORE_READS
-\item DBA_SCORE_READS_MINUS
-\item DBA_SCORE_READS_FOLD
-\item DBA_SCORE_RPKM
-\item DBA_SCORE_RPKM_FOLD
-\item DBA_SCORE_TMM_READS_FULL
-\item DBA_SCORE_TMM_READS_EFFECTIVE
-\item DBA_SCORE_TMM_MINUS_FULL
-\item DBA_SCORE_TMM_MINUS_EFFECTIVE
+\item \link{DBA_SCORE_READS}
+\item \link{DBA_SCORE_READS_MINUS}
+\item \link{DBA_SCORE_READS_FOLD}
+\item \link{DBA_SCORE_RPKM}
+\item \link{DBA_SCORE_RPKM_FOLD}
+\item \link{DBA_SCORE_TMM_READS_FULL}
+\item \link{DBA_SCORE_TMM_READS_EFFECTIVE}
+\item \link{DBA_SCORE_TMM_MINUS_FULL}
+\item \link{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 }
 }
 \item{mask}{

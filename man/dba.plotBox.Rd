@@ -8,9 +8,9 @@ Boxplots
 Boxplots for read count distributions within differentially bound sites
 }
 \usage{
-dba.plotBox(DBA, contrast=1, method=DBA$config$AnalysisMethod,
-            th=0.1, bUsePval=FALSE, bNormalized=TRUE,
-            attribute=DBA_GROUP, 
+dba.plotBox(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
+            th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
+            bNormalized=TRUE, attribute=DBA_GROUP, 
             bAll=FALSE, bAllIncreased=FALSE, bAllDecreased=FALSE, 
             bDB=TRUE, bDBIncreased=TRUE, bDBDecreased=TRUE,
             pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, 
@@ -34,12 +34,12 @@ number of contrast to use for boxplot.
 \item{method}{
 method used for analysis (used in conjunction with contrast):
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_DESEQ2
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
-\item DBA_DESEQ2_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 }
 \item{th}{
@@ -57,16 +57,15 @@ logical indicating that normalized data (using normalization factors computed by
 \item{attribute}{
 attribute to use for determining groups of samples. Default (DBA_GROUP) plots the two groups used in the contrast. Possible values:
 \itemize{ 
-\item DBA_GROUP
-\item DBA_ID
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_TREATMENT
-\item DBA_REPLICATE
-\item DBA_CONSENSUS
-\item DBA_CALLER
-\item DBA_CONTROL
+\item \link{DBA_GROUP}
+\item \link{DBA_ID}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CONSENSUS}
+\item \link{DBA_CALLER}
 }
 }
 

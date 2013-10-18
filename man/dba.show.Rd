@@ -8,7 +8,8 @@ List attributes of peaksets of contrasts associated with a DBA object
 Returns attributes of peaksets and/or contrasts associated with a DBA object.
 }
 \usage{
-dba.show(DBA, mask, attributes, bContrasts=FALSE, th=0.1, bUsePval=FALSE)
+dba.show(DBA, mask, attributes, bContrasts=FALSE, 
+         th=DBA$config$th, bUsePval=DBA$config$bUsePval) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,17 +27,17 @@ mask of peaksets for which to get attributes (used when obtaining peakset attrib
 \item{attributes}{
 attribute or vector of attributes to retrieve. Number of intervals is always shown. Used when obtaining peakset attributes, i.e. \code{bContrasts=FALSE}. Values:
 \itemize{ 
-\item DBA_ID
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_CONDITION
-\item DBA_REPLICATE
-\item DBA_CONSENSUS
-\item DBA_CALLER
-\item DBA_CONTROL
-\item DBA_INTERVALS
-\item DBA_SN_RATIO
+\item \link{DBA_ID}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CONSENSUS}
+\item \link{DBA_CALLER}
+\item \link{DBA_CONTROL}
+\item \link{DBA_INTERVALS}
+\item \link{DBA_SN_RATIO}
 }
 }
 
@@ -104,6 +105,8 @@ tamoxifen = dba.contrast(tamoxifen)
 dba.show(tamoxifen,bContrasts=TRUE)
 
 #alternatively:
+tamoxifen
+tamoxifen$config$th = .05
 tamoxifen
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

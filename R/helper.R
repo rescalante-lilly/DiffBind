@@ -43,6 +43,13 @@ pv.check = function(pv) {
       pv$config$bCorPlot=TRUE
    }
    
+   if(is.null(pv$config$th)){
+      pv$config$th=0.1
+   }
+   if(is.null(pv$config$bUsePval)){
+      pv$config$bUsePval=FALSE
+   }   
+   
    if(nrow(pv$class)<PV_TREATMENT) {
      pv$class = rbind(pv$class,'')
      rownames(pv$class)[PV_TREATMENT]='Treatment'	
@@ -693,10 +700,11 @@ pv.catstr = function(strvec){
    return(str)	
 }
 
-pv.namestrings = function(crec1,crec2,crec3) {
+pv.namestrings = function(crec1,crec2,crec3,crec4) {
    s1 = NULL
    s2 = NULL
    s3 = NULL
+   s4 = NULL
    t1 = NULL
    if(missing(crec2)) {
       crec2=crec1
@@ -704,21 +712,26 @@ pv.namestrings = function(crec1,crec2,crec3) {
    if(missing(crec3)) {
       crec3=crec1   
    }
+   if(missing(crec4)) {
+      crec4=crec1
+   }
    for(i in 1:length(crec1)) {
-   	  if( (crec1[i]==crec2[i]) && (crec1[i]==crec3[i])) {
+   	  if( (crec1[i]==crec2[i]) && (crec1[i]==crec3[i]) && (crec1[i]==crec4[i])) {
    	     t1 = pv.addstr(t1,crec1[i])
    	  } else {
    	     s1 = pv.addstr(s1,crec1[i])
    	     s2 = pv.addstr(s2,crec2[i])
    	     s3 = pv.addstr(s3,crec3[i])
+   	     s4 = pv.addstr(s4,crec4[i])
    	  }
    }
    if(is.null(s1)) { s1 = ""}
    if(is.null(s2)) { s2 = ""}
    if(is.null(s3)) { s3 = ""}
+   if(is.null(s4)) { s4 = ""}
    if(is.null(t1)) { t1 = ""}
    
-   return(list(n1=s1,n2=s2,n3=s3,tstring=t1))	
+   return(list(n1=s1,n2=s2,n3=s3,n4=s4,tstring=t1))	
 }
 
 pv.addstr = function(s1,a1) {

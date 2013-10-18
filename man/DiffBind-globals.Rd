@@ -8,12 +8,16 @@
 \alias{DBA_CALLER}
 \alias{DBA_CONSENSUS}
 \alias{DBA_CONTROL}
+\alias{DBA_ALL_ATTRIBUTES}
 \alias{DBA_INTERVALS}
 \alias{DBA_SN_RATIO}
 \alias{DBA_GROUP}
 \alias{DBA_OLAP_PEAKS}
 \alias{DBA_OLAP_ALL}
 \alias{DBA_OLAP_RATE}
+\alias{DBA_COR}
+\alias{DBA_OLAP}
+\alias{DBA_INALL}
 \alias{DBA_SCORE_READS}
 \alias{DBA_SCORE_READS_MINUS}
 \alias{DBA_SCORE_READS_FOLD}
@@ -38,10 +42,12 @@
 \alias{DBA_DESEQ_GLM}
 \alias{DBA_ALL_METHODS}
 \alias{DBA_ALL_BLOCK}
+\alias{DBA_ALL_METHODS_BLOCK}
 \alias{DBA_DATA_FRAME}
 \alias{DBA_DATA_GRANGES}
 \alias{DBA_DATA_RANGEDDATA}
 \alias{DBA_DATA_SUMMARIZED_EXPERIMENT}
+\alias{DBA_DATA_DBAOBJECT} 
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -60,6 +66,7 @@ DBA_REPLICATE
 DBA_CALLER
 DBA_CONSENSUS
 DBA_CONTROL
+DBA_ALL_ATTRIBUTES
 
 DBA_INTERVALS
 DBA_SN_RATIO
@@ -69,6 +76,10 @@ DBA_GROUP
 DBA_OLAP_PEAKS
 DBA_OLAP_ALL
 DBA_OLAP_RATE
+
+DBA_COR
+DBA_OLAP
+DBA_INALL
 
 DBA_SCORE_READS
 DBA_SCORE_READS_MINUS
@@ -96,11 +107,13 @@ DBA_EDGER_GLM
 DBA_DESEQ_GLM
 DBA_ALL_METHODS
 DBA_ALL_BLOCK
+DBA_ALL_METHODS_BLOCK
 
 DBA_DATA_FRAME
 DBA_DATA_GRANGES
 DBA_DATA_RANGEDDATA
 DBA_DATA_SUMMARIZED_EXPERIMENT
+DBA_DATA_DBAOBJECT
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -132,7 +145,9 @@ DBA peakset metadata: Is this a consensus peakset?
 \item{DBA_CONTROL}{
 DBA peakset metadata: ID of Control sample
 }
-
+\item{DBA_ALL_ATTRIBUTES}{
+DBA peakset metadata: all attributes that can be used in certain plot labels (cf \code{\link{dba.plotVenn}}), equivalent to \code{c(DBA_ID, DBA_TISSUE, DBA_FACTOR, DBA_CONDITION,DBA_TREATMENT, DBA_REPLICATE, DBA_CALLER)} 
+}
 \item{DBA_INTERVALS}{
 DBA peakset metadata: Number of intervals in peakset
 }
@@ -153,6 +168,16 @@ dba.overlap mode: return report of correlations/overlaps for each pair of sample
 \item{DBA_OLAP_RATE}{
 dba.overlap mode: return overlap rates
 }
+\item{DBA_COR}{
+When plotting a heatmap from an overlap record, use the correlation value.
+}
+\item{DBA_OLAP}{
+When plotting a heatmap from an overlap record, use the percentage overlap value.
+}
+\item{DBA_INALL}{
+When plotting a heatmap from an overlap record, use the number of peaks in common to both samples.
+}
+
 
 \item{DBA_SCORE_READS}{
 dba.count score is number of reads in ChIP
@@ -223,10 +248,13 @@ differential analysis method: use GLM in edgeR for two-group comparisons
 differential analysis method: use GLM in DESeq for two-group comparisons
 }
 \item{DBA_ALL_METHODS}{
-use all three analysis methods: c(DBA_EDGER, DBA_DESEQ, DBA_DESEQ2)
+use all three analysis methods: \code{c(DBA_EDGER, DBA_DESEQ, DBA_DESEQ2)}
 }
 \item{DBA_ALL_BLOCK}{
-report on block results for all three analysis methods: c(DBA_EDGER_BLOCK, DBA_DESEQ_BLOCK, DBA_DESEQ2_BLOCK)
+report on block results for all three analysis methods: \code{c(DBA_EDGER_BLOCK, DBA_DESEQ_BLOCK, DBA_DESEQ2_BLOCK)}
+}
+\item{DBA_ALL_METHODS_BLOCK}{
+report on block results for all analysis methods, both blocked and unblocked: \code{c(DBA_ALL_METHODS, DBA_ALL_BLOCK)}
 }
 
 \item{DBA_DATA_GRANGES}{
@@ -240,6 +268,9 @@ Use data.frame class for peaksets and reports. Can be set as default (DBA$config
 }
 \item{DBA_DATA_SUMMARIZED_EXPERIMENT}{
 Return report as a \code{\link{SummarizedExperiment}}.
+}
+\item{DBA_DATA_DBAOBJECT}{
+Return a result-based DBA object from \code{\link{dba.plotVenn}}.
 }
 }
 %\details{

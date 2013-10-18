@@ -13,7 +13,7 @@ respectively.
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
           insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
           bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
-          bLowMem, bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
+          bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
           bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -75,9 +75,7 @@ function that will be invoked for each interval with a vector of scores for each
 \item{bCorPlot}{
 logical indicating whether to plot a correlation heatmap for the counted data
 }
-\item{bLowMem}{
-DEPRECATED. See \code{bUseSummarizeOverlaps}.
-}
+
 \item{bUseSummarizeOverlaps}{
 logical indicating that \code{\link{summarizeOverlaps}} should be used for counting instead of the built-in counting code. This option is slower but uses the more standard counting function. If \code{TRUE}, all read files must be BAM (.bam extension), with associated index files (.bam.bai extension). The \code{insertLength} parameter must absent. 
 

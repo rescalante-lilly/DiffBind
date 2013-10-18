@@ -9,12 +9,12 @@ Generates a report for a differential binding affinity analysis
 }
 \usage{
 dba.report(DBA, contrast, method=DBA$config$AnalysisMethod, 
-           th=.1, bUsePval=FALSE, fold=0,  bNormalized=TRUE,  
+           th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
+           fold=0, bNormalized=TRUE,
            bCalled=FALSE, bCounts=FALSE, bCalledDetail=FALSE,
-           bDB=FALSE, bNotDB=FALSE, bAll=FALSE, bUp=FALSE, bDown=FALSE,
-           file,initString=DBA$config$reportInit,ext='csv',
-           DataType=DBA$config$DataType)
-}
+           bDB, bNotDB, bAll=TRUE, bGain=FALSE, bLoss=FALSE,
+           file,initString=DBA$config$reportInit,ext='csv',DataType=DBA$config$DataType) 
+}        
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 
@@ -31,17 +31,18 @@ contrast number to report on. When generating a report-based DBA object, this ca
   \item{method}{
 method used for analysis:
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_DESEQ2
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
-\item DBA_DESEQ2_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 When generating a report-based DBA object (see \code{bDB} and \code{bNotDB} parameters below), a list of methods may be supplied, including the shortcuts
 \itemize{ 
-\item DBA_ALL_METHODS
-\item DBA_ALL_BLOCK
+\item \link{DBA_ALL_METHODS}
+\item \link{DBA_ALL_BLOCK}
+\item \link{DBA_ALL_METHODS_BLOCK}
 }
 }
 \item{th}{
@@ -74,11 +75,11 @@ logical indicating that a report-based DBA object should be generated, and that 
 \item{bAll}{
 logical indicating that a report-based DBA object should be generated, and that it should include peaksets combining peaks with both positive and negative fold changes.
 }
-\item{bUp}{
+\item{bGain}{
 logical indicating that a report-based DBA object should be generated, and that it should include peaksets with only positive fold changes.
 }
-\item{bDown}{
-logical indicating that a report-based DBA object should be generated, and that it should include peaksets with only ngeative fold changes.
+\item{bLoss}{
+logical indicating that a report-based DBA object should be generated, and that it should include peaksets with only negative fold changes.
 }
   \item{file}{
 if present, also save the report to a comma separated value (csv) file, using this filename.
@@ -92,11 +93,11 @@ if saving to a file, append this extension to the filename.
 \item{DataType}{
 The class of object for returned report:
 \itemize{
-\item DBA_DATA_GRANGES
-\item DBA_DATA_RANGEDDATA
-\item DBA_DATA_FRAME
+\item \link{DBA_DATA_GRANGES}
+\item \link{DBA_DATA_RANGEDDATA}
+\item \link{DBA_DATA_FRAME}
 }
-If set to \code{DBA_DATA_SUMMARIZED_EXPERIMENT}, the result will be a \code{\link{SummarizedExperiment}} object, with all the count data and sample metadata for the experiment. The contrast statistics will be included as metadata columns in the \code{rowData} of the object.
+If set to \code{\link{DBA_DATA_SUMMARIZED_EXPERIMENT}}, the result will be a \code{\link{SummarizedExperiment}} object, with all the count data and sample metadata for the experiment. The contrast statistics will be included as metadata columns in the \code{rowData} of the object.
 
 Can be set as default behavior by setting DBA$config$DataType.
 }
@@ -123,7 +124,7 @@ If bCounts is TRUE, a column will be present for each sample in group 1, followe
 
 If bCalledDetail is TRUE, a column will be present for each sample in group 1, followed by each sample in group 2. The Sample ID will be used as the column header. This column contains a "+" to indicate for which sites the sample was called as a peak, and a "-" if it was not so identified.
 
-If  \code{bDB} or \code{bNotDB} is set to \code{TRUE}, a special \code{DBA object} is returned,containing peaksets based on sites determined to be differentiall bound (or not) as spcified using the \code{bDB}, \code{bNotDB}, \code{bUp}, \code{Down}, and \code{bAll} parameters. In this \code{DBA object}, the \code{Tissue} value will specify the direction of the change (\code{up} for positive fold changes, \code{down} for negative fold changes, and \code{all} both any fold change). The \code{Factor} value specifies if the peaks are differnetially bound (\code{DB}) or not (\code{!DB}). The \code{Condition} value specifies the analysis method (e.g. \code{edgeR}), and the \code{Treatment} value is blank for unblocked analyses and set to \code{block} for blocked analyses.
+If  \code{bDB} or \code{bNotDB} is set to \code{TRUE}, a special \code{DBA object} is returned,containing peaksets based on sites determined to be differentiall bound (or not) as spcified using the \code{bDB}, \code{bNotDB}, \code{bGain}, \code{bLoss}, and \code{bAll} parameters. In this \code{DBA object}, the \code{Tissue} value will specify the direction of the change (\code{Gain} for positive fold changes, \code{Loss} for negative fold changes, and \code{All} for any fold change). The \code{Factor} value specifies if the peaks are differnetially bound (\code{DB}) or not (\code{!DB}). The \code{Condition} value specifies the analysis method (e.g. \code{edgeR}), and the \code{Treatment} value is blank for unblocked analyses and set to \code{block} for blocked analyses.
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -174,9 +175,9 @@ data(tamoxifen_counts)
 tamoxifen = dba.contrast(tamoxifen, categories=DBA_CONDITION, block=tamoxifen$masks$MCF7)
 tamoxifen = dba.analyze(tamoxifen,bCorPlot=FALSE)
 tamoxifen.DB = dba.report(tamoxifen,method=c(DBA_EDGER,DBA_EDGER_BLOCK),
-                          bDB=TRUE, bUp=TRUE, bDown=TRUE)
-dba.plotVenn(tamoxifen.DB,1:4,label1="Single Factor UP",label2="Single Factor DOWN",
-                             label3="Blocking Factor UP",label4="Blocking Factor DOWN")
+                          bDB=TRUE, bGain=TRUE, bLoss=TRUE)
+dba.plotVenn(tamoxifen.DB,1:4,label1="Single Factor GAIN",label2="Single Factor LOSS",
+                             label3="Blocking Factor GAIN",label4="Blocking Factor LOSS")
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

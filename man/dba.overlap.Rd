@@ -9,8 +9,9 @@ Computes binding overlaps and co-occupancy statistics
 }
 \usage{
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-            contrast, method=DBA$config$AnalysisMethod, th=.1, bUsePval=FALSE, 
-            report, byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
+            contrast, method=DBA$config$AnalysisMethod, 
+            th=DBA$config$th, bUsePval=DBA$config$bUsePval, report,
+            byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
             DataType=DBA$config$DataType)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -32,9 +33,9 @@ mask or vector of peakset numbers indicating a subset of peaksets to use (see \c
 \item{mode}{
 indicates which results should be returned (see MODES below). One of:
 \itemize{
-\item DBA_OLAP_PEAKS
-\item DBA_OLAP_ALL
-\item DBA_OLAP_RATE
+\item \link{DBA_OLAP_PEAKS}
+\item \link{DBA_OLAP_ALL}
+\item \link{DBA_OLAP_RATE}
 }
 }
 
@@ -47,10 +48,12 @@ contrast number to use. Only specified if contrast data is to be used when mode=
   \item{method}{
 if contrast is specified and mode=DBA_OLAP_ALL, use data from method used for analysis:
 \itemize{ 
-\item DBA_EDGER
-\item DBA_DESEQ
-\item DBA_EDGER_BLOCK
-\item DBA_DESEQ_BLOCK
+\item \link{DBA_EDGER}
+\item \link{DBA_DESEQ}
+\item \link{DBA_DESEQ2}
+\item \link{DBA_EDGER_BLOCK}
+\item \link{DBA_DESEQ_BLOCK}
+\item \link{DBA_DESEQ2_BLOCK}
 }
 }
 \item{th}{
@@ -65,15 +68,14 @@ if contrast is specified and mode=DBA_OLAP_ALL, a report (obtained from  \code{\
 \item{byAttribute}{
 when computing co-occupancy statistics (DBA_OLAP_ALL), limit comparisons to peaksets with the same value for a specific attribute, one of:
 \itemize{
-\item DBA_ID
-\item DBA_TISSUE
-\item DBA_FACTOR
-\item DBA_CONDITION
-\item DBA_TREATMENT
-\item DBA_REPLICATE
-\item DBA_CONSENSUS
-\item DBA_CALLER
-\item DBA_CONTROL
+\item \link{DBA_ID}
+\item \link{DBA_TISSUE}
+\item \link{DBA_FACTOR}
+\item \link{DBA_CONDITION}
+\item \link{DBA_TREATMENT}
+\item \link{DBA_REPLICATE}
+\item \link{DBA_CONSENSUS}
+\item \link{DBA_CALLER}
 }
 }
 
@@ -88,9 +90,9 @@ when computing co-occupancy statistics (DBA_OLAP_ALL), method to use when comput
 \item{DataType}{
 if mode==DBA_OLAP_PEAKS, the class of object that peaksets should be returned as:
 \itemize{
-\item DBA_DATA_GRANGES
-\item DBA_DATA_RANGEDDATA
-\item DBA_DATA_FRAME
+\item \link{DBA_DATA_GRANGES}
+\item \link{DBA_DATA_RANGEDDATA}
+\item \link{DBA_DATA_FRAME}
 }
 Can be set as default behavior by setting DBA$config$DataType.
 }

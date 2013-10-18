@@ -31,9 +31,13 @@ export(dba,
        DBA_REPLICATE,
        DBA_INTERVALS,
        DBA_SN_RATIO,
+       DBA_ALL_ATTRIBUTES,
        DBA_OLAP_PEAKS,
        DBA_OLAP_ALL,
        DBA_OLAP_RATE,
+       DBA_COR,
+       DBA_OLAP,
+       DBA_INALL,
        DBA_SCORE_RPKM,
        DBA_SCORE_RPKM_FOLD,
        DBA_SCORE_READS,
@@ -58,10 +62,12 @@ export(dba,
        DBA_DESEQ2_BLOCK,
        DBA_ALL_METHODS,
        DBA_ALL_BLOCK,
+       DBA_ALL_METHODS_BLOCK,
        DBA_DATA_FRAME,
        DBA_DATA_RANGEDDATA,
        DBA_DATA_GRANGES,
-       DBA_DATA_SUMMARIZED_EXPERIMENT)
+       DBA_DATA_SUMMARIZED_EXPERIMENT,
+       DBA_DATA_DBAOBJECT)
 
 exportClasses("DBA")
 

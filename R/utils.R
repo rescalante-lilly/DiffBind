@@ -850,7 +850,7 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
       } else {
          vals = unique(classdb[attribute,])
       }
-      if (sum(!is.na(vals))>1) {
+      if ( (sum(!is.na(vals))>1) && (sum(!is.na(vals))<numsamps) ) {
          addcol = matrix(classdb[attribute,],numsamps,1)
          for(i in 1:length(vals)) {
             addcol[addcol[,1]==vals[i],1]=cols[i]
@@ -887,6 +887,16 @@ pv.morethanone = function(DBA,att){
    } else {
       return(FALSE)	
    }	
+}
+
+pv.checkValue = function(val,check) {
+   if(is.null(val)) {
+      return(FALSE)
+   } 
+   if (val != check) {
+      return(FALSE)
+   }
+   return(TRUE)
 }
 
 
