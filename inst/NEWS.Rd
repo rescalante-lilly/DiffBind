@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.3}{
+ \itemize{
+  \item{Fix: Missing header file introduced in version 1.9.1.}
+ }
+}
+
 \section{version 1.9.2}{
 \itemize{
   \item{Finalize deprecation of bLowMem in dba.count.}
