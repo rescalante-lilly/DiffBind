@@ -1254,7 +1254,7 @@ pv.assaysFromPeaks = function(DBA) {
       toadd = matrix(0,numpeaks,samples)
       rownames(toadd) = 1:numpeaks
       colnames(toadd) = colnames(DBA$class)
-      assays = DiffBind:::pv.listadd(assays,toadd)
+      assays = pv.listadd(assays,toadd)
    }   
    names(assays) = fields[5:numfields]
    for(sampnum in 1:samples) {

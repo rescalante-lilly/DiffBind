@@ -327,7 +327,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	  
    	  addfuns = c("BamFileList","summarizeOverlaps","ScanBamParam","scanBamFlag","countBam","SummarizedExperiment")   
       if (insertLength !=0) {
-         stop("Can not specify insert size when bLowMem is TRUE in dba.count",call.=FALSE)
+         stop("Can not specify insert size when bUseSummarizeOverlaps is TRUE in dba.count",call.=FALSE)
       }
       bAllBam = T
       for(st in todo) {
@@ -340,7 +340,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          }
       }
       if(!bAllBam) {
-         stop('All files must be BAM (.bam) with associated .bam.bai index when bLowMem is TRUE in dba.count',call.=FALSE)	
+         stop('All files must be BAM (.bam) with associated .bam.bai index when UseSummarizeOverlaps is TRUE in dba.count',call.=FALSE)	
       }
       if(!is.null(pv$config$yieldSize)) {
          yieldSize = pv$config$yieldSize	
@@ -608,7 +608,7 @@ pv.filterRate = function(pv,vFilter,filterFun=max) {
 pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,
                               mode="IntersectionNotEmpty",yieldSize=5000000,singleEnd=TRUE,params=NULL) {
    
-   intervals = pv.peaks2DataType(intervals,DiffBind:::DBA_DATA_GRANGES)
+   intervals = pv.peaks2DataType(intervals,DBA_DATA_GRANGES)
    
    bfl       = BamFileList(bamfile,yieldSize=yieldSize)
    

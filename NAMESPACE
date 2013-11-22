@@ -95,3 +95,5 @@ importFrom(stats, model.matrix, p.adjust, princomp, t.test,
 importFrom(utils, read.table, write.csv, write.table)
 
 importFrom(limma,nonEstimable)
+
+importFrom(GenomicAlignments,summarizeOverlaps)

@@ -9,7 +9,7 @@ Description: Compute differentially bound sites from multiple ChIP-seq experimen
 biocViews: Bioinformatics, HighThroughputSequencing, ChIPseq
 License: Artistic-2.0
 LazyLoad: yes
-Depends: R (>= 2.15.0), GenomicRanges, limma
+Depends: R (>= 2.15.0), GenomicRanges, limma, GenomicAlignments
 Imports: RColorBrewer, amap, edgeR (>= 2.3.58), gplots, grDevices,
         stats, utils, IRanges, zlibbioc
 Suggests: DESeq, Rsamtools, DESeq2

@@ -369,24 +369,24 @@ overLapperVennSamples = function(){
 setlist <- list(A=sample(letters, 18), B=sample(letters, 16), C=sample(letters, 20), D=sample(letters, 22),E=sample(letters, 12))
 
 setlist2 <- setlist[1:2]
-OLlist2 <- DiffBind:::overLapper(setlist=setlist2, sep="_", type="vennsets")
+OLlist2 <- overLapper(setlist=setlist2, sep="_", type="vennsets")
 OLlist2$Venn_List; counts <- sapply(OLlist2$Venn_List, length)
-DiffBind:::vennPlot(counts=counts) 
+vennPlot(counts=counts) 
 
 setlist3 <- setlist[1:3]
-OLlist3 <- DiffBind:::overLapper(setlist=setlist3, sep="_", type="vennsets")
+OLlist3 <- overLapper(setlist=setlist3, sep="_", type="vennsets")
 counts <- list(sapply(OLlist3$Venn_List, length), sapply(OLlist3$Venn_List, length))
-DiffBind:::vennPlot(counts=counts, mysub="Top: var1; Bottom: var2", yoffset=c(0.3, -0.2))
+vennPlot(counts=counts, mysub="Top: var1; Bottom: var2", yoffset=c(0.3, -0.2))
 
 setlist4 <- setlist[1:4]
-OLlist4 <- DiffBind:::overLapper(setlist=setlist4, sep="_", type="vennsets")
+OLlist4 <- overLapper(setlist=setlist4, sep="_", type="vennsets")
 counts <- list(sapply(OLlist4$Venn_List, length), sapply(OLlist4$Venn_List, length))
-DiffBind:::vennPlot(counts=counts, mysub="Top: var1; Bottom: var2", yoffset=c(0.3, -0.2))
+vennPlot(counts=counts, mysub="Top: var1; Bottom: var2", yoffset=c(0.3, -0.2))
 
 setlist5 <- setlist[1:5]
-OLlist5 <- DiffBind:::overLapper(setlist=setlist5, sep="_", type="vennsets")
+OLlist5 <- overLapper(setlist=setlist5, sep="_", type="vennsets")
 counts <- sapply(OLlist5$Venn_List, length)
-DiffBind:::vennPlot(counts=counts, ccol=c(rep(1,30),2), lcex=1.5, ccex=c(rep(1.5,5), rep(0.6,25),1.5))
+vennPlot(counts=counts, ccol=c(rep(1,30),2), lcex=1.5, ccex=c(rep(1.5,5), rep(0.6,25),1.5))
 
 }
 

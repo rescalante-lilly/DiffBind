@@ -4,8 +4,9 @@
 
 \section{version 1.9.5}{
  \itemize{
-  \item{Fix:  bug when generating GRanges overlaps and one peakset is empty.}
-  \item{Fix: need to be dependand on limma because of edgeR call to nonEstimable}
+  \item{Fix: bug when generating GRanges overlaps and one peakset is empty.}
+  \item{Fix: need to be dependant on limma because of edgeR call to nonEstimable}
+  \item{Fix: summarizeOVerlaps moved to GenomicAlignments package; add dependancy/import}
  }
 }
 
