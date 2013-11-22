@@ -343,9 +343,7 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
       res = pv.overlap(DBA,mask=mask,minVal=minVal)
       
       if(DataType!=DBA_DATA_FRAME) {
-         for(i in 1:length(res)) {
-            res[[i]] = pv.peaks2DataType(res[[i]],DataType)
-         }
+         res = lapply(res,pv.peaks2DataType,DataType)
       }   
    }                       
    

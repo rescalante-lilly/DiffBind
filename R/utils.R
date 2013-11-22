@@ -10,6 +10,12 @@ pv.peaks2DataType = function(peaks,datatype=DBA_DATA_DEFAULT) {
       return(peaks)	
    }
    
+   if(class(peaks)=="data.frame") {
+      if(nrow(peaks)==0) {
+         return(NULL)
+      }   
+   }
+   
    if(datatype==DBA_DATA_RANGEDDATA) {
       if(class(peaks)!="RangedData") {
          #require(IRanges)

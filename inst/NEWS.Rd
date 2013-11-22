@@ -2,6 +2,13 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.5}{
+ \itemize{
+  \item{Fix:  bug when generating GRanges overlaps and one peakset is empty.}
+  \item{Fix: need to be dependand on limma because of edgeR call to nonEstimable}
+ }
+}
+
 \section{version 1.9.3}{
  \itemize{
   \item{Fix: Missing header file introduced in version 1.9.1.}
