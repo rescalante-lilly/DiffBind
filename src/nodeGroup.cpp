@@ -11,7 +11,7 @@ bode::NodeGroup::NodeGroup(int size) {
 }
 
 bode::NodeGroup::~NodeGroup(void) {
-  delete [] nodes;
+  delete[] nodes;
   nodes = NULL;
   nsize = 0;
   ncount = 0;

@@ -1,9 +1,11 @@
+#include <stdexcept>
 #include <R_ext/Utils.h>
 #include "interval.h"
 #include "nodeGroup.h"
 #include "reader.h"
 #include "croi_func.h"
 #include "iBucket.h"
+#include "densitySet.h"
 
 Croi::Croi(void) {
   isets = new bode::IntervalSet();
@@ -23,6 +25,7 @@ int Croi::getReadLength(const char *filename,int ftype) {
     rlen = iv->right() - iv->left();
   }
   fd->close();
+  delete fd;
   return rlen;
 }
 
@@ -35,10 +38,10 @@ int Croi::getIlength(void) {
   return iLength;
 }
 
-int Croi::load(int maxReads,bode::NodeGroup *ng,IBucket *intervals) {
+int Croi::load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::DensitySet *densities) {
   int read_count;
   bode::Interval *read_iv;
-  std::string x;
+  std::string x(128,' ');
 
   read_count = 0;
   while (read_count < maxReads && (read_iv = rdr->next())) {
@@ -50,6 +53,13 @@ int Croi::load(int maxReads,bode::NodeGroup *ng,IBucket *intervals) {
       if (intervals == NULL || !intervals->seen(x,read_iv->left(),read_iv->right(),read_iv->strand())) {
         isets->insert(read_iv,ng);
         read_count++;
+      }
+      if (densities != NULL) {
+        try {
+          densities->add(x,read_iv->left(),read_iv->right());
+        } catch (std::out_of_range oor) {
+          warning("trapped exception from intervalDensity");
+        }
       }
     }
     if (read_count % 10000 == 0) {

@@ -260,7 +260,7 @@ PV_READS_BED       = 1
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,filterFun=max,
                      bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T,
-                     bLowMem=F, readFormat=PV_READS_DEFAULT) {
+                     bLowMem=F, readFormat=PV_READS_DEFAULT, summits) {
    
    pv = pv.check(pv)
    
@@ -360,13 +360,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
          results = dba.parallel.lapply(pv$config,params,todo,
                                        pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat)
+                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits)
       } else {
          results = NULL
          for(job in todo) {
       	    message('Sample: ',job)
             results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes,
-                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat))
+                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits))
          }	
       }
       if(PV_DEBUG){
@@ -447,8 +447,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
             scores = reads_minus
          }
       
-         res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts)
-         colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads")
+         if (!missing(summits)) {
+           res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts,cond$summits,cond$heights)
+           colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads","Summits","Heights")
+         } else {
+           res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts)
+           colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads")
+         }
          pv = pv.peakset(pv,
                          peaks       = res,
                          sampID      = pv$class[PV_ID,chipnum],
@@ -552,7 +557,7 @@ pv.checkExists = function(filelist){
 
 pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                         bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
-                        fileType=0) {
+                        fileType=0,summits) {
 
    bufferSize = 1e6
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
@@ -569,6 +574,15 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
    fdebug("Starting croi_count_reads...")
    icount <- length(intervals[[1]])
    counts.croi <- vector(mode="integer",length=icount)
+   if (!missing(summits)) {
+     summits.croi <- vector(mode="integer",length=icount)
+     heights.croi <- vector(mode="integer",length=icount)
+     bSummits = TRUE
+   } else {
+     summits.croi <- vector()
+     heights.croi <- vector()
+     bSummits = FALSE
+   }
    libsize.croi <- .Call("croi_count_reads",bamfile,
                                             as.integer(insertLength),
                                             as.integer(fileType),
@@ -578,7 +592,10 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                                             as.integer(intervals[[3]]),
                                             as.integer(icount),
                                             as.logical(bWithoutDupes),
-                                            counts.croi)
+                                            as.logical(bSummits),
+                                            counts.croi,
+                                            summits.croi,
+                                            heights.croi)
    fdebug("Done croi_count_reads...")
    counts.croi[counts.croi==0]=1
    fdebug(sprintf("Counted %d reads...",libsize.croi))
@@ -589,7 +606,12 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
    widths = intervals[,3] - intervals[,2]
    rpkm = (counts/(widths/1000))/(libsize/1E6)
    
-   return(list(counts=counts,rpkm=rpkm,libsize=libsize))
+   result <- list(counts=counts,rpkm=rpkm,libsize=libsize)
+   if (bSummits==T) {
+     result$summits <- summits.croi;
+     result$heights <- heights.croi;
+   }
+   return(result)
 }
 
 pv.filterRate = function(pv,vFilter,filterFun=max) {

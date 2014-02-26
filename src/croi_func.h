@@ -6,13 +6,14 @@
 #include "interval.h"
 #include "intervalSet.h"
 #include "iBucket.h"
+#include "densitySet.h"
 
 class Croi {
   public:
     Croi(void);
     ~Croi(void);
     void open(const char *filename,int insertLength,int filetype);
-    int load(int maxReads,bode::NodeGroup *ng,IBucket *intervals);
+    int load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::DensitySet *densities);
     void close(void);
     int count(const char *chrom,int left,int right,int withoutDupes);
     int size(void);

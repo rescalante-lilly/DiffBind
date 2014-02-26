@@ -66,6 +66,7 @@ int IBucket::bsearch(int chrom,int left,int right) {
 
   bot = 0;
   top = icount-1;
+  mid = -1;
   while (found == false && top != bot && mid != bot) {
     mid = (top-bot)/2 + bot;
     c = cmp(mid,chrom,left,right);
