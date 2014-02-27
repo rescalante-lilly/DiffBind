@@ -1148,7 +1148,7 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
    }	
 }
 
-pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
+pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE,bCPM=FALSE){
    
    if(length(pv$peaks)<2) {
       warning('Unable to TMM normalize -- not enough peaksets',call.=FALSE)
@@ -1165,11 +1165,30 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE){
    counts = res$counts
    sizes  = res$samples$lib.size * res$samples$norm.factors
    counts = t(t(counts)/sizes)
-   counts = counts * mean(res$samples$lib.size)
-
+   
+   if(bCPM) {
+      counts = counts * 1E06     
+   } else {
+      counts = counts * mean(res$samples$lib.size)
+   }
+   
    colnames(counts) = savenames
    return(counts)
                        
+}
+
+pv.normFactors = function(pv,bMinus=F,bFullLib=T) {
+   if(length(pv$peaks)<2) {
+      warning('Unable to TMM normalize -- not enough peaksets',call.=FALSE)
+      return(pv)   
+   }
+   g1     = rep(F,length(pv$peaks))
+   g1[1]  = T
+   
+   savenames = pv$class[PV_ID,]
+   pv$class[PV_ID,] = 1:ncol(pv$class)
+   res    = pv.DEedgeR(pv,g1,!g1,"1","2",bSubControl=bMinus,bFullLibrarySize=bFullLib,bNormOnly=T)
+   return(res$samples$norm.factors)
 }
 
 pv.stripDBA = function(conrec) {

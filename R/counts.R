@@ -12,14 +12,14 @@ pv.model = function(model,mask,minOverlap=2,
                     caller="raw",format, scorecol, bLowerBetter, skipLines=0,bAddCallerConsensus=T,
                     bRemoveM=T, bRemoveRandom=T,filter,
                     bKeepAll=T,bAnalysis=T,attributes) {
-
+   
    if(missing(format))       format       = NULL
    if(missing(scorecol))     scorecol     = NULL
    if(missing(bLowerBetter)) bLowerBetter = NULL
    if(missing(filter))       filter       = NULL
    
    if(!missing(model)) {
-   	  if(missing(attributes)) {
+      if(missing(attributes)) {
          if(is.null(model$attributes)) {   
             attributes = PV_ID
          } else {
@@ -28,7 +28,7 @@ pv.model = function(model,mask,minOverlap=2,
       }
       config = model$config
       model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
-                          bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes)
+                         bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes)
       model$config = config
       return(model)
    }
@@ -36,7 +36,7 @@ pv.model = function(model,mask,minOverlap=2,
    if(missing(attributes)) {   
       attributes = PV_ID
    }
-
+   
    if(is.character(samplesheet)) {
       samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
       if(is.null(samples$SampleID)){
@@ -57,14 +57,14 @@ pv.model = function(model,mask,minOverlap=2,
       if(is.null(samples$Replicate)){
          samples$Replicate = ""
       }
-
+      
       samples$SampleID[is.na(samples$SampleID)]=""
       samples$Tissue[is.na(samples$Tissue)]=""
       samples$Factor[is.na(samples$Factor)]=""
       samples$Condition[is.na(samples$Condition)]=""
       samples$Treatment[is.na(samples$Treatment)]=""
       samples$Replicate[is.na(samples$Replicate)]=""
-	   
+      
    } else samples = samplesheet
    
    model = NULL
@@ -86,7 +86,7 @@ pv.model = function(model,mask,minOverlap=2,
             if(x=="FALSE") {
                config$RunParallel=FALSE
             } else {
-            	config$RunParallel=TRUE
+               config$RunParallel=TRUE
             }
          }
       }
@@ -94,11 +94,11 @@ pv.model = function(model,mask,minOverlap=2,
    if(is.null(config$parallelPackage)){
       config$parallelPackage=DBA_PARALLEL_MULTICORE
    } else if (config$parallelPackage == "DBA_PARALLEL_MULTICORE") {
-   	  config$parallelPackage=DBA_PARALLEL_MULTICORE
+      config$parallelPackage=DBA_PARALLEL_MULTICORE
    } else if (config$parallelPackage == "DBA_PARALLEL_RLSF") {
-   	  config$parallelPackage=DBA_PARALLEL_RLSF  
+      config$parallelPackage=DBA_PARALLEL_RLSF  
    }
-
+   
    if(is.null(config$AnalysisMethod)){
       config$AnalysisMethod = DBA_EDGER
    } else if(is.character(config$AnalysisMethod)){
@@ -175,15 +175,15 @@ pv.model = function(model,mask,minOverlap=2,
       if(!is.null(counts)) {
          peakcaller = 'counts'
       }
-     
-     message(as.character(samples$SampleID[i]),' ',
-         as.character(samples$Tissue[i]),' ',
-         as.character(samples$Factor[i]),' ',
-         as.character(samples$Condition[i]),' ',
-         as.character(samples$Treatment[i]),' ',
-         as.integer(samples$Replicate[i]),' ',peakcaller)
-                  
-     model = pv.peakset(model,
+      
+      message(as.character(samples$SampleID[i]),' ',
+              as.character(samples$Tissue[i]),' ',
+              as.character(samples$Factor[i]),' ',
+              as.character(samples$Condition[i]),' ',
+              as.character(samples$Treatment[i]),' ',
+              as.integer(samples$Replicate[i]),' ',peakcaller)
+      
+      model = pv.peakset(model,
                          peaks       = as.character(samples$Peaks[i]),
                          sampID      = as.character(samples$SampleID[i]),
                          tissue      = as.character(samples$Tissue[i]),
@@ -200,21 +200,21 @@ pv.model = function(model,mask,minOverlap=2,
                          replicate   = as.integer(samples$Replicate[i]),
                          readBam     = as.character(samples$bamReads[i]),
                          controlBam  = as.character(samples$bamControl[i]),
-						       filter      = peakfilter,
-						       counts      = counts,
+                         filter      = peakfilter,
+                         counts      = counts,
                          bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,skipLines=skipLines)
-      }
-
+   }
+   
    model$samples = samples
-
+   
    if(bAddCallerConsensus){
       model = pv.add_consensus(model)
    }
    
-    model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
-                       bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes) 
-
-     
+   model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
+                      bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes) 
+   
+   
    return(model)
 }
 
@@ -252,6 +252,12 @@ PV_SCORE_TMM_MINUS_FULL       = 6
 PV_SCORE_TMM_MINUS_EFFECTIVE  = 7
 PV_SCORE_TMM_READS_FULL       = 8
 PV_SCORE_TMM_READS_EFFECTIVE  = 9
+PV_SCORE_TMM_MINUS_FULL_CPM       = 10
+PV_SCORE_TMM_MINUS_EFFECTIVE_CPM  = 11
+PV_SCORE_TMM_READS_FULL_CPM       = 12
+PV_SCORE_TMM_READS_EFFECTIVE_CPM  = 13
+PV_SCORE_SUMMIT                   = 101
+PV_SCORE_SUMMIT_ADJ               = 102
 
 PV_READS_DEFAULT   = 0
 PV_READS_BAM       = 3
@@ -268,9 +274,19 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       minOverlap = ceiling(length(pv$peaks) * minOverlap)	
    }
    
+   bRecenter = FALSE
+   if(!missing(summits)) {
+      if(bLowMem==TRUE) {
+         stop("Can not compute summits when bUseSummarizeOverlaps is TRUE in dba.count",call.=FALSE)
+      }
+      if(summits>0) {
+         bRecenter=TRUE
+      } 
+   }
+   
    bed = NULL
    if(!missing(peaks)) {
-   	  if(is.vector(peaks)) {
+      if(is.vector(peaks)) {
          if(is.character(peaks)){
             tmp = pv.peakset(NULL,peaks)
             pv$chrmap = tmp$chrmap
@@ -283,7 +299,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       } else {
          pv$chrmap = unique(as.character(peaks[,1]))
          if(is.character(peaks[1,1])){
-           peaks[,1] = factor(peaks[,1],pv$chrmap)
+            peaks[,1] = factor(peaks[,1],pv$chrmap)
          }
       }
       if(is.null(bed)) {
@@ -291,28 +307,47 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
       }
    } else {
-     if(minOverlap == pv$minOverlap) {
-        bed = pv$vectors[,1:3]
-     } else if (minOverlap == 1) {
-        bed = pv$allvectors[,1:3]
-     } else {
-        bed = pv.consensus(pv,1:length(pv$peaks),
-                           minOverlap=minOverlap,bFast=T)$peaks[[length(pv$peaks)+1]][,1:3]
-     }
+      if(minOverlap == pv$minOverlap) {
+         bed = pv$vectors[,1:3]
+      } else if (minOverlap == 1) {
+         bed = pv$allvectors[,1:3]
+      } else {
+         bed = pv.consensus(pv,1:length(pv$peaks),
+                            minOverlap=minOverlap,bFast=T)$peaks[[length(pv$peaks)+1]][,1:3]
+      }
    }
    
    bed[,1] = pv$chrmap[bed[,1]]
    bed = pv.peaksort(bed)
-
+   
    numChips = ncol(pv$class)
    chips  = unique(pv$class[PV_BAMREADS,])
    chips  = unique(chips[!is.na(chips)])
    inputs = pv$class[PV_BAMCONTROL,]
    inputs = unique(inputs[!is.na(inputs)])
    todo   = unique(c(chips,inputs))
-  
+   
    if(!pv.checkExists(todo)) {
       stop('Some read files could not be accessed. See warnings for details.')
+   }
+   
+   if(length(insertLength)==1) {
+      insertLength = rep(insertLength,length(todo))
+   }
+   if(length(insertLength)<length(todo)) {
+      warning('Fewer fragment sizes than libraries -- using mean fragment size for missing values',call.=FALSE)
+      insertLength = c(insertLength,rep(mean(insertLength),length(todo)-length(insertLength)))
+   }
+   if(length(insertLength)>length(todo)) {
+      warning('More fragment sizes than libraries',call.=FALSE)
+   }
+   
+   todorecs = NULL
+   for(i in 1:length(todo)) {
+      newrec =NULL
+      newrec$bamfile = todo[i]
+      newrec$insert = insertLength[1]
+      todorecs = pv.listadd(todorecs,newrec)
    }
    
    yieldSize = 5000000
@@ -322,12 +357,12 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    scanbamparam = NULL
    addfuns = NULL
    if(bLowMem){
-   	  
-   	  require(Rsamtools)
-   	  
-   	  addfuns = c("BamFileList","summarizeOverlaps","ScanBamParam","scanBamFlag","countBam","SummarizedExperiment")   
-      if (insertLength !=0) {
-         stop("Can not specify insert size when bUseSummarizeOverlaps is TRUE in dba.count",call.=FALSE)
+      
+      require(Rsamtools)
+      
+      addfuns = c("BamFileList","summarizeOverlaps","ScanBamParam","scanBamFlag","countBam","SummarizedExperiment")   
+      if (insertLength[1] !=0) {
+         warning("fragmentSize ignored when bUseSummarizeOverlaps is TRUE in dba.count",call.=FALSE)
       }
       bAllBam = T
       for(st in todo) {
@@ -357,15 +392,15 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    if(!bUseLast) {
       pv = dba.parallel(pv)
       if((pv$config$parallelPackage>0) && bParallel) {   	     
-   	     params  = dba.parallel.params(pv$config,c("pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
-         results = dba.parallel.lapply(pv$config,params,todo,
-                                       pv.getCounts,bed,insertLength,bWithoutDupes=bWithoutDupes,
+         params  = dba.parallel.params(pv$config,c("pv.do_getCounts","pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
+         results = dba.parallel.lapply(pv$config,params,todorecs,
+                                       pv.do_getCounts,bed,bWithoutDupes=bWithoutDupes,
                                        bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits)
       } else {
          results = NULL
-         for(job in todo) {
-      	    message('Sample: ',job)
-            results = pv.listadd(results,pv.getCounts(job,bed,insertLength,bWithoutDupes=bWithoutDupes,
+         for(job in todorecs) {
+            message('Sample: ',job)
+            results = pv.listadd(results,pv.do_getCounts(job,bed,bWithoutDupes=bWithoutDupes,
                                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits))
          }	
       }
@@ -373,14 +408,14 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          #save(results,file='dba_last_result.RData')
       }
    } else {
-   	  if(PV_DEBUG) {
+      if(PV_DEBUG) {
          load('dba_last_result.RData')
       } else {
          warning("Can't load last result: debug off")
       }
    }
    
-   if ((defaultScore >= DBA_SCORE_TMM_MINUS_FULL) || (defaultScore <= DBA_SCORE_TMM_READS_EFFECTIVE) ) {
+   if ((defaultScore >= DBA_SCORE_TMM_MINUS_FULL) || (defaultScore <= DBA_SCORE_TMM_READS_EFFECTIVE_CPM) ) {
       redoScore = defaultScore
       defaultScore = PV_SCORE_READS_MINUS	
    } else redoScore = 0
@@ -401,36 +436,36 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    allchips = unique(pv$class[c(PV_BAMREADS,PV_BAMCONTROL),])
    numAdded = 0
    for(chipnum in 1:numChips) {
-   	  if (pv.nodup(pv,chipnum)) {
-      	 jnum = which(todo %in% pv$class[PV_BAMREADS,chipnum])
-   	     cond = results[[jnum]]
-   	     if(length(cond$counts)==0){
-   	        warning('ERROR IN PROCESSING ',todo[jnum])
-   	     }
- 	  
-   	     if(!is.na(pv$class[PV_BAMCONTROL,chipnum])) {
-   	        cnum = which(todo %in% pv$class[PV_BAMCONTROL,chipnum])
-   	        cont = results[[cnum]]
-   	        if(length(cont$counts)==0){
-   	           warning('ERROR IN PROCESSING ',todo[cnum])
-   	        }
-   	        if(bScaleControl==TRUE) {
-   	           scale = cond$libsize / cont$libsize
-   	           if(scale > 1) scale = 1
-   	           if(scale != 0) {
-   	              cont$counts = ceiling(cont$counts * scale)
-   	           }	
-   	        }   	        
-   	     } else {
-   	  	    cont = NULL
-   	        cont$counts = rep(1,length(cond$counts))	
-   	        cont$rpkm   = rep(1,length(cond$rpkm))   
-   	     }
-   	     	  
-   	     rpkm_fold   = cond$rpkm   / cont$rpkm
-   	     reads_fold  = cond$counts / cont$counts
-   	     reads_minus = cond$counts - cont$counts
-  	  
+      if (pv.nodup(pv,chipnum)) {
+         jnum = which(todo %in% pv$class[PV_BAMREADS,chipnum])
+         cond = results[[jnum]]
+         if(length(cond$counts)==0){
+            warning('ERROR IN PROCESSING ',todo[jnum])
+         }
+         
+         if(!is.na(pv$class[PV_BAMCONTROL,chipnum])) {
+            cnum = which(todo %in% pv$class[PV_BAMCONTROL,chipnum])
+            cont = results[[cnum]]
+            if(length(cont$counts)==0){
+               warning('ERROR IN PROCESSING ',todo[cnum])
+            }
+            if(bScaleControl==TRUE) {
+               scale = cond$libsize / cont$libsize
+               if(scale > 1) scale = 1
+               if(scale != 0) {
+                  cont$counts = ceiling(cont$counts * scale)
+               }	
+            }   	        
+         } else {
+            cont = NULL
+            cont$counts = rep(1,length(cond$counts))	
+            cont$rpkm   = rep(1,length(cond$rpkm))   
+         }
+         
+         rpkm_fold   = cond$rpkm   / cont$rpkm
+         reads_fold  = cond$counts / cont$counts
+         reads_minus = cond$counts - cont$counts
+         
          if(bLog) {
             rpkm_fold  = log2(rpkm_fold)
             reads_fold = log2(reads_fold)
@@ -446,13 +481,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          } else if (defaultScore == PV_RES_READS_MINUS) {
             scores = reads_minus
          }
-      
+         
          if (!missing(summits)) {
-           res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts,cond$summits,cond$heights)
-           colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads","Summits","Heights")
+            res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts,cond$summits,cond$heights)
+            colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads","Summits","Heights")
          } else {
-           res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts)
-           colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads")
+            res = cbind(bed,scores,cond$rpkm,cond$counts,cont$rpkm,cont$counts)
+            colnames(res) = c("Chr","Start","End","Score","RPKM","Reads","cRPKM","cReads")
          }
          pv = pv.peakset(pv,
                          peaks       = res,
@@ -473,11 +508,24 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          numAdded = numAdded + 1
       }                  
    }
-      
+   
    if(bOnlyCounts) {
-   	  numpeaks = length(pv$peaks)
+      numpeaks = length(pv$peaks)
       res = pv.vectors(pv,(numpeaks-numAdded+1):numpeaks,minOverlap=1,bAnalysis=F,bAllSame=T)
-      if(redoScore > 0) {
+      if(bRecenter) {
+         message('Re-centering peaks...')
+         called = pv.CalledMasks(pv,res,bed)
+         newpeaks = pv.Recenter(res,summits,called)
+         if(redoScore>0) {
+            defaultScore = redoScore
+         }
+         res = pv.counts(res,peaks=newpeaks,defaultScore=defaultScore,bLog=bLog,insertLength=insertLength,
+                         bOnlyCounts=T,bCalledMasks=F,minMaxval=minMaxval,filterFun=filterFun,
+                         bParallel=bParallel,bWithoutDupes=bWithoutDupes,bScaleControl=bScaleControl,
+                         bSignal2Noise=bSignal2Noise,bLowMem=FALSE,readFormat=readFormat,summits=0)
+         res$sites = called
+         return(res)
+      } else if(redoScore > 0) {
          res = pv.setScore(res,redoScore,bSignal2Noise=bSignal2Noise)	
       }   
       if(!missing(minMaxval)) {
@@ -485,18 +533,18 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          maxs = apply(res$allvectors[,4:ncol(res$allvectors)],1,filterFun)
          tokeep = maxs>=minMaxval
          if(sum(tokeep)<length(tokeep)) {
-	         if(sum(tokeep)>1) {
-	            res$allvectors = res$allvectors[tokeep,]
-	            rownames(res$allvectors) = 1:sum(tokeep)
-	            res$vectors    = res$allvectors
-	            for(i in 1:length(res$peaks)) {
-	               res$peaks[[i]] = res$peaks[[i]][tokeep,]
-	               rownames(res$peaks[[i]]) = 1:sum(tokeep)
-	            } 
-	            res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
-	         } else {
-	            stop('No sites have activity greater than minMaxval')
-	         }
+            if(sum(tokeep)>1) {
+               res$allvectors = res$allvectors[tokeep,]
+               rownames(res$allvectors) = 1:sum(tokeep)
+               res$vectors    = res$allvectors
+               for(i in 1:length(res$peaks)) {
+                  res$peaks[[i]] = res$peaks[[i]][tokeep,]
+                  rownames(res$peaks[[i]]) = 1:sum(tokeep)
+               } 
+               res = pv.vectors(res,minOverlap=1,bAnalysis=F,bAllSame=T)
+            } else {
+               stop('No sites have activity greater than minMaxval')
+            }
          }
       }
       if(bCalledMasks && missing(peaks)) {
@@ -512,8 +560,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    if(bSignal2Noise) {
       res$SN = pv.Signal2Noise(res)
    }
-						 
-   
+
    return(res)	
 }
 
@@ -555,6 +602,17 @@ pv.checkExists = function(filelist){
    return(sum(res)==0)
 }
 
+pv.do_getCounts = function(countrec,intervals,bWithoutDupes=F,
+                           bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
+                           fileType=0,summits) {
+      res = pv.getCounts(bamfile=countrec$bamfile,intervals=intervals,insertLength=countrec$insert,
+                         bWithoutDupes=bWithoutDupes,
+                         bLowMem=bLowMem,yieldSize=yieldSize,mode=mode,singleEnd=singleEnd,
+                         scanbamparam=scanbamparam,
+                         fileType=fileType,summits=summits)
+      return(res)
+
+}
 pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                         bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
                         fileType=0,summits) {
@@ -648,5 +706,22 @@ pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,
    rpkm    = (counts/(width(intervals)/1000))/(libsize/1e+06)
 
    return(list(counts=counts,rpkm=rpkm,libsize=libsize))
+}
+
+pv.Recenter = function(pv,summits,called) {
+   if(is.null(pv$peaks[[1]]$Summits)) {
+      stop('Summits not available; re-run dba.count with summits=0')   
+   }
+   positions = sapply(pv$peaks,function(x)x$Summits)
+   heights   = sapply(pv$peaks,function(x)x$Heights) * sapply(called,function(x)x)
+   
+   centers = sapply(1:nrow(positions),function(x)round(weighted.mean(positions[x,],heights[x,])))
+   starts  = centers-summits
+   ends    = centers+summits
+   
+   bed = pv$peaks[[1]][,1:3]
+   bed[,2] = starts
+   bed[,3] = ends
+   return(bed)
 }
 

@@ -363,14 +363,20 @@ DBA_SCORE_TMM_MINUS_FULL      = PV_SCORE_TMM_MINUS_FULL
 DBA_SCORE_TMM_MINUS_EFFECTIVE = PV_SCORE_TMM_MINUS_EFFECTIVE
 DBA_SCORE_TMM_READS_FULL      = PV_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE = PV_SCORE_TMM_READS_EFFECTIVE
+DBA_SCORE_TMM_MINUS_FULL_CPM      = PV_SCORE_TMM_MINUS_FULL_CPM
+DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM = PV_SCORE_TMM_MINUS_EFFECTIVE_CPM
+DBA_SCORE_TMM_READS_FULL_CPM      = PV_SCORE_TMM_READS_FULL_CPM
+DBA_SCORE_TMM_READS_EFFECTIVE_CPM = PV_SCORE_TMM_READS_EFFECTIVE_CPM
+DBA_SCORE_SUMMIT              = PV_SCORE_SUMMIT
+DBA_SCORE_SUMMIT_ADJ          = PV_SCORE_SUMMIT_ADJ
 
 DBA_READS_DEFAULT = PV_READS_DEFAULT
 DBA_READS_BAM     = PV_READS_BAM
 DBA_READS_BED     = PV_READS_BED
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
-                     insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+                     fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
+                     filterFun=max, bCorPlot=DBA$config$bCorPlot, 
                      bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
                      bParallel=DBA$config$RunParallel) 
 {
@@ -386,36 +392,46 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
    
    bUseLast = F
    
+   res=NULL
    if(!missing(peaks) || length(filter)>1) {
       if(is.null(peaks) || length(filter)>1) {
          callers = unique(DBA$class[DBA_CALLER,])
          if((length(callers)==1) & (callers=='counts')) {
             DBA = pv.check(DBA)
-            if(length(filter)>1) {
-               DBA = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=0,filterFun=filterFun)
-               res = pv.filterRate(DBA,filter,filterFun=filterFun)	
+            if(!missing(summits)) {
+               if(summits>0) {
+                  newpeaks = pv.Recenter(DBA,summits,DBA$sites)
+                  res = pv.counts(DBA,peaks=newpeaks,
+                                  defaultScore=score, bLog=bLog, insertLength=fragmentSize, bOnlyCounts=T,
+                                  bCalledMasks=F, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
+                                  bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
+                                  bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=0)
+                  res$sites = DBA$sites
+               }
             } else {
-               res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=filter,filterFun=filterFun)
+               if(length(filter)>1) {
+                  DBA = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=0,filterFun=filterFun)
+                  res = pv.filterRate(DBA,filter,filterFun=filterFun)	
+               } else {
+                  res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=filter,filterFun=filterFun)
+               }
+               return(res)	
             }
-            return(res)	
          } else {
-            warning('DBA object must contains only counts')	
+            stop('DBA object must contains only counts')	
          }	
       } else {
          peaks = pv.DataType2Peaks(peaks)
       }
    }
    
-   if(missing(insertLength)) {
-      insertLength=0
+   if(is.null(res)) {
+      res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
+                      defaultScore=score, bLog=bLog, insertLength=fragmentSize, bOnlyCounts=T,
+                      bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
+                      bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
+                      bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=summits)
    }
-   
-   res = pv.counts(DBA, peaks=peaks, minOverlap=minOverlap, 
-                   defaultScore=score, bLog=bLog, insertLength=insertLength, bOnlyCounts=T,
-                   bCalledMasks=bCalledMasks, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
-                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
-                   bLowMem=bUseSummarizeOverlaps,readFormat=readFormat)
-   
    if(length(res$contrasts)>0) {
       for(i in 1:length(res$contrasts)) {
          res$contrasts[[i]]$edgeR = NULL

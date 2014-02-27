@@ -1,3 +1,9 @@
+## NOTE: THIS SCRIPT NO LONGER WORKS DUE TO THE SRA CHANGING THE DATA FORMAT ON THE ARCHIVE
+
+cat("NOTE: THIS SCRIPT NO LONGER WORKS DUE TO THE SRA CHANGING THE DATA FORMAT ON THE ARCHIVE\n")
+
+if(FALSE){
+   
 library(GEOquery)
 
 file.copy(file.path(system.file("extra", package="DiffBind"),"tamoxifen_GEO.csv"),getwd())
@@ -22,6 +28,8 @@ getGEOSuppFiles("GSM798427",makeDirectory=FALSE,baseDir="GEO_DATA")
 getGEOSuppFiles("GSM798441",makeDirectory=FALSE,baseDir="GEO_DATA")
 
 tamoxifen = dba(sampleSheet='tamoxifen_GEO.csv')
+
+}
 
               
               

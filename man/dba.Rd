@@ -10,11 +10,14 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 \usage{
 dba(DBA,mask, minOverlap=2,
             sampleSheet="dba_samples.csv", 
-            config=data.frame(RunParallel=TRUE, reportInit="DBA", DataType=DBA_DATA_GRANGES, 
-            AnalysisMethod=DBA_EDGER, bCorPlot=TRUE, th=.1, bUsePval=FALSE),
-            peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, 
+            config=data.frame(RunParallel=TRUE, reportInit="DBA", 
+            DataType=DBA_DATA_GRANGES, AnalysisMethod=DBA_EDGER,
+            bCorPlot=TRUE, th=.1, bUsePval=FALSE),
+            peakCaller="raw", peakFormat, scoreCol, 
+            bLowerScoreBetter, filter, skipLines=0, 
             bAddCallerConsensus=FALSE, 
-            bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
+            bRemoveM=TRUE, bRemoveRandom=TRUE, 
+            bSummarizedExperiment=FALSE,
             bCorPlot, attributes) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -75,10 +78,10 @@ data frame containing configuration options, or file name of config file to load
 }
 }
   \item{peakCaller}{
-if a sampleSheet is specified, the default peak caller that will be used if the \code{fPeakCaller} column is absent.
+if a sampleSheet is specified, the default peak caller that will be used if the \code{PeakCaller} column is absent.
 }
  \item{peakFormat}{
-if a sampleSheet is specified, the default peak file format that will be used if the \code{fPeakFormat} column is absent.
+if a sampleSheet is specified, the default peak file format that will be used if the \code{PeakFormat} column is absent.
 }
  \item{scoreCol}{
 if a sampleSheet is specified, the default column  in the peak files that will be used for scoring if the \code{ScoreCol} column is absent.

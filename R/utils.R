@@ -816,18 +816,81 @@ heatmap.3=function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
 }
 
 
-pv.attname = function(attribute) {
-   if(attribute == PV_GROUP)     return("Group")
-   if(attribute == PV_TISSUE)    return("Tissue")
-   if(attribute == PV_FACTOR)    return("Factor")
-   if(attribute == PV_CONDITION) return("Condition")
-   if(attribute == PV_TREATMENT) return("Treatment")
-   if(attribute == PV_REPLICATE) return("Replicate")
-   if(attribute == PV_CALLER)    return("Caller")
+pv.attname = function(attribute,pv=NULL) {
+   if(attribute == PV_ID) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$id)) {
+            return(pv$config$id)
+         }
+      }
+      return("ID")
+   }
+   if(attribute == PV_GROUP) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$group)) {
+            return(pv$config$group)
+         }
+      }
+      return("Group")
+   }
+   if(attribute == PV_TISSUE) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$tissue)) {
+            return(pv$config$tissue)
+         }
+      }
+      return("Tissue")
+   }
+   if(attribute == PV_FACTOR) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$factor)) {
+            return(pv$config$factor)
+         }
+      }
+      return("Factor")
+   }
+   if(attribute == PV_CONDITION) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$condition)) {
+            return(pv$config$condition)
+         }
+      }
+      return("Condition")
+   }
+   if(attribute == PV_TREATMENT) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$treatment)) {
+            return(pv$config$treatment)
+         }
+      }
+      return("Treatment")
+   }
    
+   if(attribute == PV_REPLICATE) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$replicate)) {
+            return(pv$config$replicate)
+         }
+      }
+      return("Replicate")
+   }
+   if(attribute == PV_CALLER) {
+      if(!is.null(pv)) {
+         if(!is.null(pv$config$caller)) {
+            return(pv$config$caller)
+         }
+      }
+      return("Caller")
+   }
+   
+   if(!is.null(pv)) {
+      if(!is.null(pv$config$group)) {
+         return(pv$config$group)
+      }
+   }
    return("Group")
-      	
 }
+
 pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGroup=F) {
 
    if(is.null(attributes)){
@@ -861,7 +924,7 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
          for(i in 1:length(vals)) {
             addcol[addcol[,1]==vals[i],1]=cols[i]
          }
-         colnames(addcol) = pv.attname(attribute)
+         colnames(addcol) = pv.attname(attribute,pv)
          if(bReverse) {
             atts = cbind(addcol,atts)  
          } else { 	

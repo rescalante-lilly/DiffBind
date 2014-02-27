@@ -223,12 +223,17 @@ dba.plotHeatmap(tamoxifen,contrast=1,th=1,correlations=FALSE,sortFun=var)
 
 data(tamoxifen_counts)
 #Examples of  heatmaps using DB sites with different subsets of samples
-tamoxifen = dba.contrast(tamoxifen,tamoxifen$masks$Resistant,c(3:5,10:11)) #exclude T47D
+#exclude T47D
+tamoxifen = dba.contrast(tamoxifen,tamoxifen$masks$Resistant,c(3:5,10:11)) 
 tamoxifen = dba.analyze(tamoxifen,bCorPlot=FALSE)
-dba.plotHeatmap(tamoxifen, contrast=1) # regular heatmaps with two contrast groups
-dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$All) #also include the T47D samples
-plot(tamoxifen,contrast=1,mask=!tamoxifen$masks$MCF7) # correlation heatmap without MCF7 with with T47D
-dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$T47D,correlations=FALSE) # binding heatmaps using only the T47D samples
+# regular heatmaps with two contrast groups
+dba.plotHeatmap(tamoxifen, contrast=1) 
+#also include the T47D samples
+dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$All) 
+#correlation heatmap without MCF7 with with T47D
+plot(tamoxifen,contrast=1,mask=!tamoxifen$masks$MCF7) 
+# binding heatmapsusing only the T47D samples
+dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$T47D,correlations=FALSE)  
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

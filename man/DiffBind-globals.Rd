@@ -27,6 +27,12 @@
 \alias{DBA_SCORE_TMM_READS_EFFECTIVE}
 \alias{DBA_SCORE_TMM_MINUS_FULL}
 \alias{DBA_SCORE_TMM_MINUS_EFFECTIVE}
+\alias{DBA_SCORE_TMM_READS_FULL_CPM}
+\alias{DBA_SCORE_TMM_READS_EFFECTIVE_CPM}
+\alias{DBA_SCORE_TMM_MINUS_FULL_CPM}
+\alias{DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM}
+\alias{DBA_SCORE_SUMMIT}
+\alias{DBA_SCORE_SUMMIT_ADJ}
 \alias{DBA_READS_DEFAULT}
 \alias{DBA_READS_BAM}
 \alias{DBA_READS_BED}
@@ -90,6 +96,12 @@ DBA_SCORE_TMM_READS_FULL
 DBA_SCORE_TMM_READS_EFFECTIVE
 DBA_SCORE_TMM_MINUS_FULL
 DBA_SCORE_TMM_MINUS_EFFECTIVE
+DBA_SCORE_TMM_READS_FULL_CPM
+DBA_SCORE_TMM_READS_EFFECTIVE_CPM
+DBA_SCORE_TMM_MINUS_FULL_CPM
+DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM
+DBA_SCORE_SUMMIT
+DBA_SCORE_SUMMIT_ADJ
 
 DBA_READS_DEFAULT
 DBA_READS_BAM
@@ -207,6 +219,24 @@ dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Co
 dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Effective Library size
 }
 
+\item{DBA_SCORE_TMM_READS_FULL_CPM}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts and Full Library size, reported in counts-per-million.
+}
+\item{DBA_SCORE_TMM_READS_EFFECTIVE_CPM}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts and Effective Library size, reported in counts-per-million.
+}
+\item{DBA_SCORE_TMM_MINUS_FULL_CPM}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Full Library size, reported in counts-per-million.
+}
+\item{DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM}{
+dba.count score is TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Effective Library size, reported in counts-per-million. 
+}
+\item{DBA_SCORE_SUMMIT}{
+dba.count score is summit height (highest pile-up).
+}
+\item{DBA_SCORE_SUMMIT_ADJ}{
+dba.count score is summit height (highest pile-up), adjusted for library size.
+}
 \item{DBA_READS_DEFAULT}{
 When counting read files, use the file extension to determine the file type.
 }

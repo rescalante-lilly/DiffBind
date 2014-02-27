@@ -150,8 +150,9 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
       if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE   
    }
    
-   if(ncol(peaks) < scoreCol) {
-      peaks = cbind(peaks=1)
+   scoreSave = scoreCol
+   while(ncol(peaks) < scoreSave) {
+      peaks = cbind(peaks,1)
       scoreCol = 0
    }
 
@@ -431,6 +432,7 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    
    
    res = t(pv$class[attributes,mask])
+   colnames(res) = sapply(attributes,pv.attname,pv)
    rownames(res) = which(mask)
    
    if(bIntervals) {
@@ -805,7 +807,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    
    class  = attributes[1]   
    if(length(attributes)>1) {
-      second = attributes[2]	
+      second = attributes[2]   
       if(length(attributes)>2) {
          third = attributes[3]
       }
@@ -815,18 +817,20 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    }
    
    if(missing(sites)) sites = NULL
-
-    if(missing(numSites)){
-       numSites = nrow(pv$vectors)
-    }
-         	  
+   
+   if(missing(numSites)){
+      numSites = nrow(pv$vectors)
+   }
+   
+   config = pv$config
+   
    if(!missing(mask) || !missing(numSites)){
-   	  if(missing(mask)) {
-   	     mask = rep(T,ncol(pv$class))
-   	  }
+      if(missing(mask)) {
+         mask = rep(T,ncol(pv$class))
+      }
       pv = pv.pcmask(pv,numSites,mask,sites,cor=cor)
    } 
-   
+   pv$config = config
    pc = pv$pc
    
    if(is.null(pc)) {
@@ -837,7 +841,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    #if(!is.null(pv$mask)) {
    #   classes = pv$class[,which(pv$mask)]
    #} else {
-      classes = pv$class[,mask]
+   classes = pv$class[,mask]
    #}
    
    if(max(class) > nrow(classes)){
@@ -848,7 +852,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    for(i in 1:length(vr)) { vr[i] = pc$sdev[i]^2 }
    
    if(b3D){
-   	  startComp=1
+      startComp=1
       pvar = sum(vr[startComp:(startComp+2)])/sum(vr)*100
    } else {
       pvar = sum(vr[startComp:(startComp+1)])/sum(vr)*100
@@ -858,28 +862,28 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    c3p = vr[3]/sum(vr)*100
    
    if(!missing(second)){
-   	  if(!missing(third)) {
-   	     if(!missing(fourth)) {
-	     	classvec = sprintf("%s:%s:%s:%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
-            thetitle = sprintf("PCA: %s:%s:%s:%s",rownames(classes)[class],
-                                               rownames(classes)[second],
-                                               rownames(classes)[third],
-                                               rownames(classes)[fourth],pvar)
-   	     } else {
-            classvec = sprintf("%s:%s:%s",classes[class,],classes[second,],classes[third,])      
-            thetitle = sprintf("PCA: %s:%s:%s",rownames(classes)[class],
-                                               rownames(classes)[second],
-                                               rownames(classes)[third],pvar)
-            }
+      if(!missing(third)) {
+         if(!missing(fourth)) {
+            classvec = sprintf("%s:%s:%s:%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
+            thetitle = sprintf("PCA: %s:%s:%s:%s",pv.attname(class,pv),
+                               pv.attname(second,pv),
+                               pv.attname(third,pv),
+                               pv.attname(fourth,pv),pvar)
          } else {
+            classvec = sprintf("%s:%s:%s",classes[class,],classes[second,],classes[third,])      
+            thetitle = sprintf("PCA: %s:%s:%s",pv.attname(class,pv),
+                               pv.attname(second,pv),
+                               pv.attname(third,pv),pvar)
+         }
+      } else {
          classvec = sprintf("%s:%s",classes[class,],classes[second,])      
-         thetitle = sprintf("PCA: %s:%s",rownames(classes)[class],
-                                            rownames(classes)[second],pvar)
+         thetitle = sprintf("PCA: %s:%s",pv.attname(class,pv),
+                            pv.attname(second,pv),pvar)
       }
    } else {
       classvec = classes[class,]	
-      thetitle = sprintf("PCA: %s",rownames(classes)[class],pvar)
-  }
+      thetitle = sprintf("PCA: %s",pv.attname(class,pv),pvar)
+   }
    
    numsamps = ncol(classes)
    if(numsamps <=10) {
@@ -898,26 +902,26 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    if(missing(vColors)) {
       vColors = pv.colsv
    }
-
+   
    if(b3D) {
-    if (length(find.package(package='rgl',quiet=T))>0) {
-       library(rgl)
-       rgl::plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
-              xlab=sprintf('PC #%d [%2.0f%%]',startComp,c1p),
-              ylab=sprintf('PC #%d [%2.0f%%]',startComp+2,c3p),
-              zlab=sprintf('PC #%d [%2.0f%%]',startComp+1,c2p),
-              aspect=c(1,1,1),main=thetitle,...)
-    } else {
-       warning("Package rgl not installed")
-       plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
-            xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
-            ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
-            main = thetitle,...)
-    }
+      if (length(find.package(package='rgl',quiet=T))>0) {
+         library(rgl)
+         rgl::plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
+                     xlab=sprintf('PC #%d [%2.0f%%]',startComp,c1p),
+                     ylab=sprintf('PC #%d [%2.0f%%]',startComp+2,c3p),
+                     zlab=sprintf('PC #%d [%2.0f%%]',startComp+1,c2p),
+                     aspect=c(1,1,1),main=thetitle,...)
+      } else {
+         warning("Package rgl not installed")
+         plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
+              xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+              ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
+              main = thetitle,...)
+      }
    } else {
-   	  if(!missing(size)) {
-   	     #sval = sval + .5
-   	  }
+      if(!missing(size)) {
+         #sval = sval + .5
+      }
       plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
            xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
            ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
@@ -930,6 +934,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    return(res)
    #return(cbind(uclass,vColors[1:length(uclass)])) 
 }
+
 
 
 ## pv.plotHeatmap -- draw a heatmap using a subset of binding sites

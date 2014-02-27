@@ -2,11 +2,33 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.7}{
+ \itemize{
+   \item{New set of features relating to computing peak summits}
+  \itemize{
+     \item{Feature: dba.count computes summit heights and locations for each peak.}
+     \item{Feature: new scores: DBA_SCORE_SUMMIT and DBA_SCORE_SUMMIT_ADJ}
+     \item{Feature: dba.count re-centers consensus peakset on peak summits, with defined width}
+   }
+   \item{Interface changes to dba.count}
+   \itemize{
+     \item{removed parameter bCalledMasks (now always TRUE)}
+     \item{changed insertLength to fragmentSize}
+     \item{fragmentSize default is now 125 bp}
+     \item{fragmentSize can also be a vector with separate values for each library}
+   }
+   \item{Feature: new TMM scores reporting values in CPM}
+   \item{Feature: can config custom names for ID, Tissue, Factor, Condition, Treatment, Caller}
+   \item{Fix: disabled tamoxifen_GEO.R as SRA changed data formats and script no longer works}
+   \item{Fix: shortened length of some very long lines in man pages and examples}
+ }
+}
+
 \section{version 1.9.5}{
  \itemize{
   \item{Fix: bug when generating GRanges overlaps and one peakset is empty.}
   \item{Fix: need to be dependant on limma because of edgeR call to nonEstimable}
-  \item{Fix: summarizeOVerlaps moved to GenomicAlignments package; add dependancy/import}
+  \item{Fix: summarizeOverlaps moved to GenomicAlignments package; add dependancy/import}
  }
 }
 

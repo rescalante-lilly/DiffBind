@@ -10,7 +10,8 @@ Performs differential binding affinity analysis
 \usage{
 dba.analyze(DBA, method=DBA$config$AnalysisMethod, 
             bSubControl=TRUE, bFullLibrarySize=TRUE, bTagwise=TRUE,
-            bCorPlot=DBA$config$bCorPlot,  bReduceObjects=T, bParallel=DBA$config$RunParallel)
+            bCorPlot=DBA$config$bCorPlot,  bReduceObjects=T, 
+            bParallel=DBA$config$RunParallel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

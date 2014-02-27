@@ -30,7 +30,9 @@ Arguments passed on to parent methods
 }
 }
 \details{
-S3 methods for DBA object
+S3 methods for DBA object from the \code{\link{DiffBind}} package.
+
+DBA objects are usually constructed using the \code{\link{dba}} function.
 }
 %\value{
 %}

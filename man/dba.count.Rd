@@ -11,8 +11,8 @@ respectively.
 }
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
-          insertLength, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          bCalledMasks=TRUE, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+          fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
+          filterFun=max, bCorPlot=DBA$config$bCorPlot, 
           bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
           bParallel=DBA$config$RunParallel) 
 }
@@ -26,7 +26,7 @@ dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
 DBA object
 }
  \item{peaks}{
-If GRanges, RangedData, dataframe, or matrix, this parameter contains the intervals to use for counting. If character string, it specifies a file containing the intervals to use (with the first three columns specifying chromosome, startpos, endpos).If missing or a mask, generates a consensus peakset using minOverlap parameter (after applying the mask if present). If NULL, changes the score used in the global binding matrix to the score type specified in the score parameter without re-counting.
+If GRanges, RangedData, dataframe, or matrix, this parameter contains the intervals to use for counting. If character string, it specifies a file containing the intervals to use (with the first three columns specifying chromosome, startpos, endpos).If missing or a mask, generates a consensus peakset using minOverlap parameter (after applying the mask if present). If NULL, the \code{score}, \code{filter}, and \code{summits} parameters are honored, updating the global binding matrix without re-counting in the cases of \code{score} and \code{filter}, and only counting after re-centering in the case of \code{summits}.
 }
 \item{minOverlap}{
 only include peaks in at least this many peaksets when generating consensus peakset (i.e. when peaks parameter is missing).  If minOverlap is between zero and one, peak will be included from at least this proportion of peaksets.
@@ -43,15 +43,29 @@ DBA_SCORE_TMM_READS_FULL \tab TMM normalized (using edgeR), using ChIP read coun
 DBA_SCORE_TMM_READS_EFFECTIVE \tab TMM normalized (using edgeR), using ChIP read counts and Effective Library size\cr
 DBA_SCORE_TMM_MINUS_FULL \tab TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Full Library size\cr
 DBA_SCORE_TMM_MINUS_EFFECTIVE \tab TMM normalized (using edgeR), using ChIP read counts minus Control read counts and Effective Library size\cr
+DBA_SCORE_TMM_READS_FULL_CPM \tab same as \code{DBA_SCORE_TMM_READS_FULL}, but reporrted in counts-per-million.\cr
+DBA_SCORE_TMM_READS_EFFECTIVE_CPM \tab same as \code{DBA_SCORE_TMM_READS_EFFECTIVE}, but reporrted in counts-per-million.\cr
+DBA_SCORE_TMM_MINUS_FULL_CPM \tab same as \code{DBA_SCORE_TMM_MINUS_FULL}, but reporrted in counts-per-million.\cr
+DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM \tab Tsame as \code{DBA_SCORE_TMM_MINUS_EFFECTIVE}, but reporrted in counts-per-million.\cr
+DBA_SCORE_SUMMIT \tab summit height (maximum read pileup value)\cr
+DBA_SCORE_SUMMIT_ADJ \tab summit height (maximum read pileup value), normalized to relative library size\cr
 }
 }
 \item{bLog}{
 logical indicating whether log2 of score should be used (only applies to DBA_SCORE_RPKM_FOLD and DBA_SCORE_READS_FOLD).
 }
-\item{insertLength}{
-if present, this value will be used as the length of the reads. 
+\item{fragmentSize}{
+This value will be used as the length of the reads. 
 Each read will be extended from its endpoint along the appropriate strand by this many bases. 
-If missing, the read size indicated in the BAM/BED file will be used.
+If set to zero, the read size indicated in the BAM/BED file will be used.
+\code{fragmentSize} may also be a vector of values, one for each ChIP sample plus one for each unique Control library.
+}
+\item{summits}{
+if present, summit heights (read pileup) and locations will be calculated for each peak. The values can retrieved using \code{\link{dba.peakset}}. The summits can also be used as a read score in the global binding matrix (see \code{score}). 
+
+If the value of \code{summits} is greater than zero, all consensus peaks will be re-centered around a consensus summit, with the value of \code{summits} indicating how many base pairs to include upstream and downstream of the summit (so all consensus peaks will be of the same width, namely \code{2 * summits}). 
+
+Note that if \code{summits} is greater than zero, the counting procedure will take twice as long, and \code{bUseSummarizeOverlaps} must be \code{FALSE}.
 }
 \item{filter}{
 value to use for filtering intervals with low read counts. 
@@ -66,9 +80,7 @@ The built-in counting code may not correctly handle certain cases when the \code
 \item{bScaleControl}{
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
 }
-\item{bCalledMasks}{
-logical indicating whether to compute site masks for each peakset indicating which sites were originally identified as peaks (used by \code{\link{dba.report}}). 
-}
+
 \item{filterFun}{
 function that will be invoked for each interval with a vector of scores for each sample. Returns a score that will be evaluated against the \code{filter} value (only intervals with a score at least as high as \code{filter} will be kept). Default is \code{max}, indicating that at least one sample should have a score of at least \code{filter}; other useful values include \code{sum} (indicating that all the scores added together should be at least \code{filter}) and \code{mean} (setting a minimum mean normalized count level). Users can supply their own function as well.
 }
@@ -136,7 +148,8 @@ mcf7Common = dba.overlap(tamoxifen,tamoxifen$masks$MCF7&tamoxifen$masks$Responsi
 \dontrun{tamoxifen = dba.count(tamoxifen,peaks=mcf7Common$inAll)}
 tamoxifen
 
-#First make consensus peaksets from each set of replicates, then derive master consensus set for counting from those
+#First make consensus peaksets from each set of replicates, 
+#then derive master consensus set for counting from those
 data(tamoxifen_peaks)
 tamoxifen = dba.peakset(tamoxifen,consensus = -DBA_REPLICATE)
 \dontrun{tamoxifen = dba.count(tamoxifen, peaks=tamoxifen$masks$Consensus)}

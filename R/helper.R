@@ -101,7 +101,7 @@ pv.version = function(pv,v1,v2,v3){
 }
 
 pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSignal2Noise=T) {
-
+   
    doscore = TRUE
    
    if(!is.null(pv$score)) {
@@ -116,63 +116,84 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
    }
    
    if(doscore) {	
-	   if ((score >= DBA_SCORE_TMM_MINUS_FULL) && (score <= DBA_SCORE_TMM_READS_EFFECTIVE) ) {
-	
-	      if(score == DBA_SCORE_TMM_MINUS_FULL) {
-	         bMinus   = TRUE
-	         bFullLib = TRUE	
-	      }
-	      if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE) {
-	         bMinus   = TRUE
-	         bFullLib = FALSE
-	      }
-	      if(score == DBA_SCORE_TMM_READS_FULL) {
-	         bMinus   = FALSE
-	         bFullLib = TRUE	
-	      }
-	      if(score == DBA_SCORE_TMM_READS_EFFECTIVE) {
-	         bMinus   = FALSE
-	         bFullLib = FALSE	
-	      }
-	      
-	      pv$allvectors[,4:ncol(pv$allvectors)] = pv.normTMM(pv,bMinus=bMinus,bFullLib=bFullLib)
-	      
-	      for(i in 1:length(pv$peaks)) {
-		     colnum = 3+i
-	         pv$peaks[[i]]$Score = pv$allvectors[,colnum]
-	      }
-	   
-	   } else {	
-	   	
-	  	   for(i in 1:length(pv$peaks)) {
-		      colnum = 3+i
-		      if(score == PV_SCORE_RPKM) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
-		      }   		
-		      if(score == PV_SCORE_RPKM) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
-		      } else if(score == PV_SCORE_RPKM_FOLD) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM/pv$peaks[[i]]$cRPKM
-		         if(bLog) {
-		           pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
-		         }
-		      } else if(score == PV_SCORE_READS) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads	
-		      } else if(score == PV_SCORE_READS_FOLD) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads/pv$peaks[[i]]$cReads	
-		         if(bLog) {
-		           pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
-		         }
-		      } else if(score == PV_SCORE_READS_MINUS) {
-		         pv$allvectors[,colnum] = pv$peaks[[i]]$Reads-pv$peaks[[i]]$cReads	
-		      }
-		      pv$peaks[[i]]$Score = pv$allvectors[,colnum]
-		   }
-	   }
+      if ((score >= DBA_SCORE_TMM_MINUS_FULL) && (score <= DBA_SCORE_TMM_READS_EFFECTIVE_CPM) ) {
+         bCPM=FALSE
+         if(score == DBA_SCORE_TMM_MINUS_FULL || score == DBA_SCORE_TMM_MINUS_FULL_CPM) {
+            bMinus   = TRUE
+            bFullLib = TRUE
+            if(score == DBA_SCORE_TMM_MINUS_FULL_CPM) {
+               bCPM=TRUE
+            }
+         }
+         if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE || score == DBA_SCORE_TMM_MINUS_EFFECTIVE) {
+            bMinus   = TRUE
+            bFullLib = FALSE
+            if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM) {
+               bCPM=TRUE
+            }
+         }
+         if(score == DBA_SCORE_TMM_READS_FULL || score == DBA_SCORE_TMM_READS_FULL) {
+            bMinus   = FALSE
+            bFullLib = TRUE	
+            if(score == DBA_SCORE_TMM_READS_FULL_CPM) {
+               bCPM=TRUE
+            }
+         }
+         if(score == DBA_SCORE_TMM_READS_EFFECTIVE || score == DBA_SCORE_TMM_READS_EFFECTIVE) {
+            bMinus   = FALSE
+            bFullLib = FALSE	
+            if(score == DBA_SCORE_TMM_READS_EFFECTIVE_CPM) {
+               bCPM=TRUE
+            }
+         }
+         
+         pv$allvectors[,4:ncol(pv$allvectors)] = pv.normTMM(pv,bMinus=bMinus,bFullLib=bFullLib,bCPM=bCPM)
+         
+         for(i in 1:length(pv$peaks)) {
+            colnum = 3+i
+            pv$peaks[[i]]$Score = pv$allvectors[,colnum]
+         }
+         
+      } else {	
+         
+         for(i in 1:length(pv$peaks)) {
+            colnum = 3+i
+            if(score == PV_SCORE_RPKM) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
+            }   		
+            if(score == PV_SCORE_RPKM) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM	
+            } else if(score == PV_SCORE_RPKM_FOLD) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$RPKM/pv$peaks[[i]]$cRPKM
+               if(bLog) {
+                  pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
+               }
+            } else if(score == PV_SCORE_READS) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$Reads	
+            } else if(score == PV_SCORE_READS_FOLD) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$Reads/pv$peaks[[i]]$cReads	
+               if(bLog) {
+                  pv$allvectors[,colnum] = log2(pv$allvectors[,colnum])	
+               }
+            } else if(score == PV_SCORE_READS_MINUS) {
+               pv$allvectors[,colnum] = pv$peaks[[i]]$Reads-pv$peaks[[i]]$cReads	
+            } else if(score == PV_SCORE_SUMMIT || score == PV_SCORE_SUMMIT_ADJ) {
+               if(is.null(pv$peaks[[i]]$Heights)) {
+                  warning('DBA_SCORE_SUMMIT not available; re-run dba.count with summits=0')   
+               } else {
+                  pv$allvectors[,colnum] = pv$peaks[[i]]$Heights
+                  if (score == PV_SCORE_SUMMIT_ADJ) {
+                     pv$allvectors[,colnum] = pv$allvectors[,colnum] * pv.normFactors(pv)[i]   
+                  }
+               }
+            }
+            pv$peaks[[i]]$Score = pv$allvectors[,colnum]
+         }
+      }
    }
-      
+   
    pv$vectors = pv$allvectors
-       
+   
    if(!missing(minMaxval)) {
       #data = pv$allvectors[,4:ncol(pv$allvectors)]
       maxs = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,filterFun)
@@ -194,26 +215,26 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
             pv = pv.setScore(pv,score=score,bLog=bLog,minMaxval=0,bSignal2Noise=F)
          }
          
-		  if(!is.null(pv$contrasts)) {
-			  for(i in 1:length(pv$contrasts)) {
-				  pv$contrasts[[i]]$edgeR=NULL
-				  pv$contrasts[[i]]$DESeq=NULL
-			  }
-		  }
+         if(!is.null(pv$contrasts)) {
+            for(i in 1:length(pv$contrasts)) {
+               pv$contrasts[[i]]$edgeR=NULL
+               pv$contrasts[[i]]$DESeq=NULL
+            }
+         }
       } else {
-		  if(sum(tokeep)<2) {
-			  stop('No sites have activity greater than filter value')
-		  }
+         if(sum(tokeep)<2) {
+            stop('No sites have activity greater than filter value')
+         }
       }
-	   pv$maxFilter = minMaxval
+      pv$maxFilter = minMaxval
    }
    
    pv$score = score
-	
-	if(bSignal2Noise) {
-       pv$SN = pv.Signal2Noise(pv)
-    }
-      
+   
+   if(bSignal2Noise) {
+      pv$SN = pv.Signal2Noise(pv)
+   }
+   
    return(pv)
 }
 
@@ -930,10 +951,15 @@ pv.orderfacs = function(facvec,decreasing=F) {
    return(res)	
 }
 
-pv.normalize = function(peaks,pCol,zeroVal=-1,bLog=F){
-   width   = peaks[,3] - peaks[,2]
-   density = peaks[,pCol]/width 
-   res = density/max(density)
+pv.normalize = function(peaks,pCol,zeroVal=-1,bLog=F,bDensity=F){
+   if(bDensity) {
+      width   = peaks[,3] - peaks[,2]
+      width[width==0]=1
+      density = peaks[,pCol]/width 
+      res = density/max(density)
+   } else {
+      res = peaks[,pCol]/max(peaks[,pCol])
+   }
    if(bLog) {
       res = log2(res)
       x = res == -Inf
