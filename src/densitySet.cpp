@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 #include "intervalDensity.h"
 #include "densitySet.h"
