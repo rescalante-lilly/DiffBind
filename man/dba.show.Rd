@@ -37,7 +37,7 @@ attribute or vector of attributes to retrieve. Number of intervals is always sho
 \item \link{DBA_CALLER}
 \item \link{DBA_CONTROL}
 \item \link{DBA_INTERVALS}
-\item \link{DBA_SN_RATIO}
+\item \link{DBA_FRIP}
 }
 }
 

@@ -449,7 +449,7 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    if(bSN) {	   
 	   if(!is.null(pv$SN)){
 	      res = cbind(res,pv$SN)
-	      colnames(res)[ncol(res)]='SN'
+	      colnames(res)[ncol(res)]='FRiP'
 	   }
    }
    

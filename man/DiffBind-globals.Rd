@@ -10,7 +10,7 @@
 \alias{DBA_CONTROL}
 \alias{DBA_ALL_ATTRIBUTES}
 \alias{DBA_INTERVALS}
-\alias{DBA_SN_RATIO}
+\alias{DBA_FRIP}
 \alias{DBA_GROUP}
 \alias{DBA_OLAP_PEAKS}
 \alias{DBA_OLAP_ALL}
@@ -75,7 +75,7 @@ DBA_CONTROL
 DBA_ALL_ATTRIBUTES
 
 DBA_INTERVALS
-DBA_SN_RATIO
+DBA_FRIP
 
 DBA_GROUP
 
@@ -163,8 +163,8 @@ DBA peakset metadata: all attributes that can be used in certain plot labels (cf
 \item{DBA_INTERVALS}{
 DBA peakset metadata: Number of intervals in peakset
 }
-\item{DBA_SN_RATIO}{
-DBA peakset metadata: Signal to Noise ratio (number of reads in intervals divided by total number of reads in library)
+\item{DBA_FRIP}{
+DBA peakset metadata: Fraction of Reads in Peaks (number of reads in intervals divided by total number of reads in library)
 }
 
 \item{DBA_GROUP}{

@@ -6,6 +6,7 @@
  \itemize{
   \item{Feature: added support to pass in "fragments" when using summarizeOverlaps to count.}
   \item{Fix: bug in dba when samplesheet passed in as data frame.}   
+  \item{Change: now using FRIP (fractions of reads in peaks) instyead of SN (signal-to-noise).}
   }
 }
 

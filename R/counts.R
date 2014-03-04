@@ -112,7 +112,7 @@ pv.model = function(model,mask,minOverlap=2,
    }
    
    model$config = config
-   
+   curcontrol=1
    for(i in 1:nrow(samples)) {
       if(is.null(samples$PeakCaller[i])) {
          peakcaller  = caller
@@ -156,13 +156,12 @@ pv.model = function(model,mask,minOverlap=2,
          } else {
             peakfilter = as.integer(samples$Filter[i])
          }
-      } 
-      if(is.null(samples$ControlID[i])) {
-         controlid  = ''
-      } else if(is.na(samples$ControlID[i])) {
-         controlid  = ''
-      } else {
-         controlid = as.character(samples$ControlID[i])
+      }
+      
+      controlid  = pv.controlID(samples,i,model$class,curcontrol)
+      if(is.numeric(controlid)) {
+         curcontrol = controlid+1
+         controlid = sprintf("Control%d",controlid)
       }
       counts = samples$Counts[i]
       if(!is.null(counts)) {
@@ -729,3 +728,43 @@ pv.Recenter = function(pv,summits,called) {
    return(bed)
 }
 
+pv.controlID = function(samples,i,class, curnum){
+   makeID = FALSE
+   if(is.null(samples$ControlID[i])) {
+      makeID = TRUE
+   } else if(is.na(samples$ControlID[i])) {
+      makeID = TRUE
+   } else {
+      return(as.character(samples$ControlID[i]))
+   }
+   newid = NULL
+   if(makeID) {
+      if(!is.null(samples$bamControl[i])) {
+         if(!is.na(samples$bamControl[i])) {
+            if(!samples$bamControl[i]=="") {
+               if(i==1) {
+                  newid = 1
+               } else {
+                  res = samples$bamReads %in% samples$bamControl[i]
+                  if(sum(res)) {
+                     return(samples$sampID[which(res)[1]])
+                  }
+                  res = samples$bamControl[1:(i-1)] %in% samples$bamControl[i]
+                  if(sum(res)) {
+                     newid = class[PV_CONTROL,which(res)[1]]
+                  } else {
+                     return(curnum)
+                  }
+               }
+            }
+         }
+      }  
+   }
+   
+   if(!is.null(newid)) {
+      res = newid
+   } else {
+      res = ""
+   }
+   return(res)
+}
