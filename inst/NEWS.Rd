@@ -2,6 +2,13 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.9}{
+ \itemize{
+  \item{Feature: added support to pass in "fragments" when using summarizeOverlaps to count.}
+  \item{Fix: bug in dba when samplesheet passed in as data frame.}   
+  }
+}
+
 \section{version 1.9.7}{
  \itemize{
    \item{New set of features relating to computing peak summits}

@@ -93,11 +93,12 @@ logical indicating that \code{\link{summarizeOverlaps}} should be used for count
 
 See notes for when the \code{bRemoveDuplicates} parameter is set to \code{TRUE}, where the built-in counting code may not correctly handle certain cases and \code{bUseSummarizeOverlaps} should be set to \code{TRUE}.
 
-Four additional parameters for \code{\link{summarizeOverlaps}} may be specified in \code{DBA$config}:
+Five additional parameters for \code{\link{summarizeOverlaps}} may be specified in \code{DBA$config}:
 \tabular{ll}{
 DBA$config$yieldSize \tab yieldSize indicating how many reads to process at one time; default is 5000000. The lower this value, the less memory will be used, but the more time it will take to complete the count operation.\cr
 DBA$config$intersectMode \tab mode indicating which overlap algorithm to use; default is \code{"IntersectionNotEmpty"}\cr 
 DBA$config$singleEnd \tab logical indicating if reads are single end; default is \code{TRUE}\cr 
+DBA$config$fragments \tab logical indicating how unmatched reads are counted; default is \code{FALSE}\cr 
 DBA$config$scanbamparam \tab \code{ScanBamParam} object to pass to \code{\link{summarizeOverlaps}}. If present, \code{bRemoveDuplicates} is ignored.\cr 
 }
 }

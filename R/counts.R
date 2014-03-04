@@ -39,33 +39,33 @@ pv.model = function(model,mask,minOverlap=2,
    
    if(is.character(samplesheet)) {
       samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
-      if(is.null(samples$SampleID)){
-         samples$SampleID = 1:nrow(samples)
-      }
-      if(is.null(samples$Tissue)){
-         samples$Tissue = ""
-      } 
-      if(is.null(samples$Factor)){
-         samples$Factor = ""
-      }
-      if(is.null(samples$Condition)){
-         samples$Condition = ""
-      }
-      if(is.null(samples$Treatment)){
-         samples$Treatment = ""
-      }
-      if(is.null(samples$Replicate)){
-         samples$Replicate = ""
-      }
-      
-      samples$SampleID[is.na(samples$SampleID)]=""
-      samples$Tissue[is.na(samples$Tissue)]=""
-      samples$Factor[is.na(samples$Factor)]=""
-      samples$Condition[is.na(samples$Condition)]=""
-      samples$Treatment[is.na(samples$Treatment)]=""
-      samples$Replicate[is.na(samples$Replicate)]=""
-      
    } else samples = samplesheet
+   
+   if(is.null(samples$SampleID)){
+      samples$SampleID = 1:nrow(samples)
+   }
+   if(is.null(samples$Tissue)){
+      samples$Tissue = ""
+   } 
+   if(is.null(samples$Factor)){
+      samples$Factor = ""
+   }
+   if(is.null(samples$Condition)){
+      samples$Condition = ""
+   }
+   if(is.null(samples$Treatment)){
+      samples$Treatment = ""
+   }
+   if(is.null(samples$Replicate)){
+      samples$Replicate = ""
+   }
+   
+   if(sum(is.na(samples$SampleID)))  samples$SampleID[is.na(samples$SampleID)]=""
+   if(sum(is.na(samples$Tissue)))    samples$Tissue[is.na(samples$Tissue)]=""
+   if(sum(is.na(samples$Factor)))    samples$Factor[is.na(samples$Factor)]=""
+   if(sum(is.na(samples$Condition))) samples$Condition[is.na(samples$Condition)]=""
+   if(sum(is.na(samples$Treatment))) samples$Treatment[is.na(samples$Treatment)]=""
+   if(sum(is.na(samples$Replicate))) samples$Replicate[is.na(samples$Replicate)]=""
    
    model = NULL
    if(is.character(config)) {
@@ -220,17 +220,17 @@ pv.model = function(model,mask,minOverlap=2,
 
 pv.getMethod = function(str) {   
    if (str == "DBA_EDGER") {
-   	  ret=DBA_EDGER
+      ret=DBA_EDGER
    } else if (str == "DBA_DESEQ") {
-   	  ret=DBA_DESEQ  
+      ret=DBA_DESEQ  
    } else if (str == "DBA_EDGER_CLASSIC") {
-   	  ret=DBA_EDGER_CLASSIC
+      ret=DBA_EDGER_CLASSIC
    } else if (str == "DBA_DESEQ_CLASSIC") {
-   	  ret=DBA_DESEQ_CLASSIC  
+      ret=DBA_DESEQ_CLASSIC  
    } else if (str == "DBA_EDGER_GLM") {
-   	  ret=DBA_EDGER_GLM  
+      ret=DBA_EDGER_GLM  
    } else if (str == "DBA_DESEQ_GLM") {
-   	  ret=DBA_DESEQ_GLM  
+      ret=DBA_DESEQ_GLM  
    } else ret = NULL
    
    return(ret)
@@ -386,6 +386,10 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
       if(!is.null(pv$config$singleEnd)) {
          singleEnd = pv$config$singleEnd	
       }
+      if(!is.null(pv$config$fragments)) {
+         fragments = pv$config$fragments   
+      } else fragments=FALSE
+      
       scanbamparam = pv$config$scanbamparam 	
    }
    
@@ -395,13 +399,13 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          params  = dba.parallel.params(pv$config,c("pv.do_getCounts","pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
          results = dba.parallel.lapply(pv$config,params,todorecs,
                                        pv.do_getCounts,bed,bWithoutDupes=bWithoutDupes,
-                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits)
+                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits,fragments)
       } else {
          results = NULL
          for(job in todorecs) {
             message('Sample: ',job)
             results = pv.listadd(results,pv.do_getCounts(job,bed,bWithoutDupes=bWithoutDupes,
-                                                      bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits))
+                                                         bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits,fragments))
          }	
       }
       if(PV_DEBUG){
@@ -560,17 +564,17 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
    if(bSignal2Noise) {
       res$SN = pv.Signal2Noise(res)
    }
-
+   
    return(res)	
 }
 
 pv.nodup = function(pv,chipnum) {
-
+   
    
    if(is.null(pv$class[PV_BAMREADS,chipnum])){
       return(FALSE)
    }
-
+   
    if(is.na(pv$class[PV_BAMREADS,chipnum])){
       return(FALSE)
    }   
@@ -589,7 +593,7 @@ pv.nodup = function(pv,chipnum) {
    } else {
       return(TRUE)
    }
-
+   
 }
 
 pv.checkExists = function(filelist){
@@ -604,70 +608,70 @@ pv.checkExists = function(filelist){
 
 pv.do_getCounts = function(countrec,intervals,bWithoutDupes=F,
                            bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
-                           fileType=0,summits) {
-      res = pv.getCounts(bamfile=countrec$bamfile,intervals=intervals,insertLength=countrec$insert,
-                         bWithoutDupes=bWithoutDupes,
-                         bLowMem=bLowMem,yieldSize=yieldSize,mode=mode,singleEnd=singleEnd,
-                         scanbamparam=scanbamparam,
-                         fileType=fileType,summits=summits)
-      return(res)
-
+                           fileType=0,summits,fragments) {
+   res = pv.getCounts(bamfile=countrec$bamfile,intervals=intervals,insertLength=countrec$insert,
+                      bWithoutDupes=bWithoutDupes,
+                      bLowMem=bLowMem,yieldSize=yieldSize,mode=mode,singleEnd=singleEnd,
+                      scanbamparam=scanbamparam,
+                      fileType=fileType,summits=summits,fragments=fragments)
+   return(res)
+   
 }
 pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                         bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
-                        fileType=0,summits) {
-
+                        fileType=0,summits,fragments) {
+   
    bufferSize = 1e6
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
    
    if(bLowMem) {
-      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize,singleEnd,scanbamparam)
+      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize,singleEnd,fragments,scanbamparam)
       return(res)
    }
    
-#   fdebug("Starting croi_load_reads...")
-#   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
-#   fdebug("Loaded...")
-#   libsize.croi <- .Call("croi_tree_size",bamtree)
+   #   fdebug("Starting croi_load_reads...")
+   #   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
+   #   fdebug("Loaded...")
+   #   libsize.croi <- .Call("croi_tree_size",bamtree)
    fdebug("Starting croi_count_reads...")
    icount <- length(intervals[[1]])
    counts.croi <- vector(mode="integer",length=icount)
    if (!missing(summits)) {
-     summits.croi <- vector(mode="integer",length=icount)
-     heights.croi <- vector(mode="integer",length=icount)
-     bSummits = TRUE
+      summits.croi <- vector(mode="integer",length=icount)
+      heights.croi <- vector(mode="integer",length=icount)
+      bSummits = TRUE
    } else {
-     summits.croi <- vector()
-     heights.croi <- vector()
-     bSummits = FALSE
+      summits.croi <- vector()
+      heights.croi <- vector()
+      bSummits = FALSE
    }
    libsize.croi <- .Call("croi_count_reads",bamfile,
-                                            as.integer(insertLength),
-                                            as.integer(fileType),
-                                            as.integer(bufferSize),
-                                            as.character(intervals[[1]]),
-                                            as.integer(intervals[[2]]),
-                                            as.integer(intervals[[3]]),
-                                            as.integer(icount),
-                                            as.logical(bWithoutDupes),
-                                            as.logical(bSummits),
-                                            counts.croi,
-                                            summits.croi,
-                                            heights.croi)
+                         as.integer(insertLength),
+                         as.integer(fileType),
+                         as.integer(bufferSize),
+                         as.character(intervals[[1]]),
+                         as.integer(intervals[[2]]),
+                         as.integer(intervals[[3]]),
+                         as.integer(icount),
+                         as.logical(bWithoutDupes),
+                         as.logical(bSummits),
+                         counts.croi,
+                         summits.croi,
+                         heights.croi)
    fdebug("Done croi_count_reads...")
    counts.croi[counts.croi==0]=1
    fdebug(sprintf("Counted %d reads...",libsize.croi))
-
+   
    counts = counts.croi
    libsize = libsize.croi
-
+   
    widths = intervals[,3] - intervals[,2]
    rpkm = (counts/(widths/1000))/(libsize/1E6)
    
    result <- list(counts=counts,rpkm=rpkm,libsize=libsize)
    if (bSummits==T) {
-     result$summits <- summits.croi;
-     result$heights <- heights.croi;
+      result$summits <- summits.croi;
+      result$heights <- heights.croi;
    }
    return(result)
 }
@@ -679,32 +683,32 @@ pv.filterRate = function(pv,vFilter,filterFun=max) {
    maxs = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,filterFun)
    res = NULL
    for(filter in vFilter) {
-	  tokeep = maxs >= filter
+      tokeep = maxs >= filter
       res = c(res,sum(tokeep))	
    }
    return(res)
 }
 
 pv.getCountsLowMem = function(bamfile,intervals,bWithoutDups=F,
-                              mode="IntersectionNotEmpty",yieldSize=5000000,singleEnd=TRUE,params=NULL) {
+                              mode="IntersectionNotEmpty",yieldSize=5000000,singleEnd=TRUE,fragments=FALSE,params=NULL) {
    
    intervals = pv.peaks2DataType(intervals,DBA_DATA_GRANGES)
    
    bfl       = BamFileList(bamfile,yieldSize=yieldSize)
    
    if(is.null(params)) {
-	   if(bWithoutDups==FALSE) {
-	      Dups = NA
-	   } else {
-	      Dups = FALSE   
-	   }
-	   params  = ScanBamParam(flag=scanBamFlag(isDuplicate=Dups))
+      if(bWithoutDups==FALSE) {
+         Dups = NA
+      } else {
+         Dups = FALSE   
+      }
+      params  = ScanBamParam(flag=scanBamFlag(isDuplicate=Dups))
    }
-
-   counts  = assay(summarizeOverlaps(features=intervals,reads=bfl,ignore.strand=TRUE,singleEnd=singleEnd,param=params))
+   
+   counts  = assay(summarizeOverlaps(features=intervals,reads=bfl,ignore.strand=TRUE,singleEnd=singleEnd,fragments=fragments,param=params))
    libsize = countBam(bfl)$records
    rpkm    = (counts/(width(intervals)/1000))/(libsize/1e+06)
-
+   
    return(list(counts=counts,rpkm=rpkm,libsize=libsize))
 }
 
