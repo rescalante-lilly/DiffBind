@@ -91,7 +91,7 @@ dba = function(DBA,mask, minOverlap=2,
          stop("DBA object is a character string; perhaps meant to be argument \'sampleSheet\'?")	
       }
       DBA = pv.check(DBA)	
-   }
+   } 
    
    res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
                   caller=peakCaller, format=peakFormat, scorecol=scoreCol,bLowerBetter=bLowerScoreBetter,
@@ -142,13 +142,20 @@ dba = function(DBA,mask, minOverlap=2,
    }
    
    if(missing(bCorPlot)) {
-      dba.plotHeatmap(res)
+      try(dba.plotHeatmap(res),silent=TRUE)
    } else if(bCorPlot) {
-      dba.plotHeatmap(res)      
+      try(dba.plotHeatmap(res),silent=TRUE)      
    }
    
    if(bSummarizedExperiment) {
       res = pv.DBA2SummarizedExperiment(res)
+   } else {
+      if(!is.null(DBA$ChIPQCobj)) {
+         #          resQC = DBA$ChIPQCobj
+         #          resQC@DBA = res
+         #          res = resQC
+         warning('Returning new DBA object (not ChIPQCexperiment object)')
+      }      
    }
    
    return(res)                 
@@ -270,6 +277,13 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
       if(bMerge) {
          res = pv.check(res)
       }
+      
+      if(!is.null(DBA$ChIPQCobj)) {
+         #          resQC = DBA$ChIPQCobj
+         #          resQC@DBA = res
+         #          res = resQC
+         warning('Returning new DBA object (not ChIPQCexperiment object)')
+      }   
    }   
    
    return(res)                       
@@ -393,6 +407,19 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
    bUseLast = F
    
    res=NULL
+   resetContrasts = TRUE
+   if(missing(peaks) && !missing(summits) && !is.null(DBA$summits)) {
+      if(DBA$summits == 0 ) {
+         peaks=NULL
+      } else {
+         if(summits != DBA$summits) {
+            stop('Can not change value of summits. Re-run from peaks.')
+         } else {
+            warning('No action taken, returning passed object...')
+            res = DBA
+         }
+      }
+   }
    if(!missing(peaks) || length(filter)>1) {
       if(is.null(peaks) || length(filter)>1) {
          callers = unique(DBA$class[DBA_CALLER,])
@@ -403,10 +430,12 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                   newpeaks = pv.Recenter(DBA,summits,DBA$sites)
                   res = pv.counts(DBA,peaks=newpeaks,
                                   defaultScore=score, bLog=bLog, insertLength=fragmentSize, bOnlyCounts=T,
-                                  bCalledMasks=F, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
+                                  bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
                                   bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=0)
-                  res$sites = DBA$sites
+                  res$summits = summits
+               } else {
+                  stop('Error: summits=0')
                }
             } else {
                if(length(filter)>1) {
@@ -415,7 +444,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                } else {
                   res = pv.setScore(DBA,score=score,bLog=bLog,minMaxval=filter,filterFun=filterFun)
                }
-               return(res)	
+               resetContrasts=FALSE	
             }
          } else {
             stop('DBA object must contains only counts')	
@@ -431,8 +460,11 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                       bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                       bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
                       bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=summits)
+      if(!missing(summits)) {
+         res$summits = summits
+      }
    }
-   if(length(res$contrasts)>0) {
+   if(resetContrasts && length(res$contrasts)>0) {
       for(i in 1:length(res$contrasts)) {
          res$contrasts[[i]]$edgeR = NULL
          res$contrasts[[i]]$DESeq = NULL         	
@@ -440,11 +472,15 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
    }
    
    if(bCorPlot){
-      x = dba.plotHeatmap(res,correlations=T)
+      try(dba.plotHeatmap(res,correlations=T),silent=TRUE)
    }
    
    if(class(res)!="DBA") {
       class(res) = "DBA"
+   }
+   
+   if(!is.null(DBA$ChIPQCobj)) {
+      res = checkQCobj(DBA$ChIPQCobj,res)
    }
    
    return(res)
@@ -469,6 +505,10 @@ dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="grou
    
    if(class(res)!="DBA") {
       class(res) = "DBA"
+   }
+   
+   if(!is.null(DBA$ChIPQCobj)) {
+      res = checkQCobj(DBA$ChIPQCobj,res)
    }
    
    return(res)                       	
@@ -507,7 +547,7 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
          if(!is.null(dim(rep))) {
             if(nrow(rep)>1) {
                warn=F
-               x = dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T)
+               x = try(dba.plotHeatmap(res,contrast=1,method=method[1],correlations=T),silent=TRUE)
             }	
          }
       }
@@ -516,10 +556,12 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
       }
    }
    
-   
-   
    if(class(res)!="DBA") {
       class(res) = "DBA"
+   }
+   
+   if(!is.null(DBA$ChIPQCobj)) {
+      res = checkQCobj(DBA$ChIPQCobj,res)
    }
    
    return(res)
@@ -790,6 +832,8 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, mai
                         bDB=TRUE, bNotDB, bAll=TRUE, bGain=FALSE, bLoss=FALSE,
                         labelAttributes, bReturnPeaksets=FALSE, DataType=DBA$config$DataType)
 {
+   DBA = pv.check(DBA)
+   
    newDBA = NULL
    
    if (!missing(overlaps)){
@@ -1000,6 +1044,11 @@ dba.mask = function(DBA, attribute, value, combine='or', mask, merge='or', bAppl
 dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize=FALSE)
 {
    
+   if(class(DBA)=="ChIPQCexperiment") {
+      saveChIPQC = DBA
+      DBA = DBA@DBA
+   } else saveChIPQC = NULL
+   
    if(bMinimize) {
       DBA$allvectors = NULL
    }
@@ -1027,6 +1076,10 @@ dba.save = function(DBA, file='DBA', dir='.', pre='dba_', ext='RData', bMinimize
    DBA$config$Version2 = DBA_VERSION2
    DBA$config$Version3 = DBA_VERSION3
    
+   if(!is.null(saveChIPQC)) {
+      saveChIPQC@DBA = DBA
+      DBA = saveChIPQC
+   }
    res = pv.save(DBA,file=file ,
                  dir=dir, pre=pre, ext=ext,
                  compress=TRUE)
@@ -1042,6 +1095,11 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
 {
    
    res = pv.load(file=file, dir=dir, pre=pre, ext=ext)
+   
+   if(class(res)=="ChIPQCexperiment") {
+      saveChIPQC = res
+      res = res@DBA
+   } else saveChIPQC = NULL
    
    if(is.null(res$allvectors)) {
       if(is.null(res$minOverlap)) {
@@ -1117,6 +1175,11 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
    
    if(class(res)!="DBA") {
       class(res) = "DBA"
+   }
+   
+   if(!is.null(saveChIPQC)) {
+      saveChIPQC@DBA = res
+      res = saveChIPQC
    }
    
    return(res)

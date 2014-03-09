@@ -16,7 +16,11 @@ pv.model = function(model,mask,minOverlap=2,
    if(missing(format))       format       = NULL
    if(missing(scorecol))     scorecol     = NULL
    if(missing(bLowerBetter)) bLowerBetter = NULL
-   if(missing(filter))       filter       = NULL
+   if(missing(filter))       filter       = NULL   
+   
+   if(!missing(model)){
+      ChIPQCobj = model$ChIPQCobj
+   } else ChIPQCobj=NULL
    
    if(!missing(model)) {
       if(missing(attributes)) {
@@ -30,6 +34,7 @@ pv.model = function(model,mask,minOverlap=2,
       model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                          bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes)
       model$config = config
+      model$ChIPQCobj = ChIPQCobj
       return(model)
    }
    
@@ -213,7 +218,8 @@ pv.model = function(model,mask,minOverlap=2,
    model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                       bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes) 
    
-   
+
+   model$ChIPQCobj = ChIPQCobj
    return(model)
 }
 
@@ -523,10 +529,10 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
             defaultScore = redoScore
          }
          res = pv.counts(res,peaks=newpeaks,defaultScore=defaultScore,bLog=bLog,insertLength=insertLength,
-                         bOnlyCounts=T,bCalledMasks=F,minMaxval=minMaxval,filterFun=filterFun,
+                         bOnlyCounts=T,bCalledMasks=T,minMaxval=minMaxval,filterFun=filterFun,
                          bParallel=bParallel,bWithoutDupes=bWithoutDupes,bScaleControl=bScaleControl,
                          bSignal2Noise=bSignal2Noise,bLowMem=FALSE,readFormat=readFormat,summits=0)
-         res$sites = called
+         #res$sites = called
          return(res)
       } else if(redoScore > 0) {
          res = pv.setScore(res,redoScore,bSignal2Noise=bSignal2Noise)	
@@ -550,7 +556,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
             }
          }
       }
-      if(bCalledMasks && missing(peaks)) {
+      if(bCalledMasks && (missing(peaks) || is.null(res$sites))) {
          res$sites = pv.CalledMasks(pv,res,bed)
       }
    } else {

@@ -19,6 +19,16 @@ pv.check = function(pv) {
    if(is.null(pv)) {
       return(NULL)	
    }
+   
+   if(class(pv)=="ChIPQCexperiment"){
+      saveqc = pv
+      pv = pv@DBA
+      x = "DBA object placeholder"
+      class(x) = "DBA"
+      saveqc@DBA = x
+      pv$ChIPQCobj = saveqc
+   }
+      
    if(is.null(pv$peaks)) {
       return(pv)	
    }
@@ -98,6 +108,22 @@ pv.version = function(pv,v1,v2,v3){
    pv$config$Version3 = v3   	
    
    return(pv)
+}
+
+checkQCobj = function(resQC,res) {
+   ## add better checks that objects are in sync
+   sampnames = c(unique(res$class[PV_ID,]),unique(res$class[PV_CONTROL,]))
+   if (sum(sampnames %in% names(resQC@Samples))==length(sampnames)) {
+      if(length(sampnames) == length(names(resQC@Samples))) {
+         resQC@DBA = res
+      } else resQC=NULL
+   } else resQC= NULL
+   if(is.null(resQC)) {
+      warning("ChIPQexperiment out of sync -- returning new DBA object")
+      return(res)
+   } else {
+      return(resQC)
+   }
 }
 
 pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSignal2Noise=T) {
@@ -919,7 +945,7 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    if(!is.null(cvecs)) {
       cvecs = sort(cvecs)
       for(cv in cvecs) {
-         warning(sprintf('Scores for peakset %s are all the same -- correlations set to zero.',cv),call.=F)	
+#          warning(sprintf('Scores for peakset %s are all the same -- correlations set to zero.',cv),call.=F)	
       }	
    }
    

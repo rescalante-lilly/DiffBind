@@ -57,18 +57,18 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
                       control, peak.caller, peak.format, reads=0, consensus=F, readBam, controlBam,
                       scoreCol=NULL, bLowerScoreBetter=NULL, bRemoveM=T, bRemoveRandom=T,
                       minOverlap=2,bFast=F,bMakeMasks=T,skipLines=1, filter=NULL, counts=NULL){
-	
+   
    zeroVal = -1
    bLog=F
    
    if(missing(peaks)) {
       peaks = NULL	
    }
-      
+   
    if(!is.null(pv$peaks) && length(peaks)==0) {
-     peaks = 1:length(pv$peaks)
+      peaks = 1:length(pv$peaks)
    }
-
+   
    if(missing(counts)) counts=NULL   
    if(!is.null(counts)) {
       res = pv.peaksetCounts(pv=pv,peaks=peaks,counts=counts,
@@ -76,42 +76,42 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
                              treatment=treatment,replicate=replicate)
       return(res)
    }
-     
+   
    if(missing(peak.format))       peak.format=NULL
    if(missing(scoreCol))          scoreCol=NULL
    if(missing(bLowerScoreBetter)) bLowerScoreBetter=NULL   
    if(missing(filter))            filter=NULL
-
+   
    bConsensus = F
    if(is.numeric(consensus)) { ## Add a set of consensus peaksets
-   	  bConsensus = T
+      bConsensus = T
       pv = pv.consensusSets(pv,peaks=peaks,minOverlap=minOverlap,attributes=consensus,
                             tissue,factor,condition,treatment,replicate,control,peak.caller,
                             readBam, controlBam)
-                            
+      
    } else { ## add a specific consensus peakset
-	   if(is.vector(peaks) && length(peaks) > 1) { # consensus
-	   	  bConsensus = T
-	      pv = pv.consensus(pv,peaks,minOverlap=minOverlap,bFast=bFast)
-	      if(!is.null(minOverlap)) {
-	
-		      nset = length(pv$peaks)
-		      if(!missing(sampID)){
-		         pv$class[PV_ID,nset]=sampID
-		         colnames(pv$class)[nset]=sampID
-		      }
-		  }
-	
-	      if(!missing(tissue))      pv$class[PV_TISSUE,nset]=tissue
-	      if(!missing(factor))      pv$class[PV_FACTOR,nset]=factor
-	      if(!missing(condition))   pv$class[PV_CONDITION,nset]=condition
-	      if(!missing(treatment))   pv$class[PV_TREATMENT,nset]=treatment
-	      if(!missing(replicate))   pv$class[PV_REPLICATE,nset]=replicate
-	      if(!missing(control))     pv$class[PV_CONTROL,nset]=control
-	      if(!missing(peak.caller)) pv$class[PV_CALLER,nset]=peak.caller
-	      if(!missing(readBam))     pv$class[PV_BAMREADS,nset]=readBam
-	      if(!missing(controlBam))  pv$class[PV_BAMCONTROL,nset]=controlBam
-	   }
+      if(is.vector(peaks) && length(peaks) > 1) { # consensus
+         bConsensus = T
+         pv = pv.consensus(pv,peaks,minOverlap=minOverlap,bFast=bFast)
+         if(!is.null(minOverlap)) {
+            
+            nset = length(pv$peaks)
+            if(!missing(sampID)){
+               pv$class[PV_ID,nset]=sampID
+               colnames(pv$class)[nset]=sampID
+            }
+         }
+         
+         if(!missing(tissue))      pv$class[PV_TISSUE,nset]=tissue
+         if(!missing(factor))      pv$class[PV_FACTOR,nset]=factor
+         if(!missing(condition))   pv$class[PV_CONDITION,nset]=condition
+         if(!missing(treatment))   pv$class[PV_TREATMENT,nset]=treatment
+         if(!missing(replicate))   pv$class[PV_REPLICATE,nset]=replicate
+         if(!missing(control))     pv$class[PV_CONTROL,nset]=control
+         if(!missing(peak.caller)) pv$class[PV_CALLER,nset]=peak.caller
+         if(!missing(readBam))     pv$class[PV_BAMREADS,nset]=readBam
+         if(!missing(controlBam))  pv$class[PV_BAMCONTROL,nset]=controlBam
+      }
    }
    if(bConsensus) {      
       if(bMakeMasks) {
@@ -132,83 +132,92 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
    if(missing(controlBam))   controlBam=NA
    if(length(controlBam)==0) controlBam=NA
    
-#if(is.null(scoreCol))          scoreCol=0
-#if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE
-                  
-   if(is.character(peaks)){ # Read in peaks from a file
-     
-      pcaller = strtrim(peak.caller,6)
-      if(is.null(peak.format)) {
-          peak.format = pcaller
-      }	
-      if(is.null(scoreCol)) {
-         scoreCol = pv.defaultScoreCol(peak.format)	
+   if(!is.null(peaks) && length(peaks)<=1){
+      if(is.na(peaks)) {
+         peaks = NULL
+      } else {
+         if(is.character(peaks)){
+            if(peaks == "" || peaks ==" ") peaks = NULL
+         }
       }
-      peaks = pv.readPeaks(peaks,peak.format,skipLines)
+   }
+   if(is.null(peaks)) {
+      peaks = matrix(0,0,4)
    } else {
-      if(is.null(scoreCol))          scoreCol=0
-      if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE   
-   }
-   
-   scoreSave = scoreCol
-   while(ncol(peaks) < scoreSave) {
-      peaks = cbind(peaks,1)
-      scoreCol = 0
-   }
-
-  if(is.null(bLowerScoreBetter)) {
-	  if(peak.caller == "report") {
-		  bLowerScoreBetter = TRUE
-	  } else {
-		  bLowerScoreBetter = FALSE
-	  }
-  }
-						  
-   if(is.null(filter) && peak.caller == "bayes") {
-      filter = 0.5
-   }
-						  
-   if(scoreCol > 0) {
-	  if(!missing(filter)){
-		  if(!is.null(filter)) {
-			 if(bLowerScoreBetter) {
-				tokeep = peaks[,scoreCol] <= filter
-			 } else {
-				tokeep = peaks[,scoreCol] >= filter
-			 }
-			 peaks = peaks[tokeep,]
-		  } 		  
-	  }
-      peaks[,scoreCol] = pv.normalize(peaks,scoreCol,zeroVal=zeroVal,bLog=bLog)
-      if(bLowerScoreBetter) {
-         peaks[,scoreCol] = 1 - peaks[,scoreCol]   	
+      if(is.character(peaks)){ # Read in peaks from a file
+         pcaller = strtrim(peak.caller,6)
+         if(is.null(peak.format)) {
+            peak.format = pcaller
+         }	
+         if(is.null(scoreCol)) {
+            scoreCol = pv.defaultScoreCol(peak.format)	
+         }
+         peaks = pv.readPeaks(peaks,peak.format,skipLines)
+      } else {
+         if(is.null(scoreCol))          scoreCol=0
+         if(is.null(bLowerScoreBetter)) bLowerScoreBetter = FALSE   
       }
-	  peaks = peaks[,c(1:3,scoreCol)] 
-   }      
       
-   if(bRemoveM) {
-      idx = peaks[,1] != "chrM"
-      peaks = peaks[idx,]
-      if(sum(!idx)>0) {
-         peaks[,1] = as.factor(as.character(peaks[,1]))
+      scoreSave = scoreCol
+      while(ncol(peaks) < scoreSave) {
+         peaks = cbind(peaks,1)
+         scoreCol = 0
       }
-   }
-
-   if(bRemoveRandom) {
-   	  for(i in c(1:22,"X","Y")) {
-   	     ch = sprintf("chr%s_random",i)
-         idx = peaks[,1] != ch
+      
+      if(is.null(bLowerScoreBetter)) {
+         if(peak.caller == "report") {
+            bLowerScoreBetter = TRUE
+         } else {
+            bLowerScoreBetter = FALSE
+         }
+      }
+      
+      if(is.null(filter) && peak.caller == "bayes") {
+         filter = 0.5
+      }
+      
+      if(scoreCol > 0) {
+         if(!missing(filter)){
+            if(!is.null(filter)) {
+               if(bLowerScoreBetter) {
+                  tokeep = peaks[,scoreCol] <= filter
+               } else {
+                  tokeep = peaks[,scoreCol] >= filter
+               }
+               peaks = peaks[tokeep,]
+            } 		  
+         }
+         peaks[,scoreCol] = pv.normalize(peaks,scoreCol,zeroVal=zeroVal,bLog=bLog)
+         if(bLowerScoreBetter) {
+            peaks[,scoreCol] = 1 - peaks[,scoreCol]   	
+         }
+         peaks = peaks[,c(1:3,scoreCol)] 
+      }      
+      
+      if(bRemoveM) {
+         idx = peaks[,1] != "chrM"
          peaks = peaks[idx,]
          if(sum(!idx)>0) {
             peaks[,1] = as.factor(as.character(peaks[,1]))
          }
       }
+      
+      if(bRemoveRandom) {
+         for(i in c(1:22,"X","Y")) {
+            ch = sprintf("chr%s_random",i)
+            idx = peaks[,1] != ch
+            peaks = peaks[idx,]
+            if(sum(!idx)>0) {
+               peaks[,1] = as.factor(as.character(peaks[,1]))
+            }
+         }
+      }
+      
+      newchrs = as.character(peaks[,1])
+      pv$chrmap  = unique(c(pv$chrmap,newchrs))
+      peaks[,1] = factor(peaks[,1],pv$chrmap)
    }
    
-   newchrs = as.character(peaks[,1])
-   pv$chrmap  = unique(c(pv$chrmap,newchrs))
-   peaks[,1] = factor(peaks[,1],pv$chrmap)
-
    pv$peaks = pv.listadd(pv$peaks,peaks)
    
    if(missing(sampID)) {
@@ -237,16 +246,16 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
 
 
 pv.peakset_all = function(pv, addpv, minOverlap) {
-
+   
    for(i in 1:length(addpv$peaks)) {
-   	
-   	  message(addpv$class[PV_ID,i],' ',
+      
+      message(addpv$class[PV_ID,i],' ',
               addpv$class[PV_TISSUE,i],' ',
               addpv$class[PV_FACTOR,i],' ',
               addpv$class[PV_CONDITION,i],' ',
               addpv$class[PV_REPLICATE,i],' ',
               addpv$class[PV_CALLER,i])
-    
+      
       pv = pv.peakset(pv,peaks=addpv$peaks[[i]],
                       sampID      = addpv$class[PV_ID,i],
                       tissue      = addpv$class[PV_TISSUE,i],
@@ -259,7 +268,7 @@ pv.peakset_all = function(pv, addpv, minOverlap) {
                       consensus   = addpv$class[PV_CONSENSUS,i],
                       readBam     = addpv$class[PV_BAMREADS,i],
                       controlBam  = addpv$class[PV_BAMCONTROL,i]
-                     )
+      )
    }
    
    if(minOverlap>0 && minOverlap<1) {
@@ -267,15 +276,15 @@ pv.peakset_all = function(pv, addpv, minOverlap) {
    }
    
    pv = dba(pv, minOverlap=minOverlap)
-
+   
    return(pv)
-
+   
 }
 
 ## pv.vectors -- build the binding expression vectors and do clustering/PCA
 pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAllSame=F){
-
-
+   
+   
    if(missing(attributes)) {
       if(is.null(pv$attributes)) {   
          attributes = PV_ID
@@ -283,14 +292,16 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
          attributes = pv$attributes
       }
    }
-        
+   
    if(!missing(mask)){
       if(is.logical(mask)) {
          mask = which(mask)
       }
-   	  peaks = NULL
+      peaks = NULL
       for(i in mask){
-         peaks = pv.listadd(peaks,pv$peaks[[i]])
+         #if(nrow(pv$peaks[[i]]) > 0) {
+            peaks = pv.listadd(peaks,pv$peaks[[i]])
+         #}
       }
       class     = pv$class[,mask]
       chrmap    = pv$chrmap
@@ -323,7 +334,7 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
    
    npeaks=0
    defval = -1
-
+   
    if(!bAllSame) {
       for(pnum in 1:numvecs){
          npeaks = npeaks + nrow(peaks[[pnum]])
@@ -332,22 +343,25 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
       st = 1
       end = 0
       for(pnum in 1:numvecs){
- 
+         
          peak = peaks[[pnum]]
-         end = end + nrow(peak)
-      
-         allpeaks[st:end,(pnum+3)] = peak[,4]
-
-         allpeaks[st:end,1] = match(as.character(peak[,1]),pv$chrmap)
-         allpeaks[st:end,2] = peak[,2]
-         allpeaks[st:end,3] = peak[,3]
-             
-         st = end + 1
+         if(nrow(peak)>0) {
+            
+            end = end + nrow(peak)
+            
+            allpeaks[st:end,(pnum+3)] = peak[,4]
+            
+            allpeaks[st:end,1] = match(as.character(peak[,1]),pv$chrmap)
+            allpeaks[st:end,2] = peak[,2]
+            allpeaks[st:end,3] = peak[,3]
+            
+            st = end + 1
+         }
       }
       colnames(allpeaks) = c("CHR","START","END",1:numvecs)
-
+      
       if(bKeepAll) {
-   	     #result = pv.dovectors(allpeaks,pv$class,bKeepAll=F,bDel=F,bUseLast=F)
+         #result = pv.dovectors(allpeaks,pv$class,bKeepAll=F,bDel=F,bUseLast=F)
          pv$allvectors  = pv.dovectors(allpeaks,pv$class,bKeepAll=T)
          rownames(pv$allvectors) = 1:nrow(pv$allvectors)
          if((ncol(pv$allvectors)>4) && (minOverlap>1)) {
@@ -359,12 +373,12 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
       } else {
          result = pv.dovectors(allpeaks,pv$class,bKeepAll=F)
       }
-   
+      
       pv$vectors = result
-   
+      
    } else { ## ALL SAME
       pv$allvectors = pv$peaks[[1]][,1:4]
-
+      
       for(i in 2:numvecs){
          pv$allvectors = cbind(pv$allvectors,pv$peaks[[i]][,4])
       }	
@@ -382,16 +396,16 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
    if(bAnalysis && ncol(pv$class)>1) {
       #pv = pv.analysis(pv)
    }
-  pv$hc = NULL
-  pv$pc = NULL
-  pv$masks = pv.mask(pv)
-  return(pv)   	
+   pv$hc = NULL
+   pv$pc = NULL
+   pv$masks = pv.mask(pv)
+   return(pv)   	
 }
 
 ## pv.list -- list attributes of samples in model
 pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_REPLICATE,PV_CALLER,PV_INTERVALS,PV_SN_RATIO)
 pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F){
- 
+   
    if(!missing(mask)){
       if(!is.logical(mask)) {
          tmp  = rep (F,length(pv$peaks))
@@ -407,7 +421,7 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    if(missing(attributes)) {
       attributes = pv.deflist
    }
-      
+   
    if(missing(mask)){
       mask = rep(T,ncol(pv$class))
    }
@@ -424,7 +438,7 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
       attributes = attributes[-which(attributes %in% PV_INTERVALS)]	
       bIntervals = T
    } else bIntervals = F
-
+   
    if(PV_SN_RATIO %in% attributes) {
       attributes = attributes[-which(attributes %in% PV_SN_RATIO)]	
       bSN = T
@@ -436,43 +450,43 @@ pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F)
    rownames(res) = which(mask)
    
    if(bIntervals) {
-	   intervals = NULL
-	   for(i in 1:length(mask)) {
-	      if(mask[i]) {
-	         intervals = c(intervals,nrow(pv$peaks[[i]]))
-	      }	
-	   }
-	   res = cbind(res,intervals)
-	   colnames(res)[ncol(res)]='Intervals'
-	}
-	
+      intervals = NULL
+      for(i in 1:length(mask)) {
+         if(mask[i]) {
+            intervals = c(intervals,nrow(pv$peaks[[i]]))
+         }	
+      }
+      res = cbind(res,intervals)
+      colnames(res)[ncol(res)]='Intervals'
+   }
+   
    if(bSN) {	   
-	   if(!is.null(pv$SN)){
-	      res = cbind(res,pv$SN)
-	      colnames(res)[ncol(res)]='FRiP'
-	   }
+      if(!is.null(pv$SN)){
+         res = cbind(res,pv$SN)
+         colnames(res)[ncol(res)]='FRiP'
+      }
    }
    
    j = ncol(res)
    if (nrow(res)>1) {	
-     for(i in j:1) {
-       x = unique(res[,i])
-       if(colnames(res)[i]=='Peak caller') {
-         if(all.equal(attributes,pv.deflist) == TRUE) {
-           if(length(x)==1) {
-             res = res[,-i]	
-           }
-         } 
-       } else if(length(x)==1) {
-         if (is.na(x)) {
-           res = res[,-i]
-         } else if(x[1]=="") {
-           res = res[,-i]	
-         }    	
-       }
-     }
+      for(i in j:1) {
+         x = unique(res[,i])
+         if(colnames(res)[i]=='Peak caller') {
+            if(all.equal(attributes,pv.deflist) == TRUE) {
+               if(length(x)==1) {
+                  res = res[,-i]	
+               }
+            } 
+         } else if(length(x)==1) {
+            if (is.na(x)) {
+               res = res[,-i]
+            } else if(x[1]=="") {
+               res = res[,-i]	
+            }    	
+         }
+      }
    }
-	
+   
    return(data.frame(res))
 }
 
@@ -489,13 +503,13 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
    if(class(sampvec)=='logical') {
       sampvec = which(sampvec)
    }
-
+   
    tmp = NULL
    if((bFast | is.null(minOverlap)) & (max(sampvec)<=ncol(pv$class)))  {
-   	  if(length(sampvec)<length(pv$peaks)) {
-   	     pv = pv.vectors(pv,sampvec,minOverlap=1,bAnalysis=F)
-   	     sampvec = 1:length(pv$peaks)
-   	  } else {
+      if(length(sampvec)<length(pv$peaks)) {
+         pv = pv.vectors(pv,sampvec,minOverlap=1,bAnalysis=F)
+         sampvec = 1:length(pv$peaks)
+      } else {
          pv = pv.check(pv)
       }
       sites = pv.whichSites(pv,sampvec,bUseAllvecs=T)
@@ -517,9 +531,9 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
       tmp$peaks  = peaklist
       tmp$class  = pv$class[, sampvec]
       tmp$chrmap = pv$chrmap
-   
+      
       if(is.null(minOverlap)) { ## SPECIAL CASE: OVERLAP RATES
-   	     tmp = pv.vectors(tmp,bKeepAll=T,bAnalysis=F)
+         tmp = pv.vectors(tmp,bKeepAll=T,bAnalysis=F)
          res = rep(0,length(sampvec))
          for(i in 1:length(sampvec)){
             res[i] = sum(apply(tmp$allvectors[,4:ncol(tmp$vectors)],1,pv.minOverlap,i))
@@ -536,7 +550,7 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
    }
    
    goodvecs = apply(tmp$vectors[,4:ncol(tmp$vectors)],1,pv.minOverlap,minOverlap)
-
+   
    tmp$vectors  = tmp$vectors[goodvecs,]
    
    mean.density = apply(tmp$vectors[,4:ncol(tmp$vectors)],1,pv.domean)
@@ -549,12 +563,12 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
    unlink(tmpf)
    
    if (length(unique(pv$class[PV_REPLICATE, sampvec]))==1) {
-     replicate = unique(pv$class[PV_REPLICATE, sampvec])
+      replicate = unique(pv$class[PV_REPLICATE, sampvec])
    } else {
       replicate = pv.catstr(pv$class[PV_REPLICATE, sampvec])
    }
    if(missing(sampID)) {
-   	 sampID = pv.catstr(pv$class[PV_ID, sampvec])
+      sampID = pv.catstr(pv$class[PV_ID, sampvec])
    }
    pv = pv.peakset(pv,peaks=tmp$vectors,
                    sampID      = sampID,
@@ -570,25 +584,25 @@ pv.consensus = function(pv,sampvec,minOverlap=2,bFast=F,sampID){
                    readBam     = pv.getoneorNA(pv$class[PV_BAMREADS, sampvec]),
                    controlBam  = pv.getoneorNA(pv$class[PV_BAMCONTROL, sampvec]),
                    scoreCol    = 0)
-                        
-  pv$vectors    = NULL
-  pv$allvectors = NULL
-  pv$hc         = NULL
-  pv$pc         = NULL
-
-  return(pv)
+   
+   pv$vectors    = NULL
+   pv$allvectors = NULL
+   pv$hc         = NULL
+   pv$pc         = NULL
+   
+   return(pv)
 }  
 
 pv.consensusSets = function(pv,peaks=NULL,minOverlap,attributes,
                             tissue,factor,condition,treatment,replicate,control,peak.caller,
                             readBam, controlBam)	{
-
+   
    if(is.character(peaks)) {
       stop("\"peaks\" parameter can not be a filename when \"consensus\" specifies attributes",call.=FALSE)	
    }
-
+   
    if(is.null(peaks)) {
-     peaks = rep(T,ncol(pv$class))
+      peaks = rep(T,ncol(pv$class))
    }
    
    include = F
@@ -628,17 +642,17 @@ pv.consensusSets = function(pv,peaks=NULL,minOverlap,attributes,
       return(pv)
    }
    for(i in 1:ncol(specs)) {
-   	  cand = class %in% specs[,i]
-   	  if(is.vector(cand)) {
-   	     cand = matrix(cand,numatts,ncol(class))
-   	  }
+      cand = class %in% specs[,i]
+      if(is.vector(cand)) {
+         cand = matrix(cand,numatts,ncol(class))
+      }
       samples = apply(cand,MARGIN=2,function(x){sum(x) == numatts}) & peaks
       diffatts = apply(class,MARGIN=1,function(x){length(unique(x))>1})
       if(sum(samples)>1) {
-      	 message('Add consensus: ',paste(specs[diffatts,i],collapse=" "))
-      	 if(length(unique(sampids[samples]))==1) {
-      	   sampid = sampids[samples][1]	
-      	 } else sampid = paste(specs[diffatts,i],collapse=":")
+         message('Add consensus: ',paste(specs[diffatts,i],collapse=" "))
+         if(length(unique(sampids[samples]))==1) {
+            sampid = sampids[samples][1]	
+         } else sampid = paste(specs[diffatts,i],collapse=":")
          pv = pv.consensus(pv,samples,sampID=sampid,minOverlap=minOverlap)
          sampnum = ncol(pv$class)
          if(pv$class[PV_ID,sampnum]=="") pv$class[PV_ID,sampnum]="ALL"
@@ -653,7 +667,7 @@ pv.consensusSets = function(pv,peaks=NULL,minOverlap,attributes,
          if(!missing(controlBam))  pv$class[PV_BAMCONTROL,sampnum]= controlBam
       }   	
    }
-  
+   
    return(pv)   
 }
 
@@ -667,7 +681,7 @@ pv.mask = function(pv,attribute,value,combine='or',mask,merge='or',bApply=F){
       if((merge =='or') | (merge=='and')) {
          mask = rep(F, numsamps)
       } else {
-      	 mask = rep(T, numsamps)
+         mask = rep(T, numsamps)
       }
    }
    
@@ -676,14 +690,14 @@ pv.mask = function(pv,attribute,value,combine='or',mask,merge='or',bApply=F){
       for(att in c(PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_CALLER)) {
          vals = unique(pv$class[att,])
          for (v in vals) {
-         	res = list(x=pv.mask(pv,att,v))
-         	names(res) = v
+            res = list(x=pv.mask(pv,att,v))
+            names(res) = v
             masks = c(masks,res)
          }
       }
       res = list(x=pv.mask(pv,PV_CONSENSUS,T))
       if(sum(res[[1]])) {
-      	 names(res) = "Consensus"
+         names(res) = "Consensus"
          masks = c(masks,res)       
       }
       reps = unique(pv$class[PV_REPLICATE,])
@@ -698,7 +712,7 @@ pv.mask = function(pv,attribute,value,combine='or',mask,merge='or',bApply=F){
       
       masks$All  = rep(T,ncol(pv$class))
       masks$None = rep(F,ncol(pv$class))
-     
+      
       return(masks)  
    }
    
@@ -725,11 +739,11 @@ pv.mask = function(pv,attribute,value,combine='or',mask,merge='or',bApply=F){
    if(merge == 'and') {
       mask = mask & curmask	
    }
-
+   
    if(merge == 'nor') {
       mask = !(mask | curmask)	
    }
-
+   
    if(merge == 'nand') {
       mask = !(mask & curmask)	
    }           
@@ -761,7 +775,7 @@ pv.whichSites = function(pv,pnum,combine="or",minVal=-1,bUseAllvecs=F){
    if(length(pnum)==1) {
       res = vecs[,pnum+3]>minVal
    } else {
-   	  res = vecs[,pnum[1]+3]>minVal
+      res = vecs[,pnum[1]+3]>minVal
       for(p in 2:length(pnum)) {
          newvec = vecs[,pnum[p]+3]>minVal
          if(combine=='or') {
@@ -947,53 +961,53 @@ PV_TOTAL = 0
 pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,contrast,
                           overlaps, olmask, olPlot=PV_COR,divVal,RowAttributes,ColAttributes,rowSideCols,colSideCols,
                           bTop=T,minval,maxval,bReorder=F,ColScheme="Greens",distMeth="pearson",...) {
-#require(gplots)
-#require(RColorBrewer)
-#require(amap)
-  
+   #require(gplots)
+   #require(RColorBrewer)
+   #require(amap)
+   
    pv = pv.check(pv)
-
+   
    if(missing(mask)){
       mask = rep(T,ncol(pv$class))
-    } else if(is.null(mask)) {
-      	 mask = rep(T,ncol(pv$class))
-    }
-           
+   } else if(is.null(mask)) {
+      mask = rep(T,ncol(pv$class))
+   }
+   
    ocm = NULL
    if(!missing(overlaps)) {
       cres  = overlaps
       if(!missing(olmask)) {
          cres = cres[olmask,]
-   	  }
-   	  if(is.null(nrow(cres))){
-   	     cres = matrix(cres,1,length(cres))	
-   	  }
-   	  #cres = pv.overlapToLabels(pv,cres,attributes)
-   	  if(missing(divVal)) {
-   	     ocm = pv.occ2matrix(cres,olPlot)
-   	  } else {
-   	     ocm = pv.occ2matrix(cres,olPlot,divVal)
-   	  }
-   	  labels = pv.nums2labels(pv,rownames(ocm),attributes)
-   	  rowlab = collab = labels
-   	  rownames(ocm) = labels
-   	  colnames(ocm) = labels
-   	  domap = ocm
-
+      }
+      if(is.null(nrow(cres))){
+         cres = matrix(cres,1,length(cres))	
+      }
+      #cres = pv.overlapToLabels(pv,cres,attributes)
+      if(missing(divVal)) {
+         ocm = pv.occ2matrix(cres,olPlot)
+      } else {
+         ocm = pv.occ2matrix(cres,olPlot,divVal)
+      }
+      labels = pv.nums2labels(pv,rownames(ocm),attributes)
+      rowlab = collab = labels
+      rownames(ocm) = labels
+      colnames(ocm) = labels
+      domap = ocm
+      
    } else {
-
+      
       if(missing(sites)){
          sites = 1:nrow(pv$vectors)
          numSites = min(length(sites),numSites)
       } else {
-   	     if(sum(sites)<=length(sites)){
+         if(sum(sites)<=length(sites)){
             numSites = min(sum(sites),numSites)
             sites = which(sites)
          } else {
             numSites = length(sites)
          }
       }
-   
+      
       if(bTop==T) {
          sites = sites[1:numSites]
       } else {
@@ -1043,7 +1057,7 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
       rowatts = pv.attributematrix(pv,mask,contrast=contrast,RowAttributes,rowSideCols,bReverse=T)
       rowcols = length(unique(as.vector(rowatts)))
    } 
-
+   
    if(missing(colSideCols)) {
       colSideCols = pv.colsv	
    }
@@ -1059,51 +1073,51 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
    }
    
    if(is.null(ocm)){
-   	  if(!missing(RowAttributes)) {
-   	     warning("Row color bars not permitted for peak score heatmaps.",call.=F)	
-   	  }
+      if(!missing(RowAttributes)) {
+         warning("Row color bars not permitted for peak score heatmaps.",call.=F)	
+      }
       heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab,KeyValueName="Score",
                 distfun=function(x) Dist(x,method=distMeth),
                 ColSideColors=colatts,NumColSideColors=colcols,
                 ...)
    } else {
-
+      
       res = heatmap.3(domap,labCol=collab,col=cols,trace="none",labRow=rowlab, KeyValueName="Correlation",
                       distfun=function(x) Dist(x,method=distMeth),symm=T,revC=T,Colv=T,
                       RowSideColors=rowatts,ColSideColors=colatts,NumRowSideColors=rowcols,NumColSideColors=colcols,
                       ...)         
       if(bReorder) {
-      	 if(length(unique(rownames(ocm)))==nrow(ocm)) {
+         if(length(unique(rownames(ocm)))==nrow(ocm)) {
             ocm = pv.reorderM(ocm,res$rowDendrogram)
          } else {
             warning("Unable to re-order returned correlation matrix as labels are non-unique")	
          }
       }
-
+      
       return(ocm)
    }
-
+   
 }
 
 ## pv.sort  - sort binding sites (e.g. for heatmap)
 pv.sort = function(pv,fun=sd,mask,...) {
-  
-  if(missing(mask)){
-     mask = rep(T,ncol(pv$class))
-  }
-
-  scores = apply(pv$vectors[,c(F,F,F,mask)],1,fun,...)
-  ranked = order(scores,decreasing=T)
-  
-  pv$vectors   = pv$vectors[ranked,]
-  
-  return(pv)	
+   
+   if(missing(mask)){
+      mask = rep(T,ncol(pv$class))
+   }
+   
+   scores = apply(pv$vectors[,c(F,F,F,mask)],1,fun,...)
+   ranked = order(scores,decreasing=T)
+   
+   pv$vectors   = pv$vectors[ranked,]
+   
+   return(pv)	
 }
 ## pv.overlap -- generate overlapping/unique peaksets
 pv.overlap = function(pv,mask,bFast=F,minVal=0) {
    
    if(!missing(mask)){
-   	  if(!is.logical(mask)) {
+      if(!is.logical(mask)) {
          peaksets = mask
       }	else {
          peaksets = which(mask)
@@ -1122,7 +1136,7 @@ pv.overlap = function(pv,mask,bFast=F,minVal=0) {
          return(NULL)
       }	
    } else {
-   	  stop('Must specify mask for peaksets to overlap.',call.=F)
+      stop('Must specify mask for peaksets to overlap.',call.=F)
    }
    
    numcounts = sum(pv$class[PV_CALLER,peaksets] %in% "counts")
@@ -1137,7 +1151,7 @@ pv.overlap = function(pv,mask,bFast=F,minVal=0) {
    } else if (numcounts > 0) {
       stop("Mixed counted and uncounted peaksets, can't compute overlap",call.=F)	
    } else {
-   	  #scores = pv$allvectors[,peaksets+3]
+      #scores = pv$allvectors[,peaksets+3]
       pv = pv.vectors(pv,mask=peaksets,bAnalysis=F)
       #pv$allvectors[,4:ncol(pv$allvectors)] = scores
       pv$allvectors[,1] = pv$chrmap[pv$allvectors[,1]]
@@ -1169,17 +1183,17 @@ pv.overlap = function(pv,mask,bFast=F,minVal=0) {
    } else {
       res = pv.contrast4(pv$allvectors,A,B,C,D,minVal=minVal,v1=maskA,v2=maskB,v3=maskC,v4=maskD) 
    }
-
+   
    return(res)
 }
 
 ## pv.plotVenn -- draw venn diagrams 
 pv.plotVenn = function(ovrec,label1="A",label2="B",label3="C",label4="D",main="",sub="") {
-
+   
    if(length(ovrec)==3) {
       pv.venn2(ovrec,label1,label2,main,sub)
    }
-
+   
    if(length(ovrec)==7) {
       pv.venn3(ovrec,label1,label2,label3,main,sub)
    }
@@ -1191,12 +1205,12 @@ pv.plotVenn = function(ovrec,label1="A",label2="B",label3="C",label4="D",main=""
 
 ## pv.occupancy-- generate co-occupancy stats from peaksets in a model
 pv.occupancy = function(pv,mask,sites,byAttribute,Sort='inall',CorMethod="pearson",
-                           labelAtts=pv$attributes,bPlot=F,minVal=0,bCorOnly=F,bNonZeroCors=F,chrmask) {
-  
+                        labelAtts=pv$attributes,bPlot=F,minVal=0,bCorOnly=F,bNonZeroCors=F,chrmask) {
+   
    pv = pv.check(pv)
    
    vecs=pv$allvectors
-  
+   
    if(missing(mask)) {
       mask = rep(T,ncol(pv$class))
    } else if(is.null(mask)) {
@@ -1211,20 +1225,20 @@ pv.occupancy = function(pv,mask,sites,byAttribute,Sort='inall',CorMethod="pearso
    if(missing(sites)) {
       sites = 1:nrow(vecs)
    }
-  
+   
    res=NULL     
    if(missing(byAttribute)){
-   	  if(length(sites) < nrow(vecs)) {
-   	     pv$allvectors = vecs[sites,]
-   	     pv$vectors = pv$allvectors
-   	  }
-   	  if(!missing(chrmask)) {
-   	     chrindex = match(chrmask,pv$chrmap)
-   	     vecindex = pv$allvectors[,1] == chrmask
-   	     pv$allvectors = pv$allvectors[vecindex,]
-   	     vecindex = pv$vectors[,1] == chrmask
-   	     pv$vectors = pv$vectors[vecindex,]   	     
-   	  }
+      if(length(sites) < nrow(vecs)) {
+         pv$allvectors = vecs[sites,]
+         pv$vectors = pv$allvectors
+      }
+      if(!missing(chrmask)) {
+         chrindex = match(chrmask,pv$chrmap)
+         vecindex = pv$allvectors[,1] == chrmask
+         pv$allvectors = pv$allvectors[vecindex,]
+         vecindex = pv$vectors[,1] == chrmask
+         pv$vectors = pv$vectors[vecindex,]   	     
+      }
       res = pv.pairs(pv,mask=mask,CorMethod=CorMethod,bPlot=bPlot,minVal=minVal,bCorOnly=bCorOnly,bNonZeroCors=bNonZeroCors)
       if(!is.null(nrow(res))) {
          if(!missing(labelAtts)) {
@@ -1239,7 +1253,7 @@ pv.occupancy = function(pv,mask,sites,byAttribute,Sort='inall',CorMethod="pearso
          vmask[comps]=T
          if(sum(vmask)>1) {
             res = rbind(res,pv.occupancy(pv,mask=vmask,sites=sites,
-                                        Sort=Sort,CorMethod=CorMethod,minVal=minVal,bCorOnly=bCorOnly))
+                                         Sort=Sort,CorMethod=CorMethod,minVal=minVal,bCorOnly=bCorOnly))
          }
       }
    } 
@@ -1262,13 +1276,13 @@ pv.occupancy = function(pv,mask,sites,byAttribute,Sort='inall',CorMethod="pearso
 pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F, bNormalized=T, attribute=DBA_GROUP, 
                           bAll, bAllIncreased, bAllDecreased, bDB, bDBIncreased, bDBDecreased,
                           pvalMethod=wilcox.test,  bReversePos=FALSE, attribOrder, vColors, varwidth=T, notch=T, ...) {
-
+   
    if(missing(bAll) && missing(bAllIncreased) && missing(bAllDecreased)) {
-     bMissingAll = T	
+      bMissingAll = T	
    } else bMissingAll = F
-
+   
    if(missing(bDB) && missing(bDBIncreased) && missing(bDBDecreased)) {
-     bMissingDB = T	
+      bMissingDB = T	
    } else bMissingDB = F
    
    if(missing(contrast)) {
@@ -1290,7 +1304,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
          bDBDecreased  = F   
       }	
    }
-
+   
    if(missing(vColors)) {
       vColors = pv.colsv
       vColors = vColors[2:length(vColors)]
@@ -1313,11 +1327,11 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
       names = unique(classes[attribute,])
       numPlots = length(names)
       if(!missing(attribOrder)) {
-      	  if(length(attribOrder < numPlots)) {
-      	     neworder = 1:numPlots
-      	     neworder[1:length(attribOrder)] = attribOrder
-      	     attribOrder = neworder  
-      	  }
+         if(length(attribOrder < numPlots)) {
+            neworder = 1:numPlots
+            neworder[1:length(attribOrder)] = attribOrder
+            attribOrder = neworder  
+         }
          names  = names[attribOrder[1:numPlots]]
       }
       cols = vColors[1:numPlots]
@@ -1352,7 +1366,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
    toplot = NULL
    vcols    = NULL
    vnames = NULL
-
+   
    if(bAll) {
       res       = lapply(groups,pv.box,report)
       for(i in 1:length(res)) {
@@ -1395,7 +1409,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
    if(nrow(report)==1) {
       stop('Need more than one DB site for boxplot')
    }
-    
+   
    if(bReversePos) {
       increase = report$Fold > 0   
       posgroup = DBA$contrasts[[contrast]]$name1
@@ -1405,7 +1419,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
       posgroup = DBA$contrasts[[contrast]]$name2
       neggroup = DBA$contrasts[[contrast]]$name1
    }
-           
+   
    if(bDB) {
       res       = lapply(groups,pv.box,report)
       for(i in 1:length(res)) {
@@ -1415,7 +1429,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
       vnames = c(vnames,names)
       vcols    = c(vcols,cols)   
    }   
-
+   
    if(bDBIncreased) {
       res = lapply(groups,pv.box,report[increase,])
       for(i in 1:length(res)) {
@@ -1429,7 +1443,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
    
    if(bDBDecreased) {
       res = lapply(groups,pv.box,report[!increase,])
-       for(i in 1:length(res)) {
+      for(i in 1:length(res)) {
          names(res)[i] = sprintf("%s.DB-",names[i])
       }     
       toplot = c(toplot,res)
@@ -1439,28 +1453,28 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
    }
    
    if(bNormalized==T) {
-     ystr = "log2 normalized reads in binding sites"
+      ystr = "log2 normalized reads in binding sites"
    } else {
-     ystr = "log2 reads in binding sites"   
+      ystr = "log2 reads in binding sites"   
    }
    
    if(subtitle == T) {
-     subt = sprintf("+ indicates sites with increased affinity in %s\n- indicates sites with increased affinity in %s",
-                    posgroup,neggroup)	
+      subt = sprintf("+ indicates sites with increased affinity in %s\n- indicates sites with increased affinity in %s",
+                     posgroup,neggroup)	
    } else {
-     subt = ""	
+      subt = ""	
    }
    boxplot(toplot,notch=notch, varwidth=varwidth,
            col=vcols,names=vnames,main="Binding affinity",        
            sub=subt,ylab=ystr)
-
+   
    if(!is.null(pvalMethod)){
       pvals = matrix(1,length(toplot),length(toplot))
       rownames(pvals) = names(toplot)
       colnames(pvals) = names(toplot)
       for(i in 1:(length(toplot)-1)) {
          for(j in (i+1):length(toplot)) {
-         	if(length(toplot[[i]]) == length(toplot[[j]])) {
+            if(length(toplot[[i]]) == length(toplot[[j]])) {
                pvals[i,j] = pvalMethod(toplot[[i]],toplot[[j]],paired=TRUE)$p.value
             } else {
                pvals[i,j] = pvalMethod(toplot[[i]],toplot[[j]],paired=FALSE)$p.value
