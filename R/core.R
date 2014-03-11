@@ -300,7 +300,7 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
       peaks = NULL
       for(i in mask){
          #if(nrow(pv$peaks[[i]]) > 0) {
-            peaks = pv.listadd(peaks,pv$peaks[[i]])
+         peaks = pv.listadd(peaks,pv$peaks[[i]])
          #}
       }
       class     = pv$class[,mask]
@@ -360,18 +360,24 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
       }
       colnames(allpeaks) = c("CHR","START","END",1:numvecs)
       
-      if(bKeepAll) {
-         #result = pv.dovectors(allpeaks,pv$class,bKeepAll=F,bDel=F,bUseLast=F)
-         pv$allvectors  = pv.dovectors(allpeaks,pv$class,bKeepAll=T)
-         rownames(pv$allvectors) = 1:nrow(pv$allvectors)
-         if((ncol(pv$allvectors)>4) && (minOverlap>1)) {
-            pv$overlapping = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,pv.minOverlap,minOverlap)
-            result = pv$allvectors[pv$overlapping,]
+      if(npeaks>0) {
+         if(bKeepAll) {
+            #result = pv.dovectors(allpeaks,pv$class,bKeepAll=F,bDel=F,bUseLast=F)
+            pv$allvectors  = pv.dovectors(allpeaks,pv$class,bKeepAll=T)
+            rownames(pv$allvectors) = 1:nrow(pv$allvectors)
+            if((ncol(pv$allvectors)>4) && (minOverlap>1)) {
+               pv$overlapping = apply(pv$allvectors[,4:ncol(pv$allvectors)],1,pv.minOverlap,minOverlap)
+               result = pv$allvectors[pv$overlapping,]
+            } else {
+               result = pv$allvectors
+            }
          } else {
-            result = pv$allvectors
+            result = pv.dovectors(allpeaks,pv$class,bKeepAll=F)
          }
       } else {
-         result = pv.dovectors(allpeaks,pv$class,bKeepAll=F)
+         result = matrix(0,0,3+length(pv$peaks))
+         colnames(result) = colnames(allpeaks)                        
+         pv$allvectors = result 
       }
       
       pv$vectors = result

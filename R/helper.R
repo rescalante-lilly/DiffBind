@@ -10,7 +10,7 @@
 ## pv HELPER FUNCTIONS ##
 #########################
 
-pv.check = function(pv) {
+pv.check = function(pv,bCheckEmpty=F) {
    
    if(missing(pv)) {
       stop('DBA object missing!',call.=F)
@@ -28,20 +28,26 @@ pv.check = function(pv) {
       saveqc@DBA = x
       pv$ChIPQCobj = saveqc
    }
-      
+   
    if(is.null(pv$peaks)) {
       return(pv)	
    }
-   if(is.null(pv$vectors)) {
-   	  if(is.null(pv$minOverlap)) {
-   	     minOverlap=2
-   	  } else {
-   	     minOverlap = pv$minOverlap
-   	  }
+   
+   if(bCheckEmpty && sum(sapply(pv$peaks,nrow))==0) {
+      stop('DBA object has no peaks.',call.=FALSE)
+   }
+   
+   if(is.null(pv$allvectors) || is.null(pv$vectors)) {
+      if(is.null(pv$minOverlap)) {
+         minOverlap=2
+      } else {
+         minOverlap = pv$minOverlap
+      }
       pv = pv.vectors(pv,minOverlap=minOverlap)
    }
+   
    if(is.null(pv$config$DataType)) {
-   	  pv$config$DataType=DBA_DATA_DEFAULT
+      pv$config$DataType=DBA_DATA_DEFAULT
       if(!is.null(pv$config$RangedData)) {
          if(pv$config$RangedData==F) {
             pv$config$DataType=DBA_DATA_FRAME   	
@@ -61,28 +67,28 @@ pv.check = function(pv) {
    }   
    
    if(nrow(pv$class)<PV_TREATMENT) {
-     pv$class = rbind(pv$class,'')
-     rownames(pv$class)[PV_TREATMENT]='Treatment'	
+      pv$class = rbind(pv$class,'')
+      rownames(pv$class)[PV_TREATMENT]='Treatment'	
    }
    
    return(pv)
 }
 
 pv.version = function(pv,v1,v2,v3){
-
+   
    warn = FALSE
    if(is.null(pv$config$Version1)) {
       warn = T   	
    } else {
       if(pv$config$Version1 != v1) {
-        warn = T   	
+         warn = T   	
       }	
    }
    if(is.null(pv$config$Version2)) {
       warn = T   	
    } else {
       if(pv$config$Version2 != v2) {
-        warn = T   	
+         warn = T   	
       }	
    }
    
@@ -92,16 +98,16 @@ pv.version = function(pv,v1,v2,v3){
    
    if(!is.null(pv$contrasts)) {
       for(i in 1:length(pv$contrasts)) {
-        if(!is.null(pv$contrasts[[i]]$DESeq) & is.null(pv$contrasts[[i]]$DESeq1) & is.null(pv$contrasts[[i]]$DESeq2)) {
-          pv$contrasts[[i]]$DESeq1 = pv$contrasts[[i]]$DESeq
-          pv$contrasts[[i]]$DESeq  = NULL
-        }
+         if(!is.null(pv$contrasts[[i]]$DESeq) & is.null(pv$contrasts[[i]]$DESeq1) & is.null(pv$contrasts[[i]]$DESeq2)) {
+            pv$contrasts[[i]]$DESeq1 = pv$contrasts[[i]]$DESeq
+            pv$contrasts[[i]]$DESeq  = NULL
+         }
       }   
    }
    
    if(nrow(pv$class)<PV_TREATMENT) {
-     pv$class = rbind(pv$class,'')
-     rownames(pv$class)[PV_TREATMENT]='Treatment'	
+      pv$class = rbind(pv$class,'')
+      rownames(pv$class)[PV_TREATMENT]='Treatment'	
    }
    pv$config$Version1 = v1
    pv$config$Version2 = v2
@@ -265,7 +271,7 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
 }
 
 pv.whichPeaksets = function(pv,mask) {
-
+   
    if(missing(mask)) {
       warning('mask required',call.=F)
       return(NULL)
@@ -290,7 +296,7 @@ pv.whichPeaksets = function(pv,mask) {
    } else {
       D = NULL
    }   
-
+   
    return(list(A=A,B=B,C=C,D=D))
 }
 
@@ -306,7 +312,7 @@ pv.listaddto = function(a,b){
 }
 
 fdebug = function(str,file='debug.txt'){
-
+   
    PV_DEBUG=FALSE
    
    if(PV_DEBUG == FALSE){
@@ -314,7 +320,7 @@ fdebug = function(str,file='debug.txt'){
    }
    
    #write(sprintf('%s\n',str),file=file,append=T)
-
+   
 }
 
 pv.peaksort = function(peaks){
@@ -338,8 +344,8 @@ pv.contrast2 = function(vectors,n1,n2,minVal=0,v1,v2){
    onlyB    = !v1 & v2
    
    res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
-   	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
-   	          inAll = vectors[inAll,c(1:3,(n1+3),(n2+3))])
+              onlyB = vectors[onlyB,c(1:3,(n2+3))],
+              inAll = vectors[inAll,c(1:3,(n1+3),(n2+3))])
    
    for(i in 1:3){
       if(is.null(nrow(res[[i]]))){
@@ -355,7 +361,7 @@ pv.contrast2 = function(vectors,n1,n2,minVal=0,v1,v2){
 }
 
 pv.contrast3 = function(vectors,n1,n2,n3,minVal=0,v1,v2,v3){
-	
+   
    if(missing(v1)) v1 = vectors[,n1+3] > minVal
    if(missing(v2)) v2 = vectors[,n2+3] > minVal
    if(missing(v3)) v3 = vectors[,n3+3] > minVal
@@ -370,21 +376,21 @@ pv.contrast3 = function(vectors,n1,n2,n3,minVal=0,v1,v2,v3){
    notA   = !v1 &  (v2 & v3)
    notB   = !v2 &  (v1 & v3)
    notC   = !v3 &  (v1 & v2)    
-	    
+   
    res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
-   	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
-   	          onlyC = vectors[onlyC,c(1:3,(n3+3))],
-   	          notA  = vectors[notA,c(1:3,(n2+3),(n3+3))],
-   	          notB  = vectors[notB,c(1:3,(n1+3),(n3+3))],
-   	          notC  = vectors[notC,c(1:3,(n1+3),(n2+3))],
-   	          inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3))])      
+              onlyB = vectors[onlyB,c(1:3,(n2+3))],
+              onlyC = vectors[onlyC,c(1:3,(n3+3))],
+              notA  = vectors[notA,c(1:3,(n2+3),(n3+3))],
+              notB  = vectors[notB,c(1:3,(n1+3),(n3+3))],
+              notC  = vectors[notC,c(1:3,(n1+3),(n2+3))],
+              inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3))])      
    
    for(i in 1:7){
       if(is.null(nrow(res[[i]]))){
          res[[i]] = as.matrix(t(res[[i]]))
       }
    }	
-
+   
    colnames(res[[1]]) = c("chr","start","end","score")	
    colnames(res[[2]]) = c("chr","start","end","score")	
    colnames(res[[3]]) = c("chr","start","end","score")	
@@ -392,12 +398,12 @@ pv.contrast3 = function(vectors,n1,n2,n3,minVal=0,v1,v2,v3){
    colnames(res[[5]]) = c("chr","start","end","scoreA","scoreC")
    colnames(res[[6]]) = c("chr","start","end","scoreA","scoreB")
    colnames(res[[7]]) = c("chr","start","end","scoreA","scoreB","scoreC")
-           
+   
    return(res)
 }
 
 pv.contrast4 = function(vectors,n1,n2,n3,n4,minVal=0,v1,v2,v3,v4){
-	
+   
    if(missing(v1)) v1 = vectors[,n1+3] > minVal
    if(missing(v2)) v2 = vectors[,n2+3] > minVal
    if(missing(v3)) v3 = vectors[,n3+3] > minVal
@@ -422,29 +428,29 @@ pv.contrast4 = function(vectors,n1,n2,n3,n4,minVal=0,v1,v2,v3,v4){
    BandC  = (v2 & v3) & !(v1 | v4)
    BandD  = (v2 & v4) & !(v1 | v3)
    CandD  = (v3 & v4) & !(v1 | v2)             
-	    
+   
    res = list(onlyA = vectors[onlyA,c(1:3,(n1+3))],
-   	          onlyB = vectors[onlyB,c(1:3,(n2+3))],
-   	          onlyC = vectors[onlyC,c(1:3,(n3+3))],
-   	          onlyD = vectors[onlyD,c(1:3,(n4+3))],   	          
-   	          AandB = vectors[AandB,c(1:3,(n1+3),(n2+3))],
-   	          AandC = vectors[AandC,c(1:3,(n1+3),(n3+3))],
-   	          AandD = vectors[AandD,c(1:3,(n1+3),(n4+3))],
-   	          BandC = vectors[BandC,c(1:3,(n2+3),(n3+3))],
-   	          BandD = vectors[BandD,c(1:3,(n3+3),(n4+3))],
-   	          CandD = vectors[CandD,c(1:3,(n3+3),(n4+3))],
-   	          notA  = vectors[notA,c(1:3,(n2+3),(n3+3),(n4+3))],
-   	          notB  = vectors[notB,c(1:3,(n1+3),(n3+3),(n4+3))],
-   	          notC  = vectors[notC,c(1:3,(n1+3),(n2+3),(n4+3))],
-   	          notD  = vectors[notD,c(1:3,(n1+3),(n2+3),(n3+3))],
-   	          inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3),(n4+3))])      
+              onlyB = vectors[onlyB,c(1:3,(n2+3))],
+              onlyC = vectors[onlyC,c(1:3,(n3+3))],
+              onlyD = vectors[onlyD,c(1:3,(n4+3))],   	          
+              AandB = vectors[AandB,c(1:3,(n1+3),(n2+3))],
+              AandC = vectors[AandC,c(1:3,(n1+3),(n3+3))],
+              AandD = vectors[AandD,c(1:3,(n1+3),(n4+3))],
+              BandC = vectors[BandC,c(1:3,(n2+3),(n3+3))],
+              BandD = vectors[BandD,c(1:3,(n3+3),(n4+3))],
+              CandD = vectors[CandD,c(1:3,(n3+3),(n4+3))],
+              notA  = vectors[notA,c(1:3,(n2+3),(n3+3),(n4+3))],
+              notB  = vectors[notB,c(1:3,(n1+3),(n3+3),(n4+3))],
+              notC  = vectors[notC,c(1:3,(n1+3),(n2+3),(n4+3))],
+              notD  = vectors[notD,c(1:3,(n1+3),(n2+3),(n3+3))],
+              inAll = vectors[inAll,c(1:3,(n1+3),(n2+3),(n3+3),(n4+3))])      
    
    for(i in 1:15){
       if(is.null(nrow(res[[i]]))){
          res[[i]] = as.matrix(t(res[[i]]))
       }
    }	
-
+   
    colnames(res[[1]])  = c("chr","start","end","score")	
    colnames(res[[2]])  = c("chr","start","end","score")	
    colnames(res[[3]])  = c("chr","start","end","score")	
@@ -460,19 +466,19 @@ pv.contrast4 = function(vectors,n1,n2,n3,n4,minVal=0,v1,v2,v3,v4){
    colnames(res[[13]]) = c("chr","start","end","scoreA","scoreB","scoreD")    
    colnames(res[[14]]) = c("chr","start","end","scoreA","scoreB","scoreC")      
    colnames(res[[15]]) = c("chr","start","end","scoreA","scoreB","scoreC","scoreD")
-           
+   
    return(res)
 }
 
 
 
 pv.analysis = function(pv,attributes=pv$attributes,bPCA=T,distMeth="pearson") {
-
+   
    #require(amap)
    
    peaks  = pv$vectors 
    values = matrix(as.numeric(as.matrix(peaks[,4:ncol(peaks)])),nrow(peaks),ncol(peaks)-3)
-    
+   
    if(sum(pv$vectors[,4:ncol(pv$vectors)] != 1) == 0) {
       return(pv)
    }
@@ -480,7 +486,7 @@ pv.analysis = function(pv,attributes=pv$attributes,bPCA=T,distMeth="pearson") {
    if(sum(pv$vectors[,4:ncol(pv$vectors)] != -1) == 0) {
       return(pv)
    }
-      
+   
    if(nrow(peaks) <= length(pv$peaks) ) {
       bPCA=F
    }
@@ -495,7 +501,7 @@ pv.analysis = function(pv,attributes=pv$attributes,bPCA=T,distMeth="pearson") {
    #pv$hc = hclust(Dist(t(values),method=distMeth))
    if(bPCA) pv$pc = princomp(values)
    #pv$values = values
-
+   
    return(pv)  
 }
 
@@ -536,9 +542,9 @@ pv.readPeaks = function(peaks,peak.format,skipLines=0){
    #   peaks =  pv.readbed(peaks,skipLines)
    #}  
    else if(peak.format == "csv") {
-	   peaks =  pv.csv(peaks)
+      peaks =  pv.csv(peaks)
    }  else if(peak.format == "report") {
-	   peaks =  pv.csv(peaks)
+      peaks =  pv.csv(peaks)
    } else {
       peaks =  pv.readbed(peaks,skipLines)   	
    }     
@@ -576,9 +582,9 @@ pv.defaultScoreCol = function(peak.format){
    else if(peak.format == "raw") {
       val = 4
    } else if(peak.format == "csv") {
-	   val = 4
+      val = 4
    } else if(peak.format == "report") {
-	   val = 9
+      val = 9
    } else {
       val = 4 	
    } 
@@ -588,81 +594,81 @@ pv.defaultScoreCol = function(peak.format){
 
 FDRth=100
 pv.macs = function(fn){
- data = read.table(fn,blank.lines.skip=T,header=T)
- res  = pv.peaksort(data)
- return(res)
+   data = read.table(fn,blank.lines.skip=T,header=T)
+   res  = pv.peaksort(data)
+   return(res)
 }
 
 pv.swembl = function(fn){
- data = read.table(fn,skip=14)
- res  = pv.peaksort(data)
- return(res) 
+   data = read.table(fn,skip=14)
+   res  = pv.peaksort(data)
+   return(res) 
 }
 
 pv.readbed = function(fn,skipnum=0){
- data = read.table(fn,skip=skipnum)
- res  = pv.peaksort(data)
- if(ncol(res)==3) {
-    res=cbind(res,1)	
- }
- return(res)
+   data = read.table(fn,skip=skipnum)
+   res  = pv.peaksort(data)
+   if(ncol(res)==3) {
+      res=cbind(res,1)	
+   }
+   return(res)
 }
 
 pv.bayes = function(fn){
- data = read.table(fn)
-#idx = data[,4]>0.5
-#data = data[idx,]
- res  = pv.peaksort(data)
- return(res)
+   data = read.table(fn)
+   #idx = data[,4]>0.5
+   #data = data[idx,]
+   res  = pv.peaksort(data)
+   return(res)
 }
 
 pv.tpic = function(fn){
- data = read.table(fn)
- res  = pv.peaksort(data)
- return(cbind(res,1))
+   data = read.table(fn)
+   res  = pv.peaksort(data)
+   return(cbind(res,1))
 }
 
 pv.sicer = function(fn){
- data = read.table(fn)
- res  = pv.peaksort(data)
- return(res[,c(1:3,7)]) 
+   data = read.table(fn)
+   res  = pv.peaksort(data)
+   return(res[,c(1:3,7)]) 
 }
 
 pv.sourcedata = function(fn,maxval){
- data = read.table(fn)
- vals = data[,6]
- if(!missing(maxval)) {
-    vals[vals>maxval]=maxval
- }
- #vals = vals/100
- vals = log2(vals)
- vals[vals<0]=0
- data = cbind(data[,1:3],vals,data[,4:5])
- data = pv.peaksort(data)
- return(data)
+   data = read.table(fn)
+   vals = data[,6]
+   if(!missing(maxval)) {
+      vals[vals>maxval]=maxval
+   }
+   #vals = vals/100
+   vals = log2(vals)
+   vals[vals<0]=0
+   data = cbind(data[,1:3],vals,data[,4:5])
+   data = pv.peaksort(data)
+   return(data)
 }
 
 pv.csv = function(fn){
    data = read.csv(fn)
-	res  = pv.peaksort(data)
-	if(ncol(res)==3) {
-		res=cbind(res,1)	
-	}
-    return(res)
+   res  = pv.peaksort(data)
+   if(ncol(res)==3) {
+      res=cbind(res,1)	
+   }
+   return(res)
 }
 
 pv.peakset_all = function(pv, addpv, minOverlap) {
-
+   
    for(i in 1:length(addpv$peaks)) {
-   	
-   	  message(addpv$class[PV_ID,i],' ',
+      
+      message(addpv$class[PV_ID,i],' ',
               addpv$class[PV_TISSUE,i],' ',
               addpv$class[PV_FACTOR,i],' ',
               addpv$class[PV_CONDITION,i],' ',
               addpv$class[PV_TREATMENT,i],' ',
               addpv$class[PV_REPLICATE,i],' ',
               addpv$class[PV_CALLER,i])
-    
+      
       pv = pv.peakset(pv,peaks=addpv$peaks[[i]],
                       sampID      = addpv$class[PV_ID,i],
                       tissue      = addpv$class[PV_TISSUE,i],
@@ -676,26 +682,26 @@ pv.peakset_all = function(pv, addpv, minOverlap) {
                       consensus   = addpv$class[PV_CONSENSUS,i],
                       readBam     = addpv$class[PV_BAMREADS,i],
                       controlBam  = addpv$class[PV_BAMCONTROL,i]
-                     )
+      )
    }
    
    if(minOverlap>0 && minOverlap<1) {
       minOverlap = ceiling(length(pv$peaks) * minOverlap)	
    }
    pv = dba(pv, minOverlap=minOverlap)
-
+   
    return(pv)
-
+   
 }
 
 pv.minOverlap = function(vec,minval){
    res = sum(vec != -1)
    if(minval==0) {
-     if (length(vec) == res) {
-       return(T)
-     } else {
-       return(F)
-     }
+      if (length(vec) == res) {
+         return(T)
+      } else {
+         return(F)
+      }
    } else {
       if(res >= minval) {
          return(T)
@@ -715,23 +721,23 @@ pv.domean = function(vals){
 }
 
 pv.do_peaks2bed = function(peaks,chrmap=NULL,fn,numCols=4) {
-	    if(!is.null(chrmap)) {
-	       peaks[,1] = chrmap[peaks[,1]]
-	    }
-	    if(numCols>0) {
-	       numCols = max(3,numCols)
-           mcols = min(numCols, ncol(peaks))
-        } else {
-           mcols = ncol(peaks)
-        }
-        
-        if(!is.null(fn)) {
-           ds = options("scipen")
-           options(scipen=8)
-           write.table(peaks[,1:mcols],file=fn,#sprintf("%s.bed",fn), 
-                       quote=F,row.names=F,col.names=F,sep="\t")
-           options(scipen=ds$scipen)
-        }
+   if(!is.null(chrmap)) {
+      peaks[,1] = chrmap[peaks[,1]]
+   }
+   if(numCols>0) {
+      numCols = max(3,numCols)
+      mcols = min(numCols, ncol(peaks))
+   } else {
+      mcols = ncol(peaks)
+   }
+   
+   if(!is.null(fn)) {
+      ds = options("scipen")
+      options(scipen=8)
+      write.table(peaks[,1:mcols],file=fn,#sprintf("%s.bed",fn), 
+                  quote=F,row.names=F,col.names=F,sep="\t")
+      options(scipen=ds$scipen)
+   }
    return(peaks[,1:mcols])
 }
 
@@ -763,14 +769,14 @@ pv.namestrings = function(crec1,crec2,crec3,crec4) {
       crec4=crec1
    }
    for(i in 1:length(crec1)) {
-   	  if( (crec1[i]==crec2[i]) && (crec1[i]==crec3[i]) && (crec1[i]==crec4[i])) {
-   	     t1 = pv.addstr(t1,crec1[i])
-   	  } else {
-   	     s1 = pv.addstr(s1,crec1[i])
-   	     s2 = pv.addstr(s2,crec2[i])
-   	     s3 = pv.addstr(s3,crec3[i])
-   	     s4 = pv.addstr(s4,crec4[i])
-   	  }
+      if( (crec1[i]==crec2[i]) && (crec1[i]==crec3[i]) && (crec1[i]==crec4[i])) {
+         t1 = pv.addstr(t1,crec1[i])
+      } else {
+         s1 = pv.addstr(s1,crec1[i])
+         s2 = pv.addstr(s2,crec2[i])
+         s3 = pv.addstr(s3,crec3[i])
+         s4 = pv.addstr(s4,crec4[i])
+      }
    }
    if(is.null(s1)) { s1 = ""}
    if(is.null(s2)) { s2 = ""}
@@ -794,25 +800,25 @@ pv.addstr = function(s1,a1) {
    if(a1=="FALSE") {
       a1 = "F"
    }
-      
+   
    if(is.null(s1)){
       s1 = a1
-    } else {
-   	  s1 = sprintf("%s:%s",s1,a1)
-   	}
-   	return(s1)	
+   } else {
+      s1 = sprintf("%s:%s",s1,a1)
+   }
+   return(s1)	
 }
 
 pv.dovectors = function(allpeaks,classes,bKeepAll=F,maxgap=0,useExternal=TRUE,useC=TRUE){
-
+   
    if(!useC) {
       stop('pv.dovectors called with useC set to FALSE.')	
    }
-
+   
    if(is.character(allpeaks[1,1])){
       warning('chromosome names are strings in pv.dovectors',call.=F)
    }  
-
+   
    allpeaks = pv.peaksort(allpeaks)
    allpeaks_copy <- as.data.frame(allpeaks)
    allpeaks_copy$CHR <- as.integer(allpeaks_copy$CHR)
@@ -864,7 +870,7 @@ pv.whichCalled = function(pv,called,master,minVal=-1) {
 ## pv.pairs -- compare all pairs of peaksets, rank by % overlap
 pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
                     CorMethod="pearson",bCorOnly=F,bNonZeroCors=F,minVal=0,bFixConstantVecs=T) {
-
+   
    if(missing(mask)) {
       mask=rep(T,ncol(pv$class))
       peaks = pv$peaks
@@ -881,7 +887,7 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    if(bAllVecs==T) {
       tmp$allvectors = pv$allvectors[,c(T,T,T,mask)]
    } else {
-   	  tmp$allvectors = pv$vectors[,c(T,T,T,mask)]
+      tmp$allvectors = pv$vectors[,c(T,T,T,mask)]
    }
    tmp$vectors    = pv$vectors[,c(T,T,T,mask)]
    tmp$class      = pv$class[,mask]
@@ -893,11 +899,11 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    resl = NULL
    cvecs = NULL
    for(first in 1:(numSets-1)) {
-   	  if(bCorOnly==F){
-   	     #cat(".")
-   	  }
+      if(bCorOnly==F){
+         #cat(".")
+      }
       for(second in (first+1):numSets) {
-      	 if(!bCorOnly) {
+         if(!bCorOnly) {
             res  = pv.overlap(tmp,mask = c(first,second),minVal=minVal)
             resl = pv.listadd(resl,res)
             inall = nrow(res$inAll)
@@ -913,9 +919,9 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
          v1 = tmp$vectors[,first+3]
          v2 = tmp$vectors[,second+3]
          if(bNonZeroCors) {
-           zeros = v1==0 & v2==0
-           v1 = v1[!zeros]
-           v2 = v2[!zeros]
+            zeros = v1==0 & v2==0
+            v1 = v1[!zeros]
+            v2 = v2[!zeros]
          }
          if(bFixConstantVecs) {
             if(sd(v1)==0) {
@@ -945,7 +951,7 @@ pv.pairs = function(pv,mask,bPlot=F,attributes=pv$attributes,bAllVecs=T,
    if(!is.null(cvecs)) {
       cvecs = sort(cvecs)
       for(cv in cvecs) {
-#          warning(sprintf('Scores for peakset %s are all the same -- correlations set to zero.',cv),call.=F)	
+         #          warning(sprintf('Scores for peakset %s are all the same -- correlations set to zero.',cv),call.=F)	
       }	
    }
    
@@ -1005,7 +1011,7 @@ pv.colsv = c("black","red","dodgerblue","darkgreen",
              "lavender","orange","lightgrey","olivedrab")
 
 pv.colorv = function(classes,cols=pv.colsv){
-             
+   
    colv = rep(0,length(classes))
    uv = unique(classes)
    for(i in 1:length(uv)){
@@ -1042,7 +1048,7 @@ pv.reorderM = function(ocm,dgram) {
 pv.dval = function(dgram) {
    att = attributes(dgram)
    if(!is.null(att$leaf)) {
-   	  if(!is.null(att$label)) {
+      if(!is.null(att$label)) {
          if(att$leaf==TRUE) {
             return(att$label)
          }
@@ -1051,14 +1057,14 @@ pv.dval = function(dgram) {
 }
 
 pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
-
+   
    if(missing(numSites)) numSites = nrow(pv$vectors)
    if(is.null(numSites)) numSites = nrow(pv$vectors)  
    numSites = min(numSites,nrow(pv$vectors))
-  
+   
    if(missing(sites)) sites = 1:numSites
    if(is.null(sites)) sites = 1:numSites
-
+   
    if(missing(mask)) mask = rep(T,ncol(pv$class))
    
    res = NULL   
@@ -1072,7 +1078,7 @@ pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
    if(!missing(removeComps)) {
       pv$values = pv.removeComp(pv$values,numRemove=removeComps)
    }
-
+   
    if(nrow(pv$values) >= sum(mask)) {
       res$pc   = princomp(pv$values,cor=cor)
    }
@@ -1082,35 +1088,35 @@ pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
 }
 
 pv.venn2 = function(mrec,n1,n2,...){
-#require(limma)
+   #require(limma)
    
    res = NULL
    res = pv.addrow(res,c(1,0),mrec$onlyA)
    res = pv.addrow(res,c(0,1),mrec$onlyB)
    res = pv.addrow(res,c(1,1),mrec$inAll)   
-
+   
    vennDiagram(res,names=c(n1,n2), circle.col=2:3,counts.col=1,...)
 }
 
 pv.venn2 = function(olaps,l1,l2,main="",sub="") {
-
+   
    counts = c(nrow(olaps$onlyA),
               nrow(olaps$onlyB),
               nrow(olaps$inAll))
    names(counts) = c("A","B","A_B")		
    counts = list(counts)
    vennPlot(counts,setlabels=c(l1,l2),mysub=sub,mymain=main)
-   		
+   
 }
 
 pv.venn3 = function(m3way,n1,n2,n3,...){
-#require(limma)
+   #require(limma)
    
    res = NULL
    res = pv.addrow(res,c(1,0,0),m3way$onlyA)
    res = pv.addrow(res,c(0,1,0),m3way$onlyB)
    res = pv.addrow(res,c(0,0,1),m3way$onlyC)
-
+   
    res = pv.addrow(res,c(1,1,0),m3way$notC)
    res = pv.addrow(res,c(1,0,1),m3way$notB)
    res = pv.addrow(res,c(0,1,1),m3way$notA)
@@ -1121,7 +1127,7 @@ pv.venn3 = function(m3way,n1,n2,n3,...){
 }
 
 pv.venn3 = function(olaps,l1,l2,l3,main="",sub="") {
-
+   
    counts = c(nrow(olaps$onlyA),
               nrow(olaps$onlyB),
               nrow(olaps$onlyC),	
@@ -1132,12 +1138,12 @@ pv.venn3 = function(olaps,l1,l2,l3,main="",sub="") {
    names(counts) = c("A","B","C","A_B","A_C","B_C","A_B_C")		
    counts = list(counts)
    vennPlot(counts,setlabels=c(l1,l2,l3),mysub=sub,mymain=main)
-   		
+   
 }
 
 
 pv.venn4 = function(olaps,l1,l2,l3,l4,main="",sub="") {
-
+   
    counts = c(nrow(olaps$onlyA),
               nrow(olaps$onlyB),
               nrow(olaps$onlyC),	
@@ -1158,98 +1164,98 @@ pv.venn4 = function(olaps,l1,l2,l3,l4,main="",sub="") {
    counts = list(counts)
    
    vennPlot(counts,setlabels=c(l1,l2,l3,l4),mysub=sub,mymain=main)
-   		
+   
 }
 
 pv.Signal2Noise = function(pv) {
-	sns = rep("",length(pv$peaks))
-	for(i in 1:length(sns)) {
-		rip = sum(pv$peaks[[i]]$Reads)
-		treads = as.integer(pv$class[PV_READS,i])
-		if(treads) {
-            sn  = (rip-sum(pv$peaks[[i]]$Reads==1))/treads
-            sns[i] = sprintf("%1.2f",sn)
-		}	
-	}
-	if(sum(as.numeric(sns) > 0,na.rm=T)) {
-		return(sns)  	
-	} else {
-	   return(NULL)
-	}
+   sns = rep("",length(pv$peaks))
+   for(i in 1:length(sns)) {
+      rip = sum(pv$peaks[[i]]$Reads)
+      treads = as.integer(pv$class[PV_READS,i])
+      if(treads) {
+         sn  = (rip-sum(pv$peaks[[i]]$Reads==1))/treads
+         sns[i] = sprintf("%1.2f",sn)
+      }	
+   }
+   if(sum(as.numeric(sns) > 0,na.rm=T)) {
+      return(sns)  	
+   } else {
+      return(NULL)
+   }
 }
 
 
 pv.peaksetCounts = function(pv=NULL,peaks,counts,
-                  sampID="",tissue="",factor="",condition="",treatment="",replicate) {
-                  	
-
+                            sampID="",tissue="",factor="",condition="",treatment="",replicate) {
+   
+   
    if(!is.null(pv$peaks)) {
       if(sum(!pv$class[PV_CALLER,] %in% "counts")) {
-        stop("DBA object can only have count peaksets",call.=FALSE)	
+         stop("DBA object can only have count peaksets",call.=FALSE)	
       }	
    }
-
- 	  IDs = "counts"
-      froms = NULL
-      tos   = NULL
-      if(is.null(dim(counts)) && length(counts)==1) { # filename
-         counts = read.table(counts,as.is=T)
-      }
-      if(!is.vector(counts)) {   
-         numcols = ncol(counts)
-         if(numcols>1) {
-            if(numcols == 2) {
-              numcounts = nrow(counts)
-               if(counts[numcounts,1]=="alignment_not_unique") {
-                  numcounts = numcounts - 5	
-               }
-               IDs = counts[1:numcounts,1]
-               counts = counts[1:numcounts,2]	
-            } else if(numcols == 4) {
-               IDs    = counts[,1]
-               froms  = counts[,2]
-               tos    = counts[,3]
-               counts = counts[,4]	
-            } else {
-               stop("Counts must have 1, 2, or 4 columns.",call.=FALSE)	
+   
+   IDs = "counts"
+   froms = NULL
+   tos   = NULL
+   if(is.null(dim(counts)) && length(counts)==1) { # filename
+      counts = read.table(counts,as.is=T)
+   }
+   if(!is.vector(counts)) {   
+      numcols = ncol(counts)
+      if(numcols>1) {
+         if(numcols == 2) {
+            numcounts = nrow(counts)
+            if(counts[numcounts,1]=="alignment_not_unique") {
+               numcounts = numcounts - 5	
             }
-         } else counts = counts[,1]
-      }
-      
-      if(!is.null(dim(counts))) {
-         stop('counts must be vector of counts',call.=FALSE)	
-      }
-      numcounts = length(counts)
-      #if(length(peaks)>0) {
-      #   warning('Specified peaks ignored',call.=FALSE)
-      #}
-      if(is.null(froms)) {
-         froms = tos = 1:numcounts	
-      }
-      peaks = data.frame(cbind(IDs,froms,tos))
-
+            IDs = counts[1:numcounts,1]
+            counts = counts[1:numcounts,2]	
+         } else if(numcols == 4) {
+            IDs    = counts[,1]
+            froms  = counts[,2]
+            tos    = counts[,3]
+            counts = counts[,4]	
+         } else {
+            stop("Counts must have 1, 2, or 4 columns.",call.=FALSE)	
+         }
+      } else counts = counts[,1]
+   }
+   
+   if(!is.null(dim(counts))) {
+      stop('counts must be vector of counts',call.=FALSE)	
+   }
+   numcounts = length(counts)
+   #if(length(peaks)>0) {
+   #   warning('Specified peaks ignored',call.=FALSE)
+   #}
+   if(is.null(froms)) {
+      froms = tos = 1:numcounts	
+   }
+   peaks = data.frame(cbind(IDs,froms,tos))
+   
    
    peaks = cbind(peaks,counts,counts,rep(0,numcounts),counts,rep(0,numcounts),rep(0,numcounts))
    colnames(peaks) = c("Chr","Start","End", "Score", "Score","RPKM", "Reads","cRPKM","cReads")
    
    res = dba.peakset(pv,
-                    peaks       = peaks,
-                    sampID      = sampID,
-                    tissue      = tissue,
-                    factor      = factor,
-                    condition   = condition,
-                    treatment   = treatment,
-                    consensus   = T,
-                    peak.caller = "counts",
-                    reads       = NA,
-                    replicate   = replicate)
-                    
+                     peaks       = peaks,
+                     sampID      = sampID,
+                     tissue      = tissue,
+                     factor      = factor,
+                     condition   = condition,
+                     treatment   = treatment,
+                     consensus   = T,
+                     peak.caller = "counts",
+                     reads       = NA,
+                     replicate   = replicate)
+   
    res$class[PV_READS,length(res$peaks)] = sum(counts)
    
    if(nrow(peaks) != nrow(res$peaks[[1]])) {
       stop('Mismatch in number of intervals',call.=FALSE)
    }
-      
+   
    if(sum(as.integer(res$peaks[[1]][,1]) != as.integer(res$peaks[[length(res$peaks)]][,1]))) {
       stop("Mismatch in ID",call.=FALSE)	
    }
@@ -1259,7 +1265,7 @@ pv.peaksetCounts = function(pv=NULL,peaks,counts,
    if(sum(res$peaks[[1]][,3] != res$peaks[[length(res$peaks)]][,3])) {
       stop("Mismatch in interval end",call.=FALSE)	
    }
-      
+   
    return(res)
 }
 
@@ -1318,7 +1324,7 @@ pv.assaysFromPeaks = function(DBA) {
          assays[[i-4]][,sampnum] = peak[,i]
       }
    }
-
+   
    return(assays)
 }
 

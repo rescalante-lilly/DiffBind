@@ -218,7 +218,7 @@ pv.model = function(model,mask,minOverlap=2,
    model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                       bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes) 
    
-
+   
    model$ChIPQCobj = ChIPQCobj
    return(model)
 }

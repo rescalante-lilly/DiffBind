@@ -194,7 +194,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
       
       if(missing(peaks)) {
          if(!is.null(DBA)) {
-            DBA = pv.check(DBA)
+            DBA = pv.check(DBA,T)
          } else {
             stop("DBA object is NULL; can't retrieve peakset.")	
          }	
@@ -308,7 +308,7 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        DataType=DBA$config$DataType)
 {                      
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,T)
    
    if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) | (!missing(report)) ) {
       
@@ -394,7 +394,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                      bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
                      bParallel=DBA$config$RunParallel) 
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,missing(peaks))
    
    #if(!missing(bLowMem)) {
    #   stop("parameter bLowMem deprecated, replaced with bUseSummarizeOverlaps")   
@@ -498,7 +498,7 @@ dba.contrast = function(DBA, group1, group2=!group1, name1="group1", name2="grou
       stop('minMembers must be at least 2. Use of replicates strongly advised.')	
    }
    
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    res = pv.contrast(DBA, group1=group1, group2=group2, name1=name1, name2=name2,
                      minMembers=minMembers, categories=categories,block=block)
@@ -528,7 +528,7 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
    #   bParallel=F	
    #}
    
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
    
@@ -579,7 +579,7 @@ dba.report = function(DBA, contrast, method=DBA$config$AnalysisMethod, th=DBA$co
    
 {
    
-   DBA = pv.check(DBA) 
+   DBA = pv.check(DBA,TRUE) 
    
    if(DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) {
       bCounts=T
@@ -634,7 +634,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
                            margin=10, colScheme="Greens", distMethod="pearson",
                            ...)
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    if( (missing(contrast) || !missing(mask)) && !missing(score) ) {
       DBA = dba.count(DBA,peaks=NULL,score=score)	
@@ -717,7 +717,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
                        b3D=FALSE, vColors, dotSize, ...)
    
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    if(missing(contrast) && !missing(score)) {
       DBA = dba.count(DBA,peaks=NULL,score=score)	
@@ -767,7 +767,7 @@ dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod,
                        vColors, varwidth=TRUE, notch=TRUE, ...) 
    
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    if(contrast > length(DBA$contrasts)) {
       stop('Supplied contrast greater than number of contrasts')	
@@ -792,7 +792,8 @@ dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod,
                       factor="", bXY=FALSE, dotSize=.33, bSignificant=TRUE, bSmooth=TRUE, ...)
    
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
+   
    res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval, fold=fold,
                       facname=factor, bNormalized=bNormalized, cex=dotSize, 
                       bSignificant = bSignificant, bSmooth=bSmooth,  ...)
@@ -832,7 +833,7 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, mai
                         bDB=TRUE, bNotDB, bAll=TRUE, bGain=FALSE, bLoss=FALSE,
                         labelAttributes, bReturnPeaksets=FALSE, DataType=DBA$config$DataType)
 {
-   DBA = pv.check(DBA)
+   DBA = pv.check(DBA,TRUE)
    
    newDBA = NULL
    
