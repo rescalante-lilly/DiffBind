@@ -2,12 +2,15 @@
 #include <sstream>
 #include "interval.h"
 
+#define MAX_MAPQUAL 255
+
 bode::Interval::Interval(std::string const &chr,int l,int r) {
   _chrom = chr;
   _left = l;
   _right = r;
   _mapped = true;
   _strand = 1;
+  _mapqual = MAX_MAPQUAL;
 }
 
 bode::Interval::Interval(std::string const &chr,int l,int r,int s) {
@@ -16,6 +19,16 @@ bode::Interval::Interval(std::string const &chr,int l,int r,int s) {
   _right = r;
   _mapped = true;
   _strand = s;
+  _mapqual = MAX_MAPQUAL;
+}
+
+bode::Interval::Interval(std::string const &chr,int l,int r,int s,int m) {
+  _chrom = chr;
+  _left = l;
+  _right = r;
+  _mapped = true;
+  _strand = s;
+  _mapqual = m;
 }
 
 bode::Interval::Interval(Interval const &i) {
@@ -24,6 +37,7 @@ bode::Interval::Interval(Interval const &i) {
   _right = i._right;
   _mapped = i._mapped;
   _strand = i._strand;
+  _mapqual = i._mapqual;
 }
 
 bode::Interval &bode::Interval::operator=(Interval const &i) {
@@ -33,6 +47,7 @@ bode::Interval &bode::Interval::operator=(Interval const &i) {
     _right = i._right;
     _mapped = i._mapped;
     _strand = i._strand;
+    _mapqual = i._mapqual;
   }
   return *this;
 }
@@ -56,6 +71,7 @@ void bode::Interval::updatecstr(const char *c_str,int l,int r) {
   _left = l;
   _right = r;
   _mapped = true;
+  _mapqual = MAX_MAPQUAL;
 }
 
 void bode::Interval::update(std::string const &chr,int l,int r) {
@@ -63,6 +79,7 @@ void bode::Interval::update(std::string const &chr,int l,int r) {
   _left = l;
   _right = r;
   _mapped = true;
+  _mapqual = MAX_MAPQUAL;
 }
 
 void bode::Interval::update(std::string const &chr,int l,int r,int s) {
@@ -71,6 +88,15 @@ void bode::Interval::update(std::string const &chr,int l,int r,int s) {
   _right = r;
   _mapped = true;
   _strand = s;
+}
+
+void bode::Interval::update(std::string const &chr,int l,int r,int s,int m) {
+  _chrom = chr;
+  _left = l;
+  _right = r;
+  _mapped = true;
+  _strand = s;
+  _mapqual = m;
 }
 
 std::string bode::Interval::format(void) const {

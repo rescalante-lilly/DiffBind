@@ -70,12 +70,6 @@ void bode::IntervalDensity::summit(int &position,unsigned int &height) {
   }
   position = (maxposf + maxposr) / 2;
   height = maxheightf;
-//  if (maxheightf != maxheightr) {
-//    throw std::logic_error("maxheight mismatch in summit");
-//  }
-//  if (reads > 0 && height == 0) {
-//    throw std::logic_error("inconsistency in summit");
-//  }
 }
 
 int bode::IntervalDensity::nreads(void) {

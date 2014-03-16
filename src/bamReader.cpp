@@ -51,7 +51,7 @@ void bode::BamReader::close(void) {
 }
 
 bode::Interval *bode::BamReader::next(void) {
-  int samrv,left,right,strand;
+  int samrv,left,right,strand,mapq;
   std::string chrom;
   Interval *rv = NULL;
 
@@ -64,7 +64,8 @@ bode::Interval *bode::BamReader::next(void) {
       right = bam_calend(&(_seq->core),bam1_cigar(_seq));
       chrom = _fd->header->target_name[_seq->core.tid];
       strand = bam1_strand(_seq) == 0 ? 1 : -1;
-      _bseq->update(chrom,left,right,strand);
+      mapq = _seq->core.qual;
+      _bseq->update(chrom,left,right,strand,mapq);
     }
     rv = _bseq;
   } else {

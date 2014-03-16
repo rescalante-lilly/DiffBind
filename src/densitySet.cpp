@@ -85,7 +85,6 @@ void bode::DensitySet::add(std::string &chrom,int left,int right) {
   top = vii.size();
 
   i = bsearch(vii,left,right);
-//  i = lsearch(vii,left,right);
   while (i != -1 && i < top && olap(vii[i],left,right)) {
     intervals[vii[i].index].dmap->set(left - vii[i].left,right - vii[i].left);
     i++;

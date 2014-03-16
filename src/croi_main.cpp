@@ -10,7 +10,8 @@
 extern "C" {
 
 SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
-                      SEXP bufferSize_r,SEXP chrom_r,SEXP left_r,SEXP right_r,
+                      SEXP bufferSize_r,SEXP minMapQual_r,SEXP chrom_r,
+                      SEXP left_r,SEXP right_r,
                       SEXP intervalCount_r,SEXP withoutDupes_r,
                       SEXP wantSummits_r,SEXP counts_r,SEXP summits_r,
                       SEXP heights_r) {
@@ -19,7 +20,7 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
     const char *filename;
     const char *chrom;
     int insertLength, filetype, bufferSize, intervalCount, withoutDupes;
-    int withSummits;
+    int withSummits,minMapQual;
     int *left,*right,*counts,*summits,*heights;
     int i,readCount,loadedReadCount;
     SEXP rv;
@@ -33,6 +34,7 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
     insertLength = INTEGER(insertLength_r)[0];
     filetype = INTEGER(filetype_r)[0];
     bufferSize = INTEGER(bufferSize_r)[0];
+    minMapQual = INTEGER(minMapQual_r)[0];
     intervalCount = INTEGER(intervalCount_r)[0];
     withoutDupes = LOGICAL(withoutDupes_r)[0];
     withSummits = LOGICAL(wantSummits_r)[0];
@@ -60,7 +62,7 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
       delete[] cnames;
     }
       
-    loadedReadCount = tree.load(bufferSize,ng,intervals,densities);
+    loadedReadCount = tree.load(bufferSize,ng,intervals,densities,minMapQual);
     readCount = loadedReadCount;
     for (i=0;i<intervalCount;i++) {
       chrom = CHAR(STRING_ELT(chrom_r,i));
@@ -70,7 +72,7 @@ SEXP croi_count_reads(SEXP filename_r,SEXP insertLength_r,SEXP filetype_r,
 
     while (loadedReadCount == bufferSize) {
       tree.clearCounts();
-      loadedReadCount = tree.load(bufferSize,ng,intervals,densities);
+      loadedReadCount = tree.load(bufferSize,ng,intervals,densities,minMapQual);
       readCount += loadedReadCount;
       for (i=0;i<intervalCount;i++) {
         chrom = CHAR(STRING_ELT(chrom_r,i));

@@ -825,7 +825,7 @@ pv.dovectors = function(allpeaks,classes,bKeepAll=F,maxgap=0,useExternal=TRUE,us
    allpeaks_copy$START <- as.integer(allpeaks_copy$START)
    allpeaks_copy$END <- as.integer(allpeaks_copy$END)
    maxGap_copy <- as.integer(maxgap)
-   result <- .Call("mo_mergeOne",allpeaks_copy,bKeepAll,maxGap_copy)
+   result <- cpp_mergeOne(allpeaks_copy,bKeepAll,maxGap_copy)
    
    colnames(result)[1:3] = c("CHR","START","END")
    if(ncol(result)>3) {

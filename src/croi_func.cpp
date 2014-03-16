@@ -32,13 +32,18 @@ int Croi::getReadLength(const char *filename,int ftype) {
 void Croi::open(const char *filename,int insertLength,int ftype) {
   rdr = bode::Reader::open(filename,ftype);
   iLength = std::max(insertLength,getReadLength(filename,ftype));
+  fileType = ftype;
 }
 
 int Croi::getIlength(void) {
   return iLength;
 }
 
-int Croi::load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::DensitySet *densities) {
+int Croi::load(int maxReads,
+               bode::NodeGroup *ng,
+               IBucket *intervals,
+               bode::DensitySet *densities,
+               int minMapQual) {
   int read_count;
   bode::Interval *read_iv;
   std::string x(128,' ');
@@ -46,6 +51,9 @@ int Croi::load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::Density
   read_count = 0;
   while (read_count < maxReads && (read_iv = rdr->next())) {
     if (read_iv->isMapped()) {
+      if (read_iv->mapQual() < minMapQual) {
+        continue;
+      }
       if (iLength > 0) {
         read_iv->extend(iLength);
       }

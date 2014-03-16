@@ -13,7 +13,7 @@ class Croi {
     Croi(void);
     ~Croi(void);
     void open(const char *filename,int insertLength,int filetype);
-    int load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::DensitySet *densities);
+    int load(int maxReads,bode::NodeGroup *ng,IBucket *intervals,bode::DensitySet *densities,int minMapQual);
     void close(void);
     int count(const char *chrom,int left,int right,int withoutDupes);
     int size(void);
@@ -24,6 +24,7 @@ class Croi {
     bode::Interval *iv;
     bode::Reader *rdr;
     int iLength;
+    int fileType;
     int getReadLength(const char *filename,int ftype);
 };
 

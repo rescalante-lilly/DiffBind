@@ -634,50 +634,11 @@ pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
       return(res)
    }
    
-   #   fdebug("Starting croi_load_reads...")
-   #   bamtree <- .Call("croi_load_reads",as.character(bamfile),as.integer(insertLength),as.integer(fileType))
-   #   fdebug("Loaded...")
-   #   libsize.croi <- .Call("croi_tree_size",bamtree)
    fdebug("Starting croi_count_reads...")
-   icount <- length(intervals[[1]])
-   counts.croi <- vector(mode="integer",length=icount)
-   if (!missing(summits)) {
-      summits.croi <- vector(mode="integer",length=icount)
-      heights.croi <- vector(mode="integer",length=icount)
-      bSummits = TRUE
-   } else {
-      summits.croi <- vector()
-      heights.croi <- vector()
-      bSummits = FALSE
-   }
-   libsize.croi <- .Call("croi_count_reads",bamfile,
-                         as.integer(insertLength),
-                         as.integer(fileType),
-                         as.integer(bufferSize),
-                         as.character(intervals[[1]]),
-                         as.integer(intervals[[2]]),
-                         as.integer(intervals[[3]]),
-                         as.integer(icount),
-                         as.logical(bWithoutDupes),
-                         as.logical(bSummits),
-                         counts.croi,
-                         summits.croi,
-                         heights.croi)
+   result <- cpp_count_reads(bamfile,insertLength,fileType,bufferSize,
+                             intervals,bWithoutDupes,summits)
    fdebug("Done croi_count_reads...")
-   counts.croi[counts.croi==0]=1
-   fdebug(sprintf("Counted %d reads...",libsize.croi))
-   
-   counts = counts.croi
-   libsize = libsize.croi
-   
-   widths = intervals[,3] - intervals[,2]
-   rpkm = (counts/(widths/1000))/(libsize/1E6)
-   
-   result <- list(counts=counts,rpkm=rpkm,libsize=libsize)
-   if (bSummits==T) {
-      result$summits <- summits.croi;
-      result$heights <- heights.croi;
-   }
+   fdebug(sprintf("Counted %d reads...",result$libsize))
    return(result)
 }
 
