@@ -390,7 +390,7 @@ DBA_READS_BED     = PV_READS_BED
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
                      fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+                     minMappingQuality=0, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
                      bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
                      bParallel=DBA$config$RunParallel) 
 {
@@ -432,7 +432,8 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                                   defaultScore=score, bLog=bLog, insertLength=fragmentSize, bOnlyCounts=T,
                                   bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
-                                  bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=0)
+                                  bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=0,
+                                  minMappingQuality=minMappingQuality)
                   res$summits = summits
                } else {
                   stop('Error: summits=0')
@@ -459,7 +460,8 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                       defaultScore=score, bLog=bLog, insertLength=fragmentSize, bOnlyCounts=T,
                       bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                       bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
-                      bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=summits)
+                      bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=summits,
+                      minMappingQuality=minMappingQuality)
       if(!missing(summits)) {
          res$summits = summits
       }
@@ -640,6 +642,8 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
       DBA = dba.count(DBA,peaks=NULL,score=score)	
    }
    
+   mask = pv.setMask(DBA,mask)
+   
    if(!missing(contrast)) {
       if(!missing(report)) {
          report = pv.DataType2Peaks(report)
@@ -718,6 +722,8 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    
 {
    DBA = pv.check(DBA,TRUE)
+   
+   mask = pv.setMask(DBA,mask)
    
    if(missing(contrast) && !missing(score)) {
       DBA = dba.count(DBA,peaks=NULL,score=score)	

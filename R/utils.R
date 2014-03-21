@@ -46,6 +46,11 @@ pv.peaks2DataType = function(peaks,datatype=DBA_DATA_DEFAULT) {
 }
 
 pv.DataType2Peaks = function(RDpeaks){
+   
+   if(is.null(RDpeaks)) {
+      return(NULL)
+   }
+   
    if(class(RDpeaks)=='logical') {
       return(RDpeaks)
    }
@@ -968,5 +973,27 @@ pv.checkValue = function(val,check) {
    return(TRUE)
 }
 
+pv.setMask = function(pv,mask) {
+   if(missing(mask)) {
+      mask = rep(T,length(pv$peaks))
+   } else if(is.null(mask)) {
+      mask = rep(T,length(pv$peaks))   
+   } else {
+      if(!is.logical(mask)) {
+         tmp  = rep(F,length(pv$peaks))
+         tmp[mask] = T
+         mask = tmp
+      }
+   }
+   if(length(mask) != length(pv$peaks)) {
+      stop('Mask does not match samples.')
+   }
+   for(pnum in 1:length(pv$peaks)) {
+      if(nrow(pv$peaks[[pnum]])==0) {
+         mask[pnum]=F
+      }
+   }
+   return(mask)
+}
 
 

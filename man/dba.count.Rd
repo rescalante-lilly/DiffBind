@@ -12,7 +12,7 @@ respectively.
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
           fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+          minMappingQuality=0, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
           bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
           bParallel=DBA$config$RunParallel) 
 }
@@ -79,6 +79,10 @@ The built-in counting code may not correctly handle certain cases when the \code
 }
 \item{bScaleControl}{
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
+}
+
+\item{minMappingQuality}{
+for filtering by mapping quality (mapqc). Only alignments with mappig scores of at least this value will be included. Only applicable for bam files when \code{bUseSummarizeOverlaps=FALSE} (setting \code{DBA$config$scanbamparam} appropriately to filter on quality scores when using \code{\link{summarizeOverlaps}}.)
 }
 
 \item{filterFun}{

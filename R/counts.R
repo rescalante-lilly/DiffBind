@@ -271,7 +271,7 @@ PV_READS_BED       = 1
 pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=T,insertLength=0,
                      bOnlyCounts=T,bCalledMasks=T,minMaxval,filterFun=max,
                      bParallel=F,bUseLast=F,bWithoutDupes=F, bScaleControl=F, bSignal2Noise=T,
-                     bLowMem=F, readFormat=PV_READS_DEFAULT, summits) {
+                     bLowMem=F, readFormat=PV_READS_DEFAULT, summits, minMappingQuality=0) {
    
    pv = pv.check(pv)
    
@@ -404,13 +404,15 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          params  = dba.parallel.params(pv$config,c("pv.do_getCounts","pv.getCounts","pv.bamReads","pv.BAMstats","fdebug",addfuns))            
          results = dba.parallel.lapply(pv$config,params,todorecs,
                                        pv.do_getCounts,bed,bWithoutDupes=bWithoutDupes,
-                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits,fragments)
+                                       bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,
+                                       summits,fragments,minMappingQuality)
       } else {
          results = NULL
          for(job in todorecs) {
             message('Sample: ',job)
             results = pv.listadd(results,pv.do_getCounts(job,bed,bWithoutDupes=bWithoutDupes,
-                                                         bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,summits,fragments))
+                                                         bLowMem,yieldSize,mode,singleEnd,scanbamparam,readFormat,
+                                                         summits,fragments,minMappingQuality))
          }	
       }
       if(PV_DEBUG){
@@ -451,7 +453,9 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
          if(length(cond$counts)==0){
             warning('ERROR IN PROCESSING ',todo[jnum])
          }
-         
+         if(length(cond$libsize)==0){
+            warning('ERROR IN PROCESSING ',todo[jnum])
+         }         
          if(!is.na(pv$class[PV_BAMCONTROL,chipnum])) {
             cnum = which(todo %in% pv$class[PV_BAMCONTROL,chipnum])
             cont = results[[cnum]]
@@ -459,12 +463,14 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
                warning('ERROR IN PROCESSING ',todo[cnum])
             }
             if(bScaleControl==TRUE) {
-               scale = cond$libsize / cont$libsize
-               if(scale > 1) scale = 1
-               if(scale != 0) {
-                  cont$counts = ceiling(cont$counts * scale)
-               }	
-            }   	        
+               if(cond$libsize>0) {
+                  scale = cond$libsize / cont$libsize
+                  if(scale > 1) scale = 1
+                  if(scale != 0) {
+                     cont$counts = ceiling(cont$counts * scale)
+                  }	
+               }   	        
+            }
          } else {
             cont = NULL
             cont$counts = rep(1,length(cond$counts))	
@@ -613,30 +619,35 @@ pv.checkExists = function(filelist){
 
 pv.do_getCounts = function(countrec,intervals,bWithoutDupes=F,
                            bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
-                           fileType=0,summits,fragments) {
+                           fileType=0,summits,fragments,minMappingQuality=0) {
    res = pv.getCounts(bamfile=countrec$bamfile,intervals=intervals,insertLength=countrec$insert,
                       bWithoutDupes=bWithoutDupes,
                       bLowMem=bLowMem,yieldSize=yieldSize,mode=mode,singleEnd=singleEnd,
                       scanbamparam=scanbamparam,
-                      fileType=fileType,summits=summits,fragments=fragments)
+                      fileType=fileType,summits=summits,fragments=fragments,
+                      minMappingQuality=minMappingQuality)
    return(res)
    
 }
 pv.getCounts = function(bamfile,intervals,insertLength=0,bWithoutDupes=F,
                         bLowMem=F,yieldSize,mode,singleEnd,scanbamparam,
-                        fileType=0,summits,fragments) {
+                        fileType=0,summits,fragments,minMappingQuality=0) {
    
    bufferSize = 1e6
    fdebug(sprintf('pv.getCounts: ENTER %s',bamfile))
    
    if(bLowMem) {
-      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize,singleEnd,fragments,scanbamparam)
+      if(minMappingQuality>0) {
+         warning('minMappingQuality ignored for summarizeOverlaps, set in ScanBamParam.')
+      }
+      res = pv.getCountsLowMem(bamfile,intervals,bWithoutDupes,mode,yieldSize,singleEnd,fragments,
+                               scanbamparam)
       return(res)
    }
    
    fdebug("Starting croi_count_reads...")
    result <- cpp_count_reads(bamfile,insertLength,fileType,bufferSize,
-                             intervals,bWithoutDupes,summits)
+                             intervals,bWithoutDupes,summits,minMappingQuality)
    fdebug("Done croi_count_reads...")
    fdebug(sprintf("Counted %d reads...",result$libsize))
    return(result)

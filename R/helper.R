@@ -1066,6 +1066,14 @@ pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
    if(is.null(sites)) sites = 1:numSites
    
    if(missing(mask)) mask = rep(T,ncol(pv$class))
+   for(i in which(mask)) {
+      if(nrow(pv$peaks[[i]])==0) {
+         mask[i]=F
+      }
+   }
+   if(sum(mask)<2) {
+      stop('Need at least two samples for PCA.')
+   }
    
    res = NULL   
    res$class = pv$class
