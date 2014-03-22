@@ -9,7 +9,7 @@ Sets up contrasts for differential binding affinity analysis
 }
 \usage{
 dba.contrast(DBA, group1, group2=!group1, name1="group1", name2="group2",
-             minMembers=3, block ,
+             minMembers=3, block,
              categories = c(DBA_TISSUE,DBA_FACTOR,DBA_CONDITION,DBA_TREATMENT))
 
 }

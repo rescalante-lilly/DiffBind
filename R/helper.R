@@ -71,6 +71,16 @@ pv.check = function(pv,bCheckEmpty=F) {
       rownames(pv$class)[PV_TREATMENT]='Treatment'	
    }
    
+   pv$config = as.list(pv$config)
+   
+   if (is.null(pv$config$mapQCth)) {
+      pv$config$mapQCth=15   
+   }
+   
+   if (is.null(pv$config$fragmentSize)) {
+      pv$config$fragmentSize=125
+   }   
+   
    return(pv)
 }
 
@@ -118,7 +128,9 @@ pv.version = function(pv,v1,v2,v3){
 
 checkQCobj = function(resQC,res) {
    ## add better checks that objects are in sync
-   sampnames = c(unique(res$class[PV_ID,]),unique(res$class[PV_CONTROL,]))
+   sampnames = unique(c(unique(res$class[PV_ID,]),unique(res$class[PV_CONTROL,])))
+   sampnames = sampnames[!is.na(sampnames)]
+   sampnames = sampnames[sampnames!=""]
    if (sum(sampnames %in% names(resQC@Samples))==length(sampnames)) {
       if(length(sampnames) == length(names(resQC@Samples))) {
          resQC@DBA = res
@@ -217,6 +229,12 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
                   if (score == PV_SCORE_SUMMIT_ADJ) {
                      pv$allvectors[,colnum] = pv$allvectors[,colnum] * pv.normFactors(pv)[i]   
                   }
+               }
+            } else if(score == PV_SCORE_SUMMIT_POS) {
+               if(is.null(pv$peaks[[i]]$Summits)) {
+                  warning('DBA_SCORE_SUMMIT_POS not available; re-run dba.count with summits=0')   
+               } else {
+                  pv$allvectors[,colnum] = pv$peaks[[i]]$Summits
                }
             }
             pv$peaks[[i]]$Score = pv$allvectors[,colnum]

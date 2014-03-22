@@ -30,10 +30,10 @@ pv.model = function(model,mask,minOverlap=2,
             attributes = model$attributes
          }
       }
-      config = model$config
+      config = as.list(model$config)
       model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                          bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes)
-      model$config = config
+      model$config = as.list(config)
       model$ChIPQCobj = ChIPQCobj
       return(model)
    }
@@ -95,6 +95,7 @@ pv.model = function(model,mask,minOverlap=2,
             }
          }
       }
+      config = as.list(config)
    }
    if(is.null(config$parallelPackage)){
       config$parallelPackage=DBA_PARALLEL_MULTICORE
@@ -116,7 +117,7 @@ pv.model = function(model,mask,minOverlap=2,
       }
    }
    
-   model$config = config
+   model$config = as.list(config)
    curcontrol=1
    for(i in 1:nrow(samples)) {
       if(is.null(samples$PeakCaller[i])) {
@@ -218,7 +219,7 @@ pv.model = function(model,mask,minOverlap=2,
    model = pv.vectors(model,mask=mask,minOverlap=minOverlap,
                       bKeepAll=bKeepAll,bAnalysis=bAnalysis,attributes=attributes) 
    
-   
+   model$config = as.list(model$config)
    model$ChIPQCobj = ChIPQCobj
    return(model)
 }
@@ -263,6 +264,7 @@ PV_SCORE_TMM_READS_FULL_CPM       = 12
 PV_SCORE_TMM_READS_EFFECTIVE_CPM  = 13
 PV_SCORE_SUMMIT                   = 101
 PV_SCORE_SUMMIT_ADJ               = 102
+PV_SCORE_SUMMIT_POS               = 103
 
 PV_READS_DEFAULT   = 0
 PV_READS_BAM       = 3

@@ -2,9 +2,17 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.15}{
+ \itemize{
+  \item{Feature: added legends to dba.plotPCA}
+  \item{Feature: added label parameter to dba.plotPCA to lable point in plot}  
+  \item{Feature: added mapQCth and fragmentSize to config, and made config a list}
+  }
+}
+
 \section{version 1.9.14}{
  \itemize{
-  \item{Feature: added minMappingQuality filter to dba.count.}
+  \item{Feature: added mapQCth filter to dba.count.}
   }
 }
 

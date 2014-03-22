@@ -11,9 +11,12 @@ respectively.
 }
 \usage{
 dba.count(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
-          fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE, 
-          minMappingQuality=0, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
-          bUseSummarizeOverlaps=FALSE, readFormat = DBA_READS_DEFAULT, 
+          fragmentSize=DBA$config$fragmentSize, 
+          summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
+          mapQCth=DBA$config$mapQCth, 
+          filterFun=max, 
+          bCorPlot=DBA$config$bCorPlot, 
+          bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
           bParallel=DBA$config$RunParallel) 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -49,6 +52,7 @@ DBA_SCORE_TMM_MINUS_FULL_CPM \tab same as \code{DBA_SCORE_TMM_MINUS_FULL}, but r
 DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM \tab Tsame as \code{DBA_SCORE_TMM_MINUS_EFFECTIVE}, but reporrted in counts-per-million.\cr
 DBA_SCORE_SUMMIT \tab summit height (maximum read pileup value)\cr
 DBA_SCORE_SUMMIT_ADJ \tab summit height (maximum read pileup value), normalized to relative library size\cr
+DBA_SCORE_SUMMIT_POS \tab summit position (location of maximum read pileup)\cr
 }
 }
 \item{bLog}{
@@ -81,7 +85,7 @@ The built-in counting code may not correctly handle certain cases when the \code
 logical indicating if the Control reads should be scaled based on relative library sizes. If TRUE, and there are more reads in the Control library than in the ChIP library, the number of Control reads for each peak will be multiplied by a scaling factor determined by dividing the total number of reads in the ChIP library by the total number of reads in the Control library. If this value is not an integer, the number of Control reads for each peak  will be the next highest integer.
 }
 
-\item{minMappingQuality}{
+\item{mapQCth}{
 for filtering by mapping quality (mapqc). Only alignments with mappig scores of at least this value will be included. Only applicable for bam files when \code{bUseSummarizeOverlaps=FALSE} (setting \code{DBA$config$scanbamparam} appropriately to filter on quality scores when using \code{\link{summarizeOverlaps}}.)
 }
 

@@ -9,9 +9,9 @@ Computes binding overlaps and co-occupancy statistics
 }
 \usage{
 dba.overlap(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
-            contrast, method=DBA$config$AnalysisMethod, 
-            th=DBA$config$th, bUsePval=DBA$config$bUsePval, report,
-            byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
+            contrast, method=DBA$config$AnalysisMethod, th=DBA$config$th, 
+            bUsePval=DBA$config$bUsePval, 
+            report, byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
             DataType=DBA$config$DataType)
 }
 %- maybe also 'usage' for other objects documented here.

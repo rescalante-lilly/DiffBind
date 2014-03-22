@@ -53,6 +53,7 @@ export(dba,
        DBA_SCORE_TMM_READS_EFFECTIVE_CPM,
        DBA_SCORE_SUMMIT,
        DBA_SCORE_SUMMIT_ADJ,       
+       DBA_SCORE_SUMMIT_POS,
        DBA_READS_DEFAULT,
        DBA_READS_BAM,
        DBA_READS_BED, 
@@ -103,3 +104,5 @@ importFrom(utils, read.table, write.csv, write.table)
 importFrom(limma,nonEstimable)
 
 importFrom(GenomicAlignments,summarizeOverlaps)
+
+importFrom(lattice, xyplot)

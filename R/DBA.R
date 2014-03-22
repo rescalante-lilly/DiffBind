@@ -80,8 +80,9 @@ DBA_DATA_DEFAULT                  = DBA_DATA_GRANGES
 
 dba = function(DBA,mask, minOverlap=2,
                sampleSheet="dba_samples.csv", 
-               config=data.frame(RunParallel=TRUE, reportInit="DBA", DataType=DBA_DATA_GRANGES, AnalysisMethod=DBA_EDGER,
-                                 bCorPlot=TRUE,th=.1, bUsePval=FALSE),
+               config=data.frame(RunParallel=TRUE, reportInit="DBA", DataType=DBA_DATA_GRANGES, 
+                                 AnalysisMethod=DBA_EDGER, minQCth=15, fragmentSize=125, 
+                                 bCorPlot=TRUE, th=.1, bUsePval=FALSE),
                peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, filter, skipLines=0, bAddCallerConsensus=FALSE, 
                bRemoveM=TRUE, bRemoveRandom=TRUE, bSummarizedExperiment=FALSE,
                bCorPlot, attributes) 
@@ -383,14 +384,15 @@ DBA_SCORE_TMM_READS_FULL_CPM      = PV_SCORE_TMM_READS_FULL_CPM
 DBA_SCORE_TMM_READS_EFFECTIVE_CPM = PV_SCORE_TMM_READS_EFFECTIVE_CPM
 DBA_SCORE_SUMMIT              = PV_SCORE_SUMMIT
 DBA_SCORE_SUMMIT_ADJ          = PV_SCORE_SUMMIT_ADJ
+DBA_SCORE_SUMMIT_POS          = PV_SCORE_SUMMIT_POS
 
 DBA_READS_DEFAULT = PV_READS_DEFAULT
 DBA_READS_BAM     = PV_READS_BAM
 DBA_READS_BED     = PV_READS_BED
 
 dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, bLog=FALSE,
-                     fragmentSize=125, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
-                     minMappingQuality=0, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
+                     fragmentSize=DBA$config$fragmentSize, summits, filter=0, bRemoveDuplicates=FALSE, bScaleControl=TRUE,
+                     mapQCth=DBA$config$mapQCth, filterFun=max, bCorPlot=DBA$config$bCorPlot, 
                      bUseSummarizeOverlaps=FALSE, readFormat=DBA_READS_DEFAULT,
                      bParallel=DBA$config$RunParallel) 
 {
@@ -433,7 +435,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                                   bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                                   bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
                                   bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=0,
-                                  minMappingQuality=minMappingQuality)
+                                  minMappingQuality=mapQCth)
                   res$summits = summits
                } else {
                   stop('Error: summits=0')
@@ -461,7 +463,7 @@ dba.count = function(DBA, peaks, minOverlap=2, score=DBA_SCORE_TMM_MINUS_FULL, b
                       bCalledMasks=TRUE, minMaxval=filter, bParallel=bParallel, bUseLast=bUseLast,
                       bWithoutDupes=bRemoveDuplicates,bScaleControl=bScaleControl,filterFun=filterFun,
                       bLowMem=bUseSummarizeOverlaps,readFormat=readFormat,summits=summits,
-                      minMappingQuality=minMappingQuality)
+                      minMappingQuality=mapQCth)
       if(!missing(summits)) {
          res$summits = summits
       }
@@ -717,7 +719,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 dba.plotPCA = function(DBA, attributes, minval, maxval,
                        contrast, method=DBA$config$AnalysisMethod, 
                        th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
-                       report, score, mask, sites, cor=FALSE,
+                       report, score, mask, sites, label, cor=FALSE,
                        b3D=FALSE, vColors, dotSize, ...)
    
 {
@@ -730,6 +732,10 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
    } else if (!missing(score)) {
       warning('score parameter ignored when contrast is specified')	
    }  
+   
+   if(missing(label)) {
+      label=NULL
+   }
    
    if(!missing(contrast)){
       if(missing(attributes)) {
@@ -747,14 +753,15 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
       if(attributes[1] == PV_GROUP) {
          attributes = PV_ID
       }
-      res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,b3D=b3D,vColors=vColors,...)
+      res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,
+                       b3D=b3D,vColors=vColors,label=label,...)
    } else {
       if(missing(attributes)) {
          attributes = pv.attributePCA(DBA)
       }
       
       res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, 
-                       sites=sites, b3D=b3D, vColors=vColors, ...)  
+                       sites=sites, b3D=b3D, vColors=vColors, label=label, ...)  
    }
    
    return(res)	
@@ -1177,6 +1184,16 @@ dba.load = function(file='DBA', dir='.', pre='dba_', ext='RData')
    res$config$lapplyFun    = NULL
    res$config$wait4jobsFun = NULL
    res$config$parallelInit = NULL
+   
+   res$config = as.list(res$config)
+   
+   if (is.null(res$config$mapQCth)) {
+      res$config$mapQCth=15   
+   }
+   
+   if (is.null(res$config$fragmentSize)) {
+      res$config$fragmentSize=125
+   }   
    
    res = pv.version(res,DBA_VERSION1,DBA_VERSION2, DBA_VERSION3)
    

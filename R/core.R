@@ -405,6 +405,7 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
    pv$hc = NULL
    pv$pc = NULL
    pv$masks = pv.mask(pv)
+   pv$config = as.list(pv$config)
    return(pv)   	
 }
 
@@ -821,7 +822,7 @@ pv.plotClust = function(pv,mask,numSites,sites,attributes=pv$attributes,distMeth
 
 ## pv.plotPCA -- 3D plot of PCA
 pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
-                      numSites,sites,cor=F,startComp=1,b3D=T,vColors,...){
+                      numSites,sites,cor=F,startComp=1,b3D=T,vColors,label=NULL,...){
    
    pv = pv.check(pv)
    
@@ -884,20 +885,20 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    if(!missing(second)){
       if(!missing(third)) {
          if(!missing(fourth)) {
-            classvec = sprintf("%s:%s:%s:%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
-            thetitle = sprintf("PCA: %s:%s:%s:%s",pv.attname(class,pv),
+            classvec = sprintf("%s+%s+%s+%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
+            thetitle = sprintf("PCA: %s+%s+%s+%s",pv.attname(class,pv),
                                pv.attname(second,pv),
                                pv.attname(third,pv),
                                pv.attname(fourth,pv),pvar)
          } else {
-            classvec = sprintf("%s:%s:%s",classes[class,],classes[second,],classes[third,])      
-            thetitle = sprintf("PCA: %s:%s:%s",pv.attname(class,pv),
+            classvec = sprintf("%s+%s+%s",classes[class,],classes[second,],classes[third,])      
+            thetitle = sprintf("PCA: %s+%s+%s",pv.attname(class,pv),
                                pv.attname(second,pv),
                                pv.attname(third,pv),pvar)
          }
       } else {
-         classvec = sprintf("%s:%s",classes[class,],classes[second,])      
-         thetitle = sprintf("PCA: %s:%s",pv.attname(class,pv),
+         classvec = sprintf("%s+%s",classes[class,],classes[second,])      
+         thetitle = sprintf("PCA: %s+%s",pv.attname(class,pv),
                             pv.attname(second,pv),pvar)
       }
    } else {
@@ -905,13 +906,17 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
       thetitle = sprintf("PCA: %s",pv.attname(class,pv),pvar)
    }
    
+   if(!is.null(label)) {
+      addlabels = classes[label,]
+   } else addlabels = NULL
+   
    numsamps = ncol(classes)
    if(numsamps <=10) {
-      sval = 1.5
+      sval = 2.25
    } else if (numsamps <= 25) {
-      sval = 1.25
+      sval = 1.75
    } else {
-      sval = 1
+      sval = 1.5
    }   
    if(!missing(size)){
       if(!is.null(size)) {
@@ -933,29 +938,54 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
                      aspect=c(1,1,1),main=thetitle,...)
       } else {
          warning("Package rgl not installed")
-         plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
-              xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
-              ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
-              main = thetitle,...)
+         #          plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
+         #               xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+         #               ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
+         #               main = thetitle,...)
+         p = pv.doPCAplot(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels,...)
       }
    } else {
       if(!missing(size)) {
          #sval = sval + .5
       }
-      plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
-           xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
-           ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
-           main = thetitle,...)
+      #       plot(pc$loadings[,startComp:(startComp+1)],col=pv.colorv(classvec,vColors),type='p',pch=19,cex=sval,
+      #            xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+      #            ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
+      #            main = thetitle,...)
+      p = pv.doPCAplot(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels,...)
    }      
    uclass = unique(classvec)
    res = matrix(vColors[1:length(uclass)],length(uclass),1)
    rownames(res) = uclass
    colnames(res) = "Legend"
-   return(res)
+   return(p)
    #return(cbind(uclass,vColors[1:length(uclass)])) 
 }
 
-
+pv.doPCAplot = function(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels=NULL,...) {
+   p = xyplot(Comp.2 ~ Comp.1, 
+              groups=classvec,
+              data=as.data.frame(pc$loadings[,startComp:(startComp+1)]),
+              pch=16, cex=sval,aspect=1,
+              col=unique(pv.colorv(classvec,vColors)),           
+              xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
+              ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
+              main = thetitle, 
+              key = list(
+                 space="right",
+                 rect = list(col = unique(pv.colorv(classvec,vColors))[1:length(unique(classvec))]),
+                 text = list(unique(classvec)),
+                 rep = FALSE),
+              ...)
+   
+   if(!is.null(addlabels)) {
+      p = update(p, panel = function(x, y, ...) {
+         lattice::panel.xyplot(x, y, ...);
+         lattice::ltext(x=x, y=y, labels=as.character(addlabels), pos=1, offset=1, cex=0.8)
+      })
+   }
+   print(p)
+}
 
 ## pv.plotHeatmap -- draw a heatmap using a subset of binding sites
 PV_ONLYA = 3

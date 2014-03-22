@@ -9,16 +9,16 @@ Constructs a new DBA object from a sample sheet,  or based on an existing DBA ob
 }
 \usage{
 dba(DBA,mask, minOverlap=2,
-            sampleSheet="dba_samples.csv", 
-            config=data.frame(RunParallel=TRUE, reportInit="DBA", 
-            DataType=DBA_DATA_GRANGES, AnalysisMethod=DBA_EDGER,
-            bCorPlot=TRUE, th=.1, bUsePval=FALSE),
-            peakCaller="raw", peakFormat, scoreCol, 
-            bLowerScoreBetter, filter, skipLines=0, 
-            bAddCallerConsensus=FALSE, 
-            bRemoveM=TRUE, bRemoveRandom=TRUE, 
-            bSummarizedExperiment=FALSE,
-            bCorPlot, attributes) 
+    sampleSheet="dba_samples.csv", 
+    config=data.frame(RunParallel=TRUE, reportInit="DBA", DataType=DBA_DATA_GRANGES, 
+                      AnalysisMethod=DBA_EDGER, minQCth=15, fragmentSize=125, 
+                      bCorPlot=TRUE, th=.1, bUsePval=FALSE),
+    peakCaller="raw", peakFormat, scoreCol, bLowerScoreBetter, 
+    filter, skipLines=0, 
+    bAddCallerConsensus=FALSE, 
+    bRemoveM=TRUE, bRemoveRandom=TRUE, 
+    bSummarizedExperiment=FALSE,
+    bCorPlot, attributes)  
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -74,7 +74,9 @@ data frame containing configuration options, or file name of config file to load
 \item {bCorPlot:} {logical indicating that a correlation heatmap should be plotted automatically}
 \item {th:}   {default threshold for reporting and plotting analysis results.}
 \item {bUsePval:}   {logical, default indicating whether to use FDR (\code{FALSE}) or p-values (\code{TRUE}).}
-
+\item {minQCth:}   {numeric, for filtering reads based on mapping quality score; only reads with a mapping qulity score
+gretaer than or equal to this will be counted.}
+\item {fragmentSize:} {numeric with mean fragment size. Reads will be extended to this length before counting overlaps. May be a vector of legnths, one for each sample.}
 }
 }
   \item{peakCaller}{

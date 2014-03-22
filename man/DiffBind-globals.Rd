@@ -33,6 +33,7 @@
 \alias{DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM}
 \alias{DBA_SCORE_SUMMIT}
 \alias{DBA_SCORE_SUMMIT_ADJ}
+\alias{DBA_SCORE_SUMMIT_POS}
 \alias{DBA_READS_DEFAULT}
 \alias{DBA_READS_BAM}
 \alias{DBA_READS_BED}
@@ -102,6 +103,7 @@ DBA_SCORE_TMM_MINUS_FULL_CPM
 DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM
 DBA_SCORE_SUMMIT
 DBA_SCORE_SUMMIT_ADJ
+DBA_SCORE_SUMMIT_POS
 
 DBA_READS_DEFAULT
 DBA_READS_BAM
@@ -236,6 +238,9 @@ dba.count score is summit height (highest pile-up).
 }
 \item{DBA_SCORE_SUMMIT_ADJ}{
 dba.count score is summit height (highest pile-up), adjusted for library size.
+}
+\item{DBA_SCORE_SUMMIT_POS}{
+dba.count score is summit location (position of highest pile-up).
 }
 \item{DBA_READS_DEFAULT}{
 When counting read files, use the file extension to determine the file type.
