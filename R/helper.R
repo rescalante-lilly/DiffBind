@@ -1022,11 +1022,18 @@ pv.normalize = function(peaks,pCol,zeroVal=-1,bLog=F,bDensity=F){
    return(res)
 }
 
-pv.colsv = c("black","red","dodgerblue","darkgreen",
-             "cyan","yellow","grey50","purple3",
-             "sienna","limegreen","deeppink","lightblue",
-             "rosybrown1","violet","seagreen1","slategrey",
-             "lavender","orange","lightgrey","olivedrab")
+crukMagenta=rgb(236,0,140,maxColorValue=255) #CRUK Magenta
+crukBlue=rgb(46,0,139,maxColorValue=255) #CRUK Blue
+crukGrey=rgb(200,201,199,maxColorValue=255) #CRUK grey
+crukCyan=rgb(0,182,237,maxColorValue=255) #CRUK light blue
+
+pv.colsv = c(crukBlue, crukMagenta, crukCyan,crukGrey,
+             "lightgreen", "orange","rosybrown",
+             "black","red","dodgerblue","darkgreen",
+             "yellow","grey50","purple3",
+             "sienna","limegreen","lightblue",
+             "violet","seagreen1",
+             "lavender","olivedrab")
 
 pv.colorv = function(classes,cols=pv.colsv){
    
