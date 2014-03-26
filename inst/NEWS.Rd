@@ -2,6 +2,15 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.16}{
+ \itemize{
+  \item{Vignette updated to use BiocStyles and dynamically generated Figures.}
+  \item{Plotting colors updated to CRUK colors.}  
+  \item{Data objects updaed to use hg19 alignments/peaks and bam instead of bed.}
+  }
+}
+
+
 \section{version 1.9.15}{
  \itemize{
   \item{Feature: added legends to dba.plotPCA}
