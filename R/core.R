@@ -885,19 +885,19 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
    if(!missing(second)){
       if(!missing(third)) {
          if(!missing(fourth)) {
-            classvec = sprintf("%s+%s+%s+%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
+            classvec = sprintf("%s:%s:%s:%s",classes[class,],classes[second,],classes[third,],classes[fourth,])      
             thetitle = sprintf("PCA: %s+%s+%s+%s",pv.attname(class,pv),
                                pv.attname(second,pv),
                                pv.attname(third,pv),
                                pv.attname(fourth,pv),pvar)
          } else {
-            classvec = sprintf("%s+%s+%s",classes[class,],classes[second,],classes[third,])      
+            classvec = sprintf("%s:%s:%s",classes[class,],classes[second,],classes[third,])      
             thetitle = sprintf("PCA: %s+%s+%s",pv.attname(class,pv),
                                pv.attname(second,pv),
                                pv.attname(third,pv),pvar)
          }
       } else {
-         classvec = sprintf("%s+%s",classes[class,],classes[second,])      
+         classvec = sprintf("%s:%s",classes[class,],classes[second,])      
          thetitle = sprintf("PCA: %s+%s",pv.attname(class,pv),
                             pv.attname(second,pv),pvar)
       }
@@ -964,10 +964,10 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
 
 pv.doPCAplot = function(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels=NULL,...) {
    p = xyplot(Comp.2 ~ Comp.1, 
-              groups=classvec,
+              #groups=classvec,
               data=as.data.frame(pc$loadings[,startComp:(startComp+1)]),
               pch=16, cex=sval,aspect=1,
-              col=unique(pv.colorv(classvec,vColors)),           
+              col=pv.colorv(classvec,vColors),           
               xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
               ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
               main = thetitle, 

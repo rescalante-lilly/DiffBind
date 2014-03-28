@@ -3,15 +3,22 @@
 DBA_PARALLEL_MULTICORE = 1
 DBA_PARALLEL_RLSF      = 2
 DBA_PARALLEL_LSFR      = 3
+DBA_PARALLEL_BIOC      = 4
 
 ### INITIALIZE ###
 dba.parallel = function(DBA) {
 
-   if(DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
-      DBA$config =  dba.multicore.init(DBA$config)
-      DBA$config$parallelInit = TRUE
-      return(DBA)
-   }
+    if(DBA$config$parallelPackage==DBA_PARALLEL_MULTICORE) {
+        DBA$config =  dba.multicore.init(DBA$config)
+        DBA$config$parallelInit = TRUE
+        return(DBA)
+    }
+    
+    if(DBA$config$parallelPackage==DBA_PARALLEL_BIOC) {
+        DBA$config =  dba.biocparallel.init(DBA$config)
+        DBA$config$parallelInit = TRUE
+        return(DBA)
+    }
    
    if(DBA$config$parallelPackage==DBA_PARALLEL_RLSF) {
       DBA$config =  dba.Rlsf.init(DBA$config)
@@ -145,4 +152,59 @@ dba.multicore.addjob = function(config,params,fn,...) {
 dba.multicore.wait4jobs = function(config,joblist) {
    res = mccollect(joblist)
    return(res)
+}
+
+################# BiocParallel INTERFACE #################
+
+### INITIALIZE ###
+
+dba.biocparallel.init = function(config) {
+    
+    noparallel=F
+    if (length(find.package(package="BiocParallel",quiet=T))>0) {
+        library(BiocParallel)
+    } else {
+        noparallel=T
+    }
+    if(noparallel){
+        warning("Parallel execution unavailable: executing serially.")
+        config$RunParallel = FALSE
+        config$parallelPackage = 0
+        return(config)
+    }
+    
+    config$biocparallelInit = T    
+    
+    config$initFun      = dba.biocparallel.init
+    config$paramFun     = dba.biocparallel.params
+    config$addjobFun    = dba.biocparallel.addjob
+    config$lapplyFun    = dba.biocparallel.lapply
+    config$wait4jobsFun = dba.biocparallel.wait4jobs
+    
+    return(config)
+}
+
+### CONFIG ###
+dba.biocparallel.params = function(config,funlist) {
+    return(NULL)
+}
+
+### PARALLEL LAPPLY ###
+dba.biocparallel.lapply = function(config,params,arglist,fn,...){
+    if(!is.null(config$bpparam)) {
+        res = bplapply(arglist,fn,...,BPPARAM=config$bpparam)        
+    } else {
+        res = bplapply(arglist,fn,...)        
+    }
+    return(res)
+}
+
+### ADD JOB ###
+dba.biocparallel.addjob = function(config,params,fn,...) {
+    stop('addjob unimplemented when using BiocParallel.')
+}
+
+### WAIT FOR JOBS TO COMPLETE AND GATHER RESULTS ###
+dba.biocparallel.wait4jobs = function(config,joblist) {
+    stop('wait4jobs unimplemented when using BiocParallel.')
 }

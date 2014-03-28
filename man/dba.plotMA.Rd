@@ -11,7 +11,7 @@ Generates MA and scatter plots of differential binding analysis results.
 dba.plotMA(DBA, contrast=1, method=DBA$config$AnalysisMethod, 
            th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
            fold=0, bNormalized=TRUE,
-           factor="", bXY=FALSE, dotSize=.33, 
+           factor="", bXY=FALSE, dotSize=.45, 
            bSignificant=TRUE, bSmooth=TRUE, ...)
 }
 

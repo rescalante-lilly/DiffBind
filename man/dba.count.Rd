@@ -67,7 +67,7 @@ If set to zero, the read size indicated in the BAM/BED file will be used.
 \item{summits}{
 if present, summit heights (read pileup) and locations will be calculated for each peak. The values can retrieved using \code{\link{dba.peakset}}. The summits can also be used as a read score in the global binding matrix (see \code{score}). 
 
-If the value of \code{summits} is greater than zero, all consensus peaks will be re-centered around a consensus summit, with the value of \code{summits} indicating how many base pairs to include upstream and downstream of the summit (so all consensus peaks will be of the same width, namely \code{2 * summits}). 
+If the value of \code{summits} is \code{TRUE} (or \code{0}), the summits will be calculated but the peaksets will be unaffected.  If the value is greater than zero, all consensus peaks will be re-centered around a consensus summit, with the value of \code{summits} indicating how many base pairs to include upstream and downstream of the summit (so all consensus peaks will be of the same width, namely \code{2 * summits}). 
 
 Note that if \code{summits} is greater than zero, the counting procedure will take twice as long, and \code{bUseSummarizeOverlaps} must be \code{FALSE}.
 }
