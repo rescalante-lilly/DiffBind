@@ -1104,7 +1104,8 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
                ymin  = floor(min(res$Fold))
                ymax  = ceiling(max(res$Fold))
                if(bSmooth | !bSignificant) {
-                  plotfun(res$Conc,res$Fold,pch=20,cex=cex,
+                  plotfun(res$Conc,res$Fold,pch=20,cex=cex,col=crukBlue,
+                          #colramp = colorRampPalette(c("white", crukBlue)),
                           xaxp=c(xmin,xmax,xmax-xmin),xlim=c(xmin,xmax),
                           xlab='log concentration',
                           yaxp=c(ymin,ymax,(ymax-ymin)),ylim=c(ymin,ymax),
@@ -1112,7 +1113,8 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
                           main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
                                        facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)              	
                } else {
-                  plotfun(res$Conc[!idx],res$Fold[!idx],pch=20,cex=cex,
+                  plotfun(res$Conc[!idx],res$Fold[!idx],pch=20,cex=cex, col=crukBlue,
+                          #colramp = colorRampPalette(c("white", crukBlue)),                          
                           xaxp=c(xmin,xmax,xmax-xmin),xlim=c(xmin,xmax),
                           xlab='log concentration',
                           yaxp=c(ymin,ymax,(ymax-ymin)),ylim=c(ymin,ymax),
@@ -1121,7 +1123,7 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
                                        facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)
                }
                if(bSignificant) {
-                  points(res$Conc[idx],res$Fold[idx],pch=20,cex=cex,col=2)
+                  points(res$Conc[idx],res$Fold[idx],pch=20,cex=cex,col=crukMagenta)
                }
                abline(h=0,col='dodgerblue')
             }
@@ -1133,14 +1135,14 @@ pv.DBAplotMA = function(pv,contrast,method='edgeR',bMA=T,bXY=F,th=0.1,bUsePval=F
                xymin = min(xmin,ymin)
                xymin = max(xymin,0)
                xymax = max(xmax,ymax)
-               plotfun(res[!idx,6],res[!idx,5],pch=20,cex=cex,col=1,
+               plotfun(res[!idx,6],res[!idx,5],pch=20,cex=cex,col=crukBlue,
                        xaxp=c(xymin,xymax,xymax-xymin),xlim=c(xymin,xymax),
                        xlab=sprintf('log concentration :%s',conrec$name2),
                        yaxp=c(xymin,xymax,(xymax-xymin)),ylim=c(xymin,xymax),
                        ylab=sprintf('log concentration :%s',conrec$name1),
                        main=sprintf('%s Binding Affinity: %s vs. %s (%s %s < %1.3f)',
                                     facname, conrec$name1,conrec$name2,sum(idx),tstr,th),...)
-               points(res[idx,6],res[idx,5],pch=20,cex=cex,col=2)
+               points(res[idx,6],res[idx,5],pch=20,cex=cex,col=crukMagenta)
                abline(0,1,col='dodgerblue')
             }
          }
@@ -1154,6 +1156,8 @@ pv.normTMM = function(pv,bMinus=TRUE,bFullLib=FALSE,bCPM=FALSE){
       warning('Unable to TMM normalize -- not enough peaksets',call.=FALSE)
       return(pv)	
    }
+   
+   vColors = pv.colsv
    
    g1     = rep(F,length(pv$peaks))
    g1[1]  = T

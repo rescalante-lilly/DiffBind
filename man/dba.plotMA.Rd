@@ -101,8 +101,8 @@ dba.plotMA(tamoxifen)
 
 #XY plots (with raw and normalized data)
 par(mfrow=c(1,2))
-dba.plotMA(tamoxifen,bXY=TRUE,bNormalized=FALSE)
-dba.plotMA(tamoxifen,bXY=TRUE,bNormalized=TRUE)
+dba.plotMA(tamoxifen,bXY=TRUE,bSmooth=FALSE,bNormalized=FALSE)
+dba.plotMA(tamoxifen,bXY=TRUE,bSmooth=FALSE,bNormalized=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1343,7 +1343,7 @@ pv.plotBoxplot = function(DBA, contrast, method = DBA_EDGER, th=0.1, bUsePval=F,
    
    if(missing(vColors)) {
       vColors = pv.colsv
-      vColors = vColors[2:length(vColors)]
+      #vColors = vColors[2:length(vColors)]
    }
    
    if(attribute==DBA_GROUP) {
