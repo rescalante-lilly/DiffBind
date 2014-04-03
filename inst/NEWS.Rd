@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{version 1.9.20}{
+ \itemize{
+  \item{Fix: bug in dba.count when removing duplicates!}
+  }
+}
+
 \section{version 1.9.16}{
  \itemize{
   \item{Vignette updated to use BiocStyles and dynamically generated Figures.}
