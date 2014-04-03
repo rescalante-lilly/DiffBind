@@ -5,6 +5,9 @@
 BitBucket::BitBucket(const int n) {
   size = n;
   bits = new unsigned char[n];
+  for (int i=0;i<n;i++) {
+    bits[i] = 0;
+  }
 }
 
 BitBucket::~BitBucket(void) {
