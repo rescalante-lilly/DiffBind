@@ -2,113 +2,78 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
-\section{version 1.9.20}{
- \itemize{
-  \item{Fix: bug in dba.count when removing duplicates!}
-  }
-}
+\section{Version 1.10.0}{
 
-\section{version 1.9.16}{
- \itemize{
-  \item{Vignette updated to use BiocStyles and dynamically generated Figures.}
-  \item{Plotting colors updated to CRUK colors.}  
-  \item{Data objects updaed to use hg19 alignments/peaks and bam instead of bed.}
-  }
-}
+Changes since last release:
 
-
-\section{version 1.9.15}{
- \itemize{
-  \item{Feature: added legends to dba.plotPCA}
-  \item{Feature: added label parameter to dba.plotPCA to lable point in plot}  
-  \item{Feature: added mapQCth and fragmentSize to config, and made config a list}
-  }
-}
-
-\section{version 1.9.14}{
- \itemize{
-  \item{Feature: added mapQCth filter to dba.count.}
-  }
-}
-
-
-\section{version 1.9.9}{
- \itemize{
-  \item{Feature: added support to pass in "fragments" when using summarizeOverlaps to count.}
-  \item{Fix: bug in dba when samplesheet passed in as data frame.}   
-  \item{Change: now using FRIP (fractions of reads in peaks) instead of SN (signal-to-noise).}
-  }
-}
-
-\section{version 1.9.7}{
- \itemize{
-   \item{New set of features relating to computing peak summits}
-  \itemize{
-     \item{Feature: dba.count computes summit heights and locations for each peak.}
-     \item{Feature: new scores: DBA_SCORE_SUMMIT and DBA_SCORE_SUMMIT_ADJ}
-     \item{Feature: dba.count re-centers consensus peakset on peak summits, with defined width}
-   }
-   \item{Interface changes to dba.count}
-   \itemize{
-     \item{removed parameter bCalledMasks (now always TRUE)}
-     \item{changed insertLength to fragmentSize}
-     \item{fragmentSize default is now 125 bp}
-     \item{fragmentSize can also be a vector with separate values for each library}
-   }
-   \item{Feature: new TMM scores reporting values in CPM}
-   \item{Feature: can config custom names for ID, Tissue, Factor, Condition, Treatment, Caller}
-   \item{Fix: disabled tamoxifen_GEO.R as SRA changed data formats and script no longer works}
-   \item{Fix: shortened length of some very long lines in man pages and examples}
- }
-}
-
-\section{version 1.9.5}{
- \itemize{
-  \item{Fix: bug when generating GRanges overlaps and one peakset is empty.}
-  \item{Fix: need to be dependant on limma because of edgeR call to nonEstimable}
-  \item{Fix: summarizeOverlaps moved to GenomicAlignments package; add dependancy/import}
- }
-}
-
-\section{version 1.9.3}{
- \itemize{
-  \item{Fix: Missing header file introduced in version 1.9.1.}
- }
-}
-
-\section{version 1.9.2}{
 \itemize{
-  \item{Finalize deprecation of bLowMem in dba.count.}
-  \item{add new constants: DBA_ALL_ATTRIBUTES, DBA_ALL_METHODS_BLOCK}
-  \item{add config options th and bUsePval to set default thresholds on a per-DBA object basis.}
-  \item{redo report-based DBA object interface}
-  \itemize{
-    \item{bDown is now bLoss}
-    \item{bUp is now bGain}
-    \item{default values changed}
-    \item{in resulting object, all is now All, down us now Loss, and up is now Gain}
-  }
-  \item{pv.plotVenn changes/improvements}
-  \itemize{
-     \item{labelAttributes parameter added for generaiton of default labels}
-     \item{more checks for consistency of masks}
-     \item{default main and sub titles added}
-     \item{added plotting of DB sites by specifying contrasts and other parameters similar to report-dbased DBA objects in dba.report}
-     \item{added bReturnPeaksets to enable all peaksets in the Venn diagram ot be returned}
-     \item{added DataType to control clas of returned peaskets, including DBA_DATA_DBAOBJECT to retrieve a DBa object made up of DB sites}
-  }
-  \item{prevent dba.plotHeatmap from plotting column vector for attributes where every sample has a different value}
-  \item{warning and errors; fix non-expoerted constants}
- }
+   \item{Counting}
+      \itemize{
+         \item{New: option to compute summits}
+         \item{New: option to center peaks with fixed width around summits}
+         \item{New: scores for summits (height, position) and CPM for TMM values}
+         \item{New: filter reads by mapping quality (mapQCth)}
+         \item{New: support for PE bam data using summarizeOverlaps}
+         \item{Remove: bCalledMask (now always TRUE)}
+         \item{Change: insertLength to fragmentSize}
+         \item{Add: fragmentSize can be a vector with a size for each sample}
+         \item{Change: fragmentSize default is 125 bp}
+      }
+   \item{Plotting}
+      \itemize{
+        \item{Change: colors based on CRUK color scheme}
+        \item{PCA plots}
+           \itemize{
+              \item{New: legend}
+              \item{New: label parameter for adding text labels of points in 2D plot}
+           }
+         \item{Venn diagrams}
+         \itemize{
+            \item{New: plot overlaps of differentially bound sites by specifying contrasts, thresholds etc.}
+            \item{New: able to return overlapping peaksets as GRanges directly}
+            \item{New: able to generate new DBA object consisting of overlapping peaks}
+            \item{New: labelAttributes for controlling default labels}
+            \item{New: default main and sub titles}
+         }
+        \item{Heatmaps}
+         \itemize{
+            \item{Fix: don’t plot column vector for attributes where every sample has a different value}
+         }
+      }
+
+   \item{General}
+   \itemize{
+     \item{New: add attribute value: DBA_ALL_ATTRIBUTES}
+     \item{Change: SN  (signal/noise) to FRIP (fraction of reads in peaks)}
+     \item{Change: “Down” to “Loss” and Up” to “Gain”}
+     \item{Vignette}
+       \itemize{
+          \item{Change: vignette uses BiocStyles and dynamically generated figures}
+           \item{Change: example data based on hg19 instead of hg18}
+           \item{Change: example reads from bam files instead of bed files}
+            \item{New: section on using DiffBind and ChIPQC together}
+     }
+     \item{New configuration defaults options (DBA$config):}
+        \itemize{
+          \item{Metadata name strings: ID, Tissue, Factor, Condition, Treatment, Caller}
+          \item{th: significance threshold}
+          \item{bUsePval}
+          \item{fragmentSize}
+          \item{mapQCth: filter reads by mapping quality}
+          \item{fragments (for summarizeOverlaps)}
+      }
+   }
+   \item{Bugs/Issues}
+   \itemize{
+      \item{Fix: bRemoveDuplicates had some unpredictable behaviour}
+      \item{Fix: chrN_random were being counted against chrN}
+      \item{Disable: tamoxifen_GEO.R doesn’t work after SRA changed format of archived data}
+   }
+}
 }
 
-\section{version 1.9.1}{
- \itemize{
-  \item{Fix: longstanding bug in dba.count that could case reads mapped to chrN_random to be counted aginst intervals on chrN.}
- }
-}
 
-\section{version 1.8.0}{
+\section{Version 1.8.0}{
 
 Changes since last release:
 
