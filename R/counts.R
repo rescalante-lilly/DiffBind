@@ -431,6 +431,8 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
         }
     }
     
+    gc(verbose=FALSE)
+    
     if ((defaultScore >= DBA_SCORE_TMM_MINUS_FULL) || (defaultScore <= DBA_SCORE_TMM_READS_EFFECTIVE_CPM) ) {
         redoScore = defaultScore
         defaultScore = PV_SCORE_READS_MINUS	
@@ -528,7 +530,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
             numAdded = numAdded + 1
         }                  
     }
-    
+    gc(verbose=FALSE)
     if(bOnlyCounts) {
         numpeaks = length(pv$peaks)
         res = pv.vectors(pv,(numpeaks-numAdded+1):numpeaks,minOverlap=1,bAnalysis=F,bAllSame=T)
@@ -580,7 +582,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
     if(bSignal2Noise) {
         res$SN = pv.Signal2Noise(res)
     }
-    
+    gc(verbose=FALSE)
     return(res)	
 }
 
@@ -631,6 +633,7 @@ pv.do_getCounts = function(countrec,intervals,bWithoutDupes=F,
                        scanbamparam=scanbamparam,
                        fileType=fileType,summits=summits,fragments=fragments,
                        minMappingQuality=minMappingQuality)
+    gc(verbose=FALSE)
     return(res)
     
 }

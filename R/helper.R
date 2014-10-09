@@ -1081,7 +1081,7 @@ pv.dval = function(dgram) {
    }
 }
 
-pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
+pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F,bLog=T){
    
    if(missing(numSites)) numSites = nrow(pv$vectors)
    if(is.null(numSites)) numSites = nrow(pv$vectors)  
@@ -1110,6 +1110,11 @@ pv.pcmask = function(pv,numSites, mask, sites,removeComps,cor=F){
    
    if(!missing(removeComps)) {
       pv$values = pv.removeComp(pv$values,numRemove=removeComps)
+   }
+   
+   if(bLog) {
+       pv$values[pv$values<=0]=1
+       pv$values = log2(pv$values)
    }
    
    if(nrow(pv$values) >= sum(mask)) {

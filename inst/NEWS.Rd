@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.12.0}{
+\itemize{
+   \item{Mostly bug fixes!}
+ }
+}
+
 \section{Version 1.10.0}{
 
 Changes since last release:

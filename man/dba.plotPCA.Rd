@@ -11,7 +11,7 @@ Principal Component Analysis plot
 dba.plotPCA(DBA, attributes, minval, maxval,
            contrast, method=DBA$config$AnalysisMethod, 
            th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
-           report, score, mask, sites, label, cor=FALSE,
+           report, score, bLog=TRUE, mask, sites, label, cor=FALSE,
            b3D=FALSE, vColors, dotSize, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -88,6 +88,9 @@ Score to use for count data. Only used when plotting the global binding matrix (
 \item \link{DBA_SCORE_TMM_MINUS_FULL}
 \item \link{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 }
+}
+\item{bLog}{
+Logical indicating that log2 values should be used.
 }
 \item{mask}{
 mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included. See  \code{\link{dba.mask}}.

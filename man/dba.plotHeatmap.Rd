@@ -11,7 +11,7 @@ Draws a binding site heatmap
 dba.plotHeatmap(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                 contrast, method=DBA$config$AnalysisMethod, 
                 th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
-                report, score, mask, sites, sortFun,
+                report, score, bLog=TRUE, mask, sites, sortFun,
                 correlations=TRUE, olPlot=DBA_COR, 
                 ColAttributes,RowAttributes, colSideCols, rowSideCols=colSideCols,
                 margin=10, colScheme="Greens", distMethod="pearson",
@@ -92,7 +92,9 @@ Score to use for count data. Only used when plotting the global binding matrix (
 \item \link{DBA_SCORE_TMM_MINUS_EFFECTIVE}
 }
 }
-
+\item{bLog}{
+Logical indicating that log2 values should be used.
+}
 \item{mask}{
 mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included.
 }

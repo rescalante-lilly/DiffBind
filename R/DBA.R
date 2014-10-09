@@ -98,7 +98,7 @@ dba = function(DBA,mask, minOverlap=2,
                    caller=peakCaller, format=peakFormat, scorecol=scoreCol,bLowerBetter=bLowerScoreBetter,
                    skipLines=skipLines,bAddCallerConsensus=bAddCallerConsensus, 
                    bRemoveM=bRemoveM, bRemoveRandom=bRemoveRandom,
-                   bKeepAll=TRUE, bAnalysis=TRUE, 
+                   bKeepAll=TRUE, bAnalysis=TRUE, filter=filter,
                    attributes=attributes)
     
     res$contrasts=NULL
@@ -633,7 +633,7 @@ dba.report = function(DBA, contrast, method=DBA$config$AnalysisMethod, th=DBA$co
 dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval, maxval,
                            contrast, method=DBA$config$AnalysisMethod, 
                            th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
-                           report, score, mask, sites, sortFun,
+                           report, score, bLog=TRUE, mask, sites, sortFun, 
                            correlations=TRUE, olPlot=DBA_COR, ColAttributes,RowAttributes, colSideCols, rowSideCols=colSideCols,
                            margin=10, colScheme="Greens", distMethod="pearson",
                            ...)
@@ -644,7 +644,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
         DBA = dba.count(DBA,peaks=NULL,score=score)	
     }
     
-    mask = pv.setMask(DBA,mask)
+    mask = pv.setMask(DBA,mask,contrast)
     
     if(!missing(contrast)) {
         if(!missing(report)) {
@@ -652,10 +652,23 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
         }   	
         DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
                              method=method,th=th,bUsePval=bUsePval,bNormalized=T,
-                             bPCA=F,bLog=T,minval=minval,maxval=maxval,mask=mask)
+                             bPCA=F,bLog=F,minval=minval,maxval=maxval,mask=mask)
         contrast = 1
         mask = NULL                     
     }
+    
+    if(bLog) {
+        vectors = DBA$vectors[,4:ncol(DBA$vectors)]
+        vectors[vectors<=0]=1
+        vectors = log2(vectors)
+        DBA$vectors[,4:ncol(DBA$vectors)] = vectors
+        if(missing(minval)) {
+            minval = 0
+        } else {
+            minval = max(0,minval)
+        }
+    }
+    DBA$allvectors = DBA$vectors
     
     if(length(correlations)==1 & ((correlations[1] == DBA_OLAP_ALL) | (correlations[1] == TRUE)))  {
         if(nrow(DBA$allvectors)>1) {
@@ -687,7 +700,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
             res = pv.plotHeatmap(DBA, numSites=maxSites, attributes=attributes, contrast=contrast,
                                  RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                                  ColScheme=colScheme, distMeth=distMethod, 
-                                 margins=c(margin,margin),...)
+                                 margins=c(margin,margin), ...)
             res = NULL
             
         } else {
@@ -719,13 +732,13 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
 dba.plotPCA = function(DBA, attributes, minval, maxval,
                        contrast, method=DBA$config$AnalysisMethod, 
                        th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
-                       report, score, mask, sites, label, cor=FALSE,
+                       report, score, bLog=TRUE, mask, sites, label, cor=FALSE,
                        b3D=FALSE, vColors, dotSize, ...)
     
 {
     DBA = pv.check(DBA,TRUE)
     
-    mask = pv.setMask(DBA,mask)
+    mask = pv.setMask(DBA,mask,contrast)
     
     if(missing(contrast) && !missing(score)) {
         DBA = dba.count(DBA,peaks=NULL,score=score)	
@@ -749,19 +762,19 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
         }  	  
         DBA = pv.getPlotData(DBA,attributes=attributes,contrast=contrast,report=report,
                              method=method,th=th,bUsePval=bUsePval,bNormalized=T,
-                             bPCA=T,minval=minval,maxval=maxval,mask=mask)                     
+                             bPCA=T,minval=minval,maxval=maxval,mask=mask,bLog=F)                     
         if(attributes[1] == PV_GROUP) {
             attributes = PV_ID
         }
         res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,
-                         b3D=b3D,vColors=vColors,label=label,...)
+                         b3D=b3D,vColors=vColors,label=label,bLog=bLog,...)
     } else {
         if(missing(attributes)) {
             attributes = pv.attributePCA(DBA)
         }
         
         res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, 
-                         sites=sites, b3D=b3D, vColors=vColors, label=label, ...)  
+                         sites=sites, b3D=b3D, vColors=vColors, label=label,bLog=bLog, ...)  
     }
     
     invisible(res)	
