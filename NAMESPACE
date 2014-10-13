@@ -1,0 +1,108 @@
+import(zlibbioc)
+
+export(dba,
+       dba.peakset,
+       dba.overlap,
+       dba.count,
+       dba.contrast,
+       dba.analyze,
+       dba.report,
+       dba.plotHeatmap,
+       dba.plotPCA,
+       dba.plotMA,
+       dba.plotVenn,
+       dba.plotBox,
+       dba.show,
+       dba.mask,
+       dba.save,
+       dba.load,
+       print.DBA,
+       summary.DBA,
+       plot.DBA,
+       DBA_GROUP,
+       DBA_ID,
+       DBA_TISSUE,
+       DBA_FACTOR,
+       DBA_CONDITION,
+       DBA_TREATMENT,
+       DBA_CONSENSUS,
+       DBA_CALLER,
+       DBA_CONTROL,
+       DBA_REPLICATE,
+       DBA_INTERVALS,
+       DBA_FRIP,
+       DBA_ALL_ATTRIBUTES,
+       DBA_OLAP_PEAKS,
+       DBA_OLAP_ALL,
+       DBA_OLAP_RATE,
+       DBA_COR,
+       DBA_OLAP,
+       DBA_INALL,
+       DBA_SCORE_RPKM,
+       DBA_SCORE_RPKM_FOLD,
+       DBA_SCORE_READS,
+       DBA_SCORE_READS_FOLD,
+       DBA_SCORE_READS_MINUS,
+       DBA_SCORE_TMM_MINUS_FULL,
+       DBA_SCORE_TMM_MINUS_EFFECTIVE,
+       DBA_SCORE_TMM_READS_FULL,
+       DBA_SCORE_TMM_READS_EFFECTIVE,
+       DBA_SCORE_TMM_MINUS_FULL_CPM,
+       DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM,
+       DBA_SCORE_TMM_READS_FULL_CPM,
+       DBA_SCORE_TMM_READS_EFFECTIVE_CPM,
+       DBA_SCORE_SUMMIT,
+       DBA_SCORE_SUMMIT_ADJ,       
+       DBA_SCORE_SUMMIT_POS,
+       DBA_READS_DEFAULT,
+       DBA_READS_BAM,
+       DBA_READS_BED, 
+       DBA_EDGER,
+       DBA_EDGER_BLOCK,
+       DBA_EDGER_GLM,
+       DBA_EDGER_CLASSIC,
+       DBA_DESEQ,
+       DBA_DESEQ_BLOCK,
+       DBA_DESEQ_GLM,
+       DBA_DESEQ_CLASSIC,
+       DBA_DESEQ2,
+       DBA_DESEQ2_BLOCK,
+       DBA_ALL_METHODS,
+       DBA_ALL_BLOCK,
+       DBA_ALL_METHODS_BLOCK,
+       DBA_DATA_FRAME,
+       DBA_DATA_RANGEDDATA,
+       DBA_DATA_GRANGES,
+       DBA_DATA_SUMMARIZED_EXPERIMENT,
+       DBA_DATA_DBAOBJECT)
+
+exportClasses("DBA")
+
+useDynLib(DiffBind)
+
+importFrom(amap, Dist)
+
+import(edgeR)
+
+importFrom(gplots, heatmap.2)
+
+import(IRanges)
+
+import(GenomicRanges)
+
+importFrom(graphics, abline, boxplot, plot, points, smoothScatter)
+
+importFrom(grDevices, colorRampPalette)
+
+importFrom(RColorBrewer, brewer.pal)
+
+importFrom(stats, model.matrix, p.adjust, princomp, t.test,
+           wilcox.test)
+
+importFrom(utils, read.table, write.csv, write.table)
+
+importFrom(limma,nonEstimable)
+
+importFrom(GenomicAlignments,summarizeOverlaps)
+
+importFrom(lattice, xyplot)
