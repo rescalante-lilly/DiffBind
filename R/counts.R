@@ -291,11 +291,24 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
         }
         if (summits>0) {
             bRecenter=TRUE
+            bCalledMasks=F
         } 
     }
     
     bed = NULL
-    if(!missing(peaks)) {
+    if(missing(peaks)) {
+        bPeaksSupplied=FALSE
+        if(minOverlap == pv$minOverlap) {
+            bed = pv$vectors[,1:3]
+        } else if (minOverlap == 1) {
+            bed = pv$allvectors[,1:3]
+        } else {
+            bed = pv.consensus(pv,1:length(pv$peaks),
+                               minOverlap=minOverlap,bFast=T)$peaks[[length(pv$peaks)+1]][,1:3]
+        }
+    } else {
+        bPeaksSupplied=TRUE
+        bCalledMasks=FALSE
         if(is.vector(peaks)) {
             if(is.character(peaks)){
                 tmp = pv.peakset(NULL,peaks)
@@ -316,19 +329,10 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
             colnames(peaks)[1:3] = c("CHR","START","END")
             bed = pv.dovectors(peaks[,1:3],bKeepAll=T)
         }
-    } else {
-        if(minOverlap == pv$minOverlap) {
-            bed = pv$vectors[,1:3]
-        } else if (minOverlap == 1) {
-            bed = pv$allvectors[,1:3]
-        } else {
-            bed = pv.consensus(pv,1:length(pv$peaks),
-                               minOverlap=minOverlap,bFast=T)$peaks[[length(pv$peaks)+1]][,1:3]
-        }
-    }
+    } 
     
     bed[,1] = pv$chrmap[bed[,1]]
-    bed = pv.peaksort(bed)
+    bed = pv.peaksort(bed,bNumericRows=TRUE)
     
     numChips = ncol(pv$class)
     chips  = unique(pv$class[PV_BAMREADS,])
@@ -569,7 +573,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
                 }
             }
         }
-        if(bCalledMasks && (missing(peaks) || is.null(res$sites))) {
+        if(bCalledMasks && (bPeaksSupplied==FALSE || is.null(res$sites))) {
             res$sites = pv.CalledMasks(pv,res,bed)
         }
     } else {

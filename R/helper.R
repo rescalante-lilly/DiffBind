@@ -341,13 +341,16 @@ fdebug = function(str,file='debug.txt'){
    
 }
 
-pv.peaksort = function(peaks){
+pv.peaksort = function(peaks,bNumericRows=FALSE){
    p2 = peaks[,2]
    o1 = order(p2,decreasing=F)
    peaks = peaks[o1,]
    p1 = peaks[,1]
    o2 = order(p1,decreasing=F)
    peaks = peaks[o2,]
+   if(bNumericRows) {
+       rownames(peaks) = 1:nrow(peaks)
+   }
    return(peaks)
 }
 
@@ -837,7 +840,7 @@ pv.dovectors = function(allpeaks,classes,bKeepAll=F,maxgap=0,useExternal=TRUE,us
       warning('chromosome names are strings in pv.dovectors',call.=F)
    }  
    
-   allpeaks = pv.peaksort(allpeaks)
+   allpeaks = pv.peaksort(allpeaks,TRUE)
    allpeaks_copy <- as.data.frame(allpeaks)
    allpeaks_copy$CHR <- as.integer(allpeaks_copy$CHR)
    allpeaks_copy$START <- as.integer(allpeaks_copy$START)

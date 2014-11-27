@@ -106,3 +106,9 @@ importFrom(limma,nonEstimable)
 importFrom(GenomicAlignments,summarizeOverlaps)
 
 importFrom(lattice, xyplot)
+
+#importFrom(Rsamtools,BamFileList,ScanBamParam,scanBamFlag,countBam)
+
+importFrom(S4Vectors,DataFrame,SimpleList,Rle)
+
+#importFrom(parallel,mclapply,mcparallel,mccollect)

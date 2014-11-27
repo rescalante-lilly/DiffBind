@@ -2,6 +2,13 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.12.1}{
+\itemize{
+   \item{Fixed bug where incorrect results could have been returned when certain chromosome annotations were used.}
+   \item{Disabled including peak call information in reprtos when a) a peakset was explcitly specified in dba.count() or b) peaks are re-centered using summit information.}
+ }
+}
+
 \section{Version 1.12.0}{
 \itemize{
    \item{Mostly bug fixes!}

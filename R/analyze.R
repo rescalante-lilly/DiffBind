@@ -998,20 +998,25 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
     
     colnames(data) = c('Chr','Start','End','Conc',conc1,conc2,'Fold','p-value','FDR')
     
-    if(bCalled & !is.null(pv$sites)) {
-        called1 = rep(F,length(pv$sites[[1]]))
-        toadd = which(con$group1)
-        for(i in toadd) {
-            called1 = called1 + pv$sites[[i]]
+    bNoCalls=F
+    if(bCalled) {
+        if (!is.null(pv$sites)) {
+            called1 = rep(F,length(pv$sites[[1]]))
+            toadd = which(con$group1)
+            for(i in toadd) {
+                called1 = called1 + pv$sites[[i]]
+            }
+            Called1 = called1[sites]
+            called2 = rep(F,length(pv$sites[[1]]))
+            toadd = which(con$group2)
+            for(i in toadd) {
+                called2 = called2 + pv$sites[[i]]
+            }
+            Called2 = called2[sites]
+            data = cbind(data,Called1,Called2)
+        } else {
+            bNoCalls=T
         }
-        Called1 = called1[sites]
-        called2 = rep(F,length(pv$sites[[1]]))
-        toadd = which(con$group2)
-        for(i in toadd) {
-            called2 = called2 + pv$sites[[i]]
-        }
-        Called2 = called2[sites]
-        data = cbind(data,Called1,Called2)
     }
     
     
@@ -1027,17 +1032,24 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
         }
     }
     
-    if(bCalledDetail & !is.null(pv$sites)) {
-        toadd = c(which(con$group1),which(con$group2))
-        newd = NULL
-        for(i in toadd) {
-            newd = cbind(newd,pv$sites[[i]][sites])
+    if(bCalledDetail){
+        if(!is.null(pv$sites)) {
+            toadd = c(which(con$group1),which(con$group2))
+            newd = NULL
+            for(i in toadd) {
+                newd = cbind(newd,pv$sites[[i]][sites])
+            }
+            newd[newd==T] = '+'
+            newd[newd==F] = '-'
+            colnames(newd) = c(pv$class[PV_ID,con$group1],pv$class[PV_ID,con$group2])
+            data = cbind(data,newd)
+        } else {
+            bNoCalls=T
         }
-        newd[newd==T] = '+'
-        newd[newd==F] = '-'
-        colnames(newd) = c(pv$class[PV_ID,con$group1],pv$class[PV_ID,con$group2])
-        data = cbind(data,newd)
-    }   
+    }
+    if(bNoCalls) {
+        warning("No peak calling information available.",call.=FALSE)    
+    }
     
     if(minFold>0) {
         data = data[abs(data$Fold)>=minFold,]
@@ -1062,7 +1074,7 @@ pv.getsites = function(pv,sites){
     if(is.logical(sites)) {
         sites = which(sites)
     }
-    idx   = match(as.integer(sites),rownames(pv$allvectors))
+    idx   = match(as.integer(sites),1:nrow(pv$allvectors))
     sites = pv$allvectors[idx,1:3]
     sites[,1] = pv$chrmap[sites[,1]]
     return(sites)
