@@ -45,7 +45,7 @@ Entry Points:
 }
 }
 \author{
-Rory Stark <rory.stark @at@ cruk.cam.ac.uk> and Gordon Brown <gordon.brown @at@ cruk.cam.ac.uk>
+Rory Stark <rory.stark @at@ cruk.cam.ac.uk> and Gord Brown <gdbzork @at@ gmail.com>
 }
 %\references{
 %}

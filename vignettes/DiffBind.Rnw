@@ -28,7 +28,7 @@ savewd = getwd()
 \title{\Biocpkg{DiffBind}: Differential binding analysis of ChIP-Seq peak data}
 \author{Rory Stark \\ \Rcode{rory.stark@cruk.cam.ac.uk}
 \and
-Gordon Brown \\ \Rcode{gordon.brown@cruk.cam.ac.uk} 
+Gord Brown \\ \Rcode{gdbzork@gmail.com} 
 \and University of Cambridge\\Cancer Research UK - Cambridge Institute
 }
 
