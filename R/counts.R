@@ -1,4 +1,4 @@
-##########€€€€€######################
+#####################################
 ## pv_counts.R -- count-dependant  ##
 ## 20 October 2009                 ##
 ## 3 February 2011 -- packaged     ##
@@ -368,7 +368,7 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
     addfuns = NULL
     if(bLowMem){
         
-        require(Rsamtools)
+        requireNamespace("Rsamtools",quietly=TRUE)
         
         addfuns = c("BamFileList","summarizeOverlaps","ScanBamParam","scanBamFlag","countBam","SummarizedExperiment")   
         if (insertLength[1] !=0) {

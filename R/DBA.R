@@ -221,7 +221,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
             res = pv.peaks2DataType(res,DataType)
         }    
         
-    } else { ## ADD PEAKSET(S)
+    } else { ## ADD PEAKSET(S)
         
         if(!is.null(DBA)) {
             DBA = pv.check(DBA)

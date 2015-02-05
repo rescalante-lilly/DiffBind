@@ -16,9 +16,6 @@ export(dba,
        dba.mask,
        dba.save,
        dba.load,
-       print.DBA,
-       summary.DBA,
-       plot.DBA,
        DBA_GROUP,
        DBA_ID,
        DBA_TISSUE,
@@ -78,6 +75,10 @@ export(dba,
 
 exportClasses("DBA")
 
+S3method(print,DBA)
+S3method(plot,DBA)
+S3method(summary,DBA)
+
 useDynLib(DiffBind)
 
 importFrom(amap, Dist)
@@ -106,3 +107,5 @@ importFrom(limma,nonEstimable)
 importFrom(GenomicAlignments,summarizeOverlaps)
 
 importFrom(lattice, xyplot)
+
+import(locfit)

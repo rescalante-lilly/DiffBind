@@ -930,8 +930,7 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
     }
     
     if(b3D) {
-        if (length(find.package(package='rgl',quiet=T))>0) {
-            library(rgl)
+        if (requireNamespace("rgl",quietly=TRUE)) {
             rgl::plot3d(pc$loadings[,c(startComp,startComp+2,startComp+1)],col=pv.colorv(classvec,vColors),type='s',size=sval,
                         xlab=sprintf('PC #%d [%2.0f%%]',startComp,c1p),
                         ylab=sprintf('PC #%d [%2.0f%%]',startComp+2,c3p),
@@ -1004,9 +1003,6 @@ PV_TOTAL = 0
 pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,contrast,
                           overlaps, olmask, olPlot=PV_COR,divVal,RowAttributes,ColAttributes,rowSideCols,colSideCols,
                           bTop=T,minval,maxval,bReorder=F,ColScheme="Greens",distMeth="pearson",...) {
-    #require(gplots)
-    #require(RColorBrewer)
-    #require(amap)
     
     pv = pv.check(pv)
     

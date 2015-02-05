@@ -92,8 +92,7 @@ dba.lsfR.init = function(config){
 dba.multicore.init = function(config) {
 
    noparallel=F
-   if (length(find.package(package="parallel",quiet=T))>0) {
-      library(parallel)
+   if (requireNamespace("parallel",quietly=TRUE)) {
       if(!exists("mcparallel","package:parallel")) {
          noparallel=T
       }     
@@ -161,9 +160,7 @@ dba.multicore.wait4jobs = function(config,joblist) {
 dba.biocparallel.init = function(config) {
     
     noparallel=F
-    if (length(find.package(package="BiocParallel",quiet=T))>0) {
-        library(BiocParallel)
-    } else {
+    if (!requireNamespace("BiocParallel",quietly=TRUE)) {
         noparallel=T
     }
     if(noparallel){

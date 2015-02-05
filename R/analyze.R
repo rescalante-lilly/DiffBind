@@ -76,9 +76,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
     }
     
     if('DESeq1' %in% method) {
-        if (length(find.package(package='DESeq',quiet=T))>0) {
-            require(DESeq)
-        } else {
+        if (!requireNamespace("DESeq",quietly=TRUE)) {
             stop("Package DESeq not installed")
         }
         if(bParallel && (pv$config$parallelPackage > 0)) {
@@ -95,9 +93,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
     }
     
     if('DESeq1GLM' %in% method) {
-        if (length(find.package(package='DESeq',quiet=T))>0) {
-            require(DESeq)
-        } else {
+        if (!requireNamespace("DESeq",quietly=TRUE)) {
             stop("Package DESeq not installed")
         }
         if(bParallel && (pv$config$parallelPackage > 0)) {
@@ -114,9 +110,7 @@ pv.DBA = function(pv,method='edgeR',bSubControl=T,bFullLibrarySize=F,bTagwise=T,
     }
     
     if('DESeq2' %in% method) {
-        if (length(find.package(package='DESeq2',quiet=T))>0) {
-            require(DESeq2)
-        } else {
+        if (!requireNamespace("DESeq2",quietly=TRUE)) {
             stop("Package DESeq2 not installed")
         }
         if(bParallel && (pv$config$parallelPackage > 0)) {
@@ -179,14 +173,12 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
         #require('edgeR')
         edgeR = T   
     } else if (method == 'DESeq1'|| method=='DESeq1GLM') {
-        if (length(find.package(package='DESeq',quiet=T))>0) {
-            require(DESeq)
+        if (requireNamespace("DESeq",quietly=TRUE)) {
             DESeq1 = T 
         }   
     } else if (method == 'DESeq2') {
         #stop('DESeq2 not supported in this release',call.=F)
-        if (length(find.package(package='DESeq2',quiet=T))>0) {
-            require(DESeq2)
+        if (requireNamespace("DESeq2",quietly=TRUE)) {
             DESeq2 = T 
         } else {
             stop("Package DESeq2 not installed")
@@ -245,9 +237,9 @@ pv.DEinit = function(pv,mask1,mask2,group1=1,group2=2,method='edgeR',meanTH=0,
         if(DESeq1) {
             colnames(counts) = NULL
             if(is.null(targets)) {
-                res = newCountDataSet(counts,groups)
+                res = DESeq::newCountDataSet(counts,groups)
             } else {
-                res = newCountDataSet(counts,targets)	
+                res = DESeq::newCountDataSet(counts,targets)	
             }
             if(bFullLibrarySize) {
                 DESeq::sizeFactors(res) = libsize/min(libsize)
@@ -368,9 +360,7 @@ pv.DEedgeR = function(pv,group1,group2,label1="Group 1",label2="Group 2",blockLi
 
 pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
                     bSubControl=T,bFullLibrarySize=F,bTagwise=T,bGLM=T,blockList=NULL){
-    if (length(find.package(package='DESeq',quiet=T))>0) {
-        require(DESeq)
-    } else {
+    if (!requireNamespace("DESeq",quietly=TRUE)) {
         stop("Package DESeq not installed")
     }
     res = NULL
@@ -472,9 +462,7 @@ pv.DESeq = function(pv,group1,group2,label1="Group 1",label2="Group 2",
 
 pv.DESeq2 = function(pv,group1,group2,label1="Group 1",label2="Group 2",
                      bSubControl=T,bFullLibrarySize=F,bTagwise=T,bGLM=T,blockList=NULL){
-    if (length(find.package(package='DESeq2',quiet=T))>0) {
-        require(DESeq2)
-    } else {
+    if (!requireNamespace("DESeq2",quietly=TRUE)) {
         stop("Package DESeq2 not installed")
     }
     res = NULL
@@ -632,9 +620,7 @@ pv.DESeq_parallel = function(contrast,pv,blockList,bSubControl,bFullLibrarySize,
 
 pv.allDESeq = function(pv,block,bSubControl=F,bFullLibrarySize=F,bTagwise=T,bGLM=F,bParallel=F) {
     
-    if (length(find.package(package='DESeq',quiet=T))>0) {
-        require(DESeq)
-    } else {
+    if (!requireNamespace("DESeq",quietly=TRUE)) {
         stop("Package DESeq not installed")
     }
     
@@ -706,9 +692,7 @@ pv.DESeq2_parallel = function(contrast,pv,blockList,bSubControl,bFullLibrarySize
 
 pv.allDESeq2 = function(pv,block,bSubControl=F,bFullLibrarySize=F,bTagwise=T,bGLM=F,bParallel=F) {
     
-    if (length(find.package(package='DESeq2',quiet=T))>0) {
-        require(DESeq2)
-    } else {
+    if (!requireNamespace("DESeq2",quietly=TRUE)) {
         stop("Package DESeq2 not installed")
     }
     
@@ -858,9 +842,7 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
             counts = counts * con$edgeR$pseudo.lib.size
         } 
     } else if (method=='DESeq1' || method=='DESeq1GLM' || method=='DESeq1Block') {
-        if (length(find.package(package='DESeq',quiet=T))>0) {
-            require(DESeq)
-        } else {
+        if (!requireNamespace("DESeq",quietly=TRUE)) {
             stop("Package DESeq not installed")
         }
         if(is.null(con$DESeq1) || class(con$DESeq1)=="try-error") {
@@ -903,9 +885,7 @@ pv.DBAreport = function(pv,contrast=1,method='edgeR',th=.1,bUsePval=F,bCalled=F,
             counts = counts * con$edgeR$pseudo.lib.size
         } 
     } else if (method=='DESeq2' || method=='DESeq2Block') {
-        if (length(find.package(package='DESeq2',quiet=T))>0) {
-            require(DESeq2)
-        } else {
+        if (!requireNamespace("DESeq2",quietly=TRUE)) {
             stop("Package DESeq2 not installed")
         }
         if(is.null(con$DESeq2) || class(con$DESeq2)=="try-error") {
