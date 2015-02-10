@@ -745,7 +745,7 @@ This follows the \Rcode{DBA\_DESEQ\_GLM} case detailed above, except a more comp
 \Rcode{DBA\$contrasts[[n]]\$DESeq1\$block\$DEdata}. 
 
 \subsection{\Biocpkg{DESeq2} analysis}
-When \Rfunction{dba.analyze} is invoked using \Rcode{method=DBA\_DESEQ2}\footnote{Note that \Biocpkg{DESeq2} can be made the default analysis method for a DBA object by setting \Rcode{DBA\$config\$AnalysisMethod=DBA\_DESEQ2}.}, a standardized differential analysis is performed using the \Biocpkg{DESeq2}package (\cite{Anders:2010p792}). This section details the precise steps in that analysis.
+When \Rfunction{dba.analyze} is invoked using \Rcode{method=DBA\_DESEQ2}\footnote{Note that \Biocpkg{DESeq2} can be made the default analysis method for a DBA object by setting \Rcode{DBA\$config\$AnalysisMethod=DBA\_DESEQ2}.}, a standardized differential analysis is performed using the \Biocpkg{DESeq2}package (\cite{Love2014}). This section details the precise steps in that analysis.
 
 For each contrast, a separate analysis is performed. 
 First, a matrix of counts is constructed for the contrast, with columns for all the samples in the first group, followed by columns for all the samples in the second group. 

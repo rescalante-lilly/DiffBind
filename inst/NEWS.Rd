@@ -2,6 +2,14 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.12.2}{
+\itemize{
+   \item{Updated citation for DESeq2 in vignette.}
+   \item{Change vignette sample sheet to use raw format instead of bed.}
+ }
+}
+
+
 \section{Version 1.12.1}{
 \itemize{
    \item{Fixed bug where incorrect results could have been returned when certain chromosome annotations were used.}
