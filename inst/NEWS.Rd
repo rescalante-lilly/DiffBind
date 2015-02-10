@@ -2,6 +2,21 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.13.4}{
+\itemize{
+   \item{Roll up all updates}
+   \item{Update DESeq2 reference in vignette; fix vignette samplesheet}
+   \item{use vennPlot from systemPiper}
+ }
+}
+
+\section{Version 1.13.1}{
+\itemize{
+   \item{New: color vector lists for dba.plotHeatmap and colos for dba.plotPCA labels}
+   \item{Fix: bug causing two plots when changing score in dba.plotHeatmap and dba.plotPCA}
+ }
+}
+
 \section{Version 1.12.0}{
 \itemize{
    \item{Mostly bug fixes!}

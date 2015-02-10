@@ -12,7 +12,7 @@ dba.plotPCA(DBA, attributes, minval, maxval,
            contrast, method=DBA$config$AnalysisMethod, 
            th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
            report, score, bLog=TRUE, mask, sites, label, cor=FALSE,
-           b3D=FALSE, vColors, dotSize, ...)
+           b3D=FALSE, vColors, dotSize, labelSize, labelCols, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -114,6 +114,14 @@ vector of custom colors; is absent, default colors will be used.
 }
 \item{dotSize}{
 size of dots to plot; is absent, a default  will be calculated.
+}
+
+\item{labelSize}{
+Scaling factor for labels if present. Default is 0.8.
+}
+
+\item{labelCols}{
+Vector of colors to use for labels. Default is "black".
 }
 
 \item{\dots}{

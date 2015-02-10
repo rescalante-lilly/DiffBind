@@ -911,13 +911,17 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
     for(num in length(attributes):1) {
         attribute = attributes[num]
         if(attribute==PV_GROUP) {
+            vals = NA
             if(!missing(contrast)) {
-                gps = rep(3,length(pv$contrasts[[contrast]]$group1))
-                gps[pv$contrasts[[contrast]]$group1]=1
-                gps[pv$contrasts[[contrast]]$group2]=2
-                classdb = rbind(classdb,gps)
-                attribute = nrow(classdb)
-                vals = 1:max(gps)
+                if(sum(pv$contrasts[[contrast]]$group1) || 
+                       sum(pv$contrast[[contrast]]$group2)) {
+                    gps = rep(3,length(pv$contrasts[[contrast]]$group1))
+                    gps[pv$contrasts[[contrast]]$group1]=1
+                    gps[pv$contrasts[[contrast]]$group2]=2
+                    classdb = rbind(classdb,gps)
+                    attribute = nrow(classdb)
+                    vals = 1:max(gps)
+                }
             } else {
                 vals = NA	
             }
@@ -927,7 +931,8 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
         if ( (sum(!is.na(vals))>1) && (sum(!is.na(vals))<numsamps) ) {
             addcol = matrix(classdb[attribute,],numsamps,1)
             for(i in 1:length(vals)) {
-                addcol[addcol[,1]==vals[i],1]=cols[i]
+                #addcol[addcol[,1]==vals[i],1]=cols[i]
+                addcol[addcol[,1]==vals[i],1]=i
             }
             colnames(addcol) = pv.attname(attribute,pv)
             if(bReverse) {
@@ -936,6 +941,14 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
                 atts = cbind(atts,addcol)  	
             }
         }         	
+    }
+    attnum = 1
+    for(i in ncol(atts):1) {
+        if(is.list(cols)) {
+            usecols = cols[[attnum]]
+        } else usecols = cols
+        atts[,i] = usecols[as.numeric(atts[,i])]
+        attnum = attnum+1
     }
     return(atts)	
 }

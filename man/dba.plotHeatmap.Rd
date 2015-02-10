@@ -134,10 +134,12 @@ Attribute or vector of attributes to plot for column color bars. If missing, all
 Attribute or vector of attributes for row color bars. Row color bars are only allowed for correlation heatmaps.  Same values as for ColAttributes parameter. Default is  to draw a row color bar only if a contrast is specified, in which case the plotted attribute is DBA_GROUP.
 }
 \item{rowSideCols}{
-Vector of colors to use in row color bars. Uses default colors if missing.
+Vector of colors to use in row color bars. Uses default colors if missing. 
+Can also be a list of color vectors.
 }
 \item{colSideCols}{
 Vector of colors to use in column color bars. Uses default colors if missing.
+Can also be a list of color vectors.
 }
   \item{margin}{
 margin size of plot
@@ -232,10 +234,10 @@ tamoxifen = dba.analyze(tamoxifen,bCorPlot=FALSE)
 dba.plotHeatmap(tamoxifen, contrast=1) 
 #also include the T47D samples
 dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$All) 
-#correlation heatmap without MCF7 with with T47D
+#correlation heatmap without MCF7 
 plot(tamoxifen,contrast=1,mask=!tamoxifen$masks$MCF7) 
-# binding heatmapsusing only the T47D samples
-dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$T47D,correlations=FALSE)  
+# binding heatmap using only the MCF7 samples
+dba.plotHeatmap(tamoxifen,contrast=1,mask=tamoxifen$masks$MCF7,correlations=FALSE)  
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -823,7 +823,8 @@ pv.plotClust = function(pv,mask,numSites,sites,attributes=pv$attributes,distMeth
 
 ## pv.plotPCA -- 3D plot of PCA
 pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
-                      numSites,sites,cor=F,startComp=1,b3D=T,vColors,label=NULL,bLog=T,...){
+                      numSites,sites,cor=F,startComp=1,b3D=T,vColors,label=NULL,
+                      bLog=T,labelSize=.8,labelCols="black",...){
     
     pv = pv.check(pv)
     
@@ -962,13 +963,15 @@ pv.plotPCA = function(pv,attributes=PV_ID,second,third,fourth,size,mask,
         #            xlab=sprintf('Principal Component #%d [%2.0f%%]',startComp,c1p),
         #            ylab=sprintf('Principal Component #%d [%2.0f%%]',startComp+1,c2p),
         #            main = thetitle,...)
-        p = pv.doPCAplot(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels,...)
+        p = pv.doPCAplot(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,
+                         addlabels,labelSize,labelCols,...)
     }      
     return(p)
     #return(cbind(uclass,vColors[1:length(uclass)])) 
 }
 
-pv.doPCAplot = function(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addlabels=NULL,...) {
+pv.doPCAplot = function(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,
+                        addlabels=NULL,labelSize=.8,labelCols="black",...) {
     p = xyplot(Comp.2 ~ Comp.1, 
                #groups=classvec,
                data=as.data.frame(pc$loadings[,startComp:(startComp+1)]),
@@ -985,9 +988,18 @@ pv.doPCAplot = function(pc,classvec,startComp,sval,vColors,thetitle,c1p,c2p,addl
                ...)
     
     if(!is.null(addlabels)) {
+        if(length(labelCols)>1) {
+            newcols = rep("",length(addlabels))
+            colvals = unique(addlabels)
+            for(i in 1:length(colvals)) {
+                newcols[addlabels %in% colvals[i]] = labelCols[i]
+            }
+            labelCols = newcols
+        }
         p = update(p, panel = function(x, y, ...) {
             lattice::panel.xyplot(x, y, ...);
-            lattice::ltext(x=x, y=y, labels=as.character(addlabels), pos=1, offset=1, cex=0.8)
+            lattice::ltext(x=x, y=y, labels=as.character(addlabels), pos=1, 
+                           offset=1, cex=labelSize,col=labelCols)
         })
     }
     print(p)
@@ -1089,8 +1101,10 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
     rowcols = 0
     if(missing(RowAttributes)){
         if(!missing(contrast)) {
-            rowatts = pv.attributematrix(pv,mask,contrast=contrast,PV_GROUP,rowSideCols)	
-            rowcols = length(unique(as.vector(rowatts)))
+            if(sum(pv$contrasts[[contrast]]$group1) || sum(pv$contrasts[[contrast]]$group1)) {
+                rowatts = pv.attributematrix(pv,mask,contrast=contrast,PV_GROUP,rowSideCols)	
+                rowcols = length(unique(as.vector(rowatts)))
+            }
         }
     } else if(!is.null(RowAttributes)) {
         rowatts = pv.attributematrix(pv,mask,contrast=contrast,RowAttributes,rowSideCols,bReverse=T)
@@ -1178,7 +1192,8 @@ pv.overlap = function(pv,mask,bFast=F,minVal=0) {
         stop('Must specify mask for peaksets to overlap.',call.=F)
     }
     
-    numcounts = sum(pv$class[PV_CALLER,peaksets] %in% "counts")
+    numcounts <-
+        sum(pv$class[PV_CALLER,peaksets] %in% "counts")
     if(numcounts == length(peaksets)) {
         if(is.null(pv$sites)) {
             stop("Called masks not present; re-run dba.count with bCalledMasks=TRUE",call.=F)	

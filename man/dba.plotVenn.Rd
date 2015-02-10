@@ -136,21 +136,22 @@ None, unless \code{bReturnPeaksets = TRUE}. In this case, either a list of peaks
 %% ~put references to the literature/web site here ~
 %}
 \author{
-Rory Stark and Thomas Girke
+Rory Stark
 }
 \note{
 
 When working with results overlaps (a least one \code{contrast} is specified), and results-oriented DBA object is generated internally (as decribed in \code{\link{dba.report}}). In some cases, it may be better to generate the DBA object explicitly (using \code{\link{dba.report}} or setting \code{bReturnPeaksets=TRUE} and \code{DataType=DBA_DATA_DBAOBJECT}). This include the case where mseveral plots are being made of the same results set, and it takes a long time to generate the results-based DBA object, as well as the case where there are more than four results peaksets and a mask needs to be specified. I
 
 
-Venn plotting code written by Thomas Girke as part of overLapper code:
-http://manuals.bioinformatics.ucr.edu/home/R_BioCondManual#R_graphics_venn
+This function relies on  \code{\link{vennPlot}} in the  \code{systemPipeR} package, written by Thomas Girke.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
- \code{\link{dba.analyze}},  \code{\link{dba.overlap}},  \code{\link{dba.report}}, \code{\link{dba.plotPCA}}
+ \code{\link{dba.analyze}},  \code{\link{dba.overlap}},  
+ \code{\link{dba.report}}, \code{\link{dba.plotPCA}},
+ \code{\link{vennPlot}}
 }
 
 \examples{
@@ -192,7 +193,4 @@ par(mfrow=c(2,1))
 dba.plotVenn(tamoxifen,contrast=1,method=DBA_ALL_BLOCK,bAll=FALSE,bGain=TRUE,bLoss=FALSE)
 dba.plotVenn(tamoxifen,contrast=1,method=DBA_ALL_BLOCK,bAll=FALSE,bGain=FALSE,bLoss=TRUE)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-%\keyword{ ~kwd1 }
-%\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

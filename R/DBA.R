@@ -641,7 +641,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
     DBA = pv.check(DBA,TRUE)
     
     if( (missing(contrast) || !missing(mask)) && !missing(score) ) {
-        DBA = dba.count(DBA,peaks=NULL,score=score)	
+        DBA = dba.count(DBA,peaks=NULL,score=score,bCorPlot=FALSE)	
     }
     
     mask = pv.setMask(DBA,mask,contrast)
@@ -733,7 +733,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
                        contrast, method=DBA$config$AnalysisMethod, 
                        th=DBA$config$th, bUsePval=DBA$config$bUsePval, 
                        report, score, bLog=TRUE, mask, sites, label, cor=FALSE,
-                       b3D=FALSE, vColors, dotSize, ...)
+                       b3D=FALSE, vColors, dotSize, labelSize, labelCols, ...)
     
 {
     DBA = pv.check(DBA,TRUE)
@@ -741,13 +741,20 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
     mask = pv.setMask(DBA,mask,contrast)
     
     if(missing(contrast) && !missing(score)) {
-        DBA = dba.count(DBA,peaks=NULL,score=score)	
+        DBA = dba.count(DBA,peaks=NULL,score=score,bCorPlot=FALSE)	
     } else if (!missing(score)) {
         warning('score parameter ignored when contrast is specified')	
     }  
     
     if(missing(label)) {
         label=NULL
+    } else {
+        if(missing(labelSize)) {
+            labelSize=.8
+        }
+        if(missing(labelCols)) {
+            labelCols="black"
+        }
     }
     
     if(!missing(contrast)){
@@ -767,14 +774,16 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
             attributes = PV_ID
         }
         res = pv.plotPCA(DBA,attributes=attributes,size=dotSize,cor=cor,
-                         b3D=b3D,vColors=vColors,label=label,bLog=bLog,...)
+                         b3D=b3D,vColors=vColors,label=label,bLog=bLog,
+                         labelSize=labelSize,labelCols=labelCols,...)
     } else {
         if(missing(attributes)) {
             attributes = pv.attributePCA(DBA)
         }
         
         res = pv.plotPCA(DBA, attributes=attributes, size=dotSize, mask=mask, 
-                         sites=sites, b3D=b3D, vColors=vColors, label=label,bLog=bLog, ...)  
+                         sites=sites, b3D=b3D, vColors=vColors, label=label,
+                         bLog=bLog,labelSize=labelSize,labelCols=labelCols,...)  
     }
     
     invisible(res)	

@@ -109,3 +109,5 @@ importFrom(GenomicAlignments,summarizeOverlaps)
 importFrom(lattice, xyplot)
 
 import(locfit)
+
+importFrom(systemPipeR,vennPlot)

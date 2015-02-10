@@ -61,7 +61,7 @@ logical indicating that the analyses is to be done in parallel using multicore (
 }
 }
 \details{
-See the DBA User Guide for more details on how the edgeR and DESeq analyses are carried out.  
+See the DBA User Guide for more details on how the edgeR, DESeq, and DESeq2 analyses are carried out.  
 }
 \value{
 DBA object with results of analysis added to DBA$contrasts. 
