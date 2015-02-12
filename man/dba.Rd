@@ -63,6 +63,7 @@ data frame containing sample sheet, or file name of sample sheet to load (ignore
 \item {LowerBetter:}	{logical indicating that lower scores signify better peaks}
 \item{Counts:} {file path for externally computed read counts; see \code{\link{dba.peakset}} (\code{counts} parameter)}
 }
+For sample sheets loaded from a file, the accepted formats are comma-separated values (column headers, followed by one line per sample), or Excel-formatted spreadsheets (\code{.xls} or \code{.xlsx} extension).
 }
   \item{config}{
 data frame containing configuration options, or file name of config file to load when constructing a new DBA object from a sample sheet. NULL indicates no config file. Relevant fields include:

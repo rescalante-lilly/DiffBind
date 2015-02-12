@@ -2,11 +2,31 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.13.5}{
+\itemize{
+   \item{Add support for reading Excel-format sample sheets (.xls, .xlsx extensions}
+ }
+}
+
 \section{Version 1.13.4}{
 \itemize{
    \item{Roll up all updates}
    \item{Update DESeq2 reference in vignette; fix vignette samplesheet}
    \item{use vennPlot from systemPiper}
+ }
+}
+
+\section{Version 1.13.3}{
+\itemize{
+   \item{Fix Makevars to avoid gnu-specific extensions}
+   \item{Replace 'require' with 'requireNamespace' to eliminate NOTEs regarding misuse of 'require'}
+   \item{Remove non-ASCII characters from a couple of comments}
+ }
+}
+
+\section{Version 1.13.2}{
+\itemize{
+   \item{Change Gord's email address}
  }
 }
 

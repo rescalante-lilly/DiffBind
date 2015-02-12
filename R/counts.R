@@ -43,7 +43,16 @@ pv.model = function(model,mask,minOverlap=2,
     }
     
     if(is.character(samplesheet)) {
-        samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
+        ext <- file_ext(samplesheet)
+        if (ext %in% c("xls","xlsx")) {
+          if (requireNamespace("XLConnect",quietly=TRUE)) {
+            samples = XLConnect::readWorksheetFromFile(samplesheet,sheet=1)
+          } else {
+            stop("Package XLConnect is needed to read Excel-format sample sheets.")
+          }
+        } else {
+          samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
+        }
     } else samples = samplesheet
     
     if(is.null(samples$SampleID)){

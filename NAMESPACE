@@ -111,3 +111,5 @@ importFrom(lattice, xyplot)
 import(locfit)
 
 importFrom(systemPipeR,vennPlot)
+
+importFrom(tools,file_ext)
