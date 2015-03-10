@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.12.3}{
+\itemize{
+   \item{Update vignette data.}
+ }
+}
+
 \section{Version 1.12.2}{
 \itemize{
    \item{Updated citation for DESeq2 in vignette.}

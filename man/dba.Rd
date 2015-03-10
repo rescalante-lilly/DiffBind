@@ -182,7 +182,7 @@ Responsive
 
 # change peak caller but leave peak format the same
 setwd(system.file("extra", package="DiffBind"))
-tamoxifen = dba(sampleSheet="tamoxifen.csv", peakCaller="macs", peakFormat="raw")
+tamoxifen = dba(sampleSheet="tamoxifen.csv", peakCaller="macs", peakFormat="bed")
 dba.show(tamoxifen, attributes=c(DBA_TISSUE,DBA_CONDITION,DBA_REPLICATE,DBA_CALLER))
 
 # Convert DBA object to SummarizedExperiment

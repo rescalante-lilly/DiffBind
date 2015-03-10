@@ -208,13 +208,16 @@ to add peaksets using a sample sheet, see  \code{\link{dba}}.
 # create a new DBA object by adding three peaksets
 mcf7 = dba.peakset(NULL,
                    peaks=system.file("extra/peaks/MCF7_ER_1.bed.gz", package="DiffBind"),
-                   sampID="MCF7.1",tissue="MCF7",factor="ER",condition="Responsive",replicate=1)
+                   sampID="MCF7.1",tissue="MCF7",factor="ER",condition="Responsive",
+                   peak.caller="macs", peak.format="bed",replicate=1)
 mcf7 = dba.peakset(mcf7,
                    peaks=system.file("extra/peaks/MCF7_ER_2.bed.gz", package="DiffBind"),    
-                   sampID="MCF7.2",tissue="MCF7",factor="ER",condition="Responsive",replicate=2)
+                   sampID="MCF7.2",tissue="MCF7",factor="ER",condition="Responsive",
+                   peak.caller="macs",peak.format="bed",replicate=2)
 mcf7 = dba.peakset(mcf7,
                    peaks=system.file("extra/peaks/MCF7_ER_3.bed.gz", package="DiffBind"),      
-                   sampID="MCF7.3",tissue="MCF7",factor="ER",condition="Responsive",replicate=3)
+                   sampID="MCF7.3",tissue="MCF7",factor="ER",condition="Responsive",
+                   peak.caller="macs",peak.format="bed",replicate=3)
 mcf7
 
 #retrieve peaks that are in all three peaksets
