@@ -1,6 +1,6 @@
 Package: DiffBind
 Type: Package
-Version: 1.14.0
+Version: 1.15.0
 Title: Differential Binding Analysis of ChIP-Seq peak data
 Date: 2015-02-12
 Author: Rory Stark<rory.stark@cruk.cam.ac.uk>, Gord Brown
