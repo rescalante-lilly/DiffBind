@@ -185,7 +185,10 @@ dba.plotHeatmap(DBA, attributes, maxSites, minval, maxval,
 }
 \value{
 %%  ~Describe the value returned
-if  correlations is not FALSE, the overlap/correlation matrix is returned.
+if  correlations is not \code{FALSE}, the overlap/correlation matrix is returned.
+
+if correlations is \code{FALSE}, the sites used in the heatmap are returned, 
+in the row order they appear (top to bottom).
 }
 %\references{
 %% ~put references to the literature/web site here ~

@@ -2,36 +2,23 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
-\section{Version 1.13.5}{
+\section{Version 1.14.1}{
+\itemize{
+   \item{Fix bug when summit heights are zero}
+   \item{Update version number in object}
+   \item{dba.plotHeatmap returns binding sites in row order}
+ }
+}
+
+\section{Version 1.14.0}{
 \itemize{
    \item{Add support for reading Excel-format sample sheets (.xls, .xlsx extensions}
- }
-}
-
-\section{Version 1.13.4}{
-\itemize{
-   \item{Roll up all updates}
    \item{Update DESeq2 reference in vignette; fix vignette samplesheet}
    \item{use vennPlot from systemPiper}
- }
-}
-
-\section{Version 1.13.3}{
-\itemize{
    \item{Fix Makevars to avoid gnu-specific extensions}
    \item{Replace 'require' with 'requireNamespace' to eliminate NOTEs regarding misuse of 'require'}
    \item{Remove non-ASCII characters from a couple of comments}
- }
-}
-
-\section{Version 1.13.2}{
-\itemize{
    \item{Change Gord's email address}
- }
-}
-
-\section{Version 1.13.1}{
-\itemize{
    \item{New: color vector lists for dba.plotHeatmap and colos for dba.plotPCA labels}
    \item{Fix: bug causing two plots when changing score in dba.plotHeatmap and dba.plotPCA}
  }

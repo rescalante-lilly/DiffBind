@@ -711,7 +711,7 @@ pv.Recenter = function(pv,summits,called) {
         stop('Summits not available; re-run dba.count with summits=0')   
     }
     positions = sapply(pv$peaks,function(x)x$Summits)
-    heights   = sapply(pv$peaks,function(x)x$Heights) * sapply(called,function(x)x)
+    heights   = sapply(pv$peaks,function(x)max(1,x$Heights)) * sapply(called,function(x)x)
     
     centers = sapply(1:nrow(positions),function(x)round(weighted.mean(positions[x,],heights[x,])))
     starts  = centers-summits
