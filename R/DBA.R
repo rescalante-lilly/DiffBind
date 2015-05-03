@@ -36,7 +36,7 @@
 #########################################################
 DBA_VERSION1  = 1
 DBA_VERSION2  = 14
-DBA_VERSION3  = 0
+DBA_VERSION3  = 2
 
 DBA_GROUP     = PV_GROUP
 DBA_ID        = PV_ID 
@@ -91,7 +91,7 @@ dba = function(DBA,mask, minOverlap=2,
         if(class(DBA)=="character") {
             stop("DBA object is a character string; perhaps meant to be argument \'sampleSheet\'?")	
         }
-        DBA = pv.check(DBA)	
+        DBA = pv.check(DBA,bCheckSort=F)	
     } 
     
     res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
