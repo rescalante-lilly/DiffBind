@@ -35,8 +35,7 @@ pv.writePeakset = function(pv,fname,peaks,numCols=4){
    }
    
    if((class(peaks)=='numeric') || (class(peaks)=='integer')) {
-      bed = pv.do_peaks2bed(pv$peaks[[peaks]],pv$chrmap,fname,numCols=numCols)
-      return(bed)
+      peaks=pv$peaks[[peaks]]
    }           
    
    if(!is.null(dim(peaks))) {

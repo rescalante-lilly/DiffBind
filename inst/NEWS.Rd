@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.15.2}{
+\itemize{
+   \item{Fix bug when not all chromosome names in first peakset}
+ }
+}
+
 \section{Version 1.15.1}{
 \itemize{
    \item{Fix bug when summit heights are zero}

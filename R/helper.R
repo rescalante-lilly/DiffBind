@@ -10,10 +10,10 @@
 ## pv HELPER FUNCTIONS ##
 #########################
 
-pv.check = function(pv,bCheckEmpty=F) {
+pv.check = function(pv,bCheckEmpty=FALSE,bCheckSort=TRUE) {
    
    if(missing(pv)) {
-      stop('DBA object missing!',call.=F)
+      stop('DBA object missing!',call.=FALSE)
    }
    
    if(is.null(pv)) {
@@ -81,6 +81,12 @@ pv.check = function(pv,bCheckEmpty=F) {
       pv$config$fragmentSize=125
    }   
    
+   if(bCheckSort && is.unsorted(pv$chrmap)) {
+       message("Older version of DBA object. Recommend running DBA <- dba(DBA).")
+       message('Converting...')
+       pv = dba(pv)
+   }
+   
    return(pv)
 }
 
@@ -119,6 +125,11 @@ pv.version = function(pv,v1,v2,v3){
       pv$class = rbind(pv$class,'')
       rownames(pv$class)[PV_TREATMENT]='Treatment'	
    }
+   
+   if(is.unsorted(pv$chrmap)) {
+       pv = dba(pv)
+   }
+   
    pv$config$Version1 = v1
    pv$config$Version2 = v2
    pv$config$Version3 = v3   	
@@ -1329,9 +1340,9 @@ pv.DBA2SummarizedExperiment = function(DBA, bAssays=T, report) {
          names(assays) = c("scores",names(extra))
       }  
    }
-   res = SummarizedExperiment(assays=assays,
-                              rowData = peaks,
-                              colData = meta)
+   res = SummarizedExperiment(assays    = assays,
+                              rowRanges = peaks,
+                              colData   = meta)
    colnames(res) = colnames(DBA$class)                           
    return(res)                           
 }

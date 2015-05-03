@@ -214,8 +214,9 @@ pv.peakset = function(pv=NULL,peaks, sampID, tissue, factor,condition, treatment
         }
         
         newchrs = as.character(peaks[,1])
-        pv$chrmap  = unique(c(pv$chrmap,newchrs))
-        peaks[,1] = factor(peaks[,1],pv$chrmap)
+        pv$chrmap  = sort(unique(c(pv$chrmap,newchrs)))
+        #         peaks[,1] = factor(peaks[,1],pv$chrmap)
+        peaks[,1] <- as.character(peaks[,1])
     }
     
     pv$peaks = pv.listadd(pv$peaks,peaks)
@@ -351,13 +352,16 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
                 
                 allpeaks[st:end,(pnum+3)] = peak[,4]
                 
-                allpeaks[st:end,1] = match(as.character(peak[,1]),pv$chrmap)
+                allpeaks[st:end,1] = match(peak[,1],pv$chrmap)
+                
                 allpeaks[st:end,2] = peak[,2]
                 allpeaks[st:end,3] = peak[,3]
                 
                 st = end + 1
             }
         }
+        allpeaks = pv.peaksort(allpeaks)
+        
         colnames(allpeaks) = c("CHR","START","END",1:numvecs)
         
         if(npeaks>0) {
@@ -384,7 +388,9 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
         
     } else { ## ALL SAME
         pv$allvectors = pv$peaks[[1]][,1:4]
-        
+        if(is.character(pv$allvectors[1,1])) {
+            pv$allvectors[,1] = match(pv$allvectors[,1],pv$chrmap)
+        }
         for(i in 2:numvecs){
             pv$allvectors = cbind(pv$allvectors,pv$peaks[[i]][,4])
         }	
@@ -395,13 +401,26 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
     pv$attributes = attributes
     pv$minOverlap = minOverlap
     
+    
     if(nrow(pv$vectors)>0) {
+        vnames = pv$chrmap[pv$vectors[,1]]
+    }  
+    allnames = pv$chrmap[pv$allvectors[,1]]
+    newmap = sort(unique(allnames))
+    pv$allvectors[,1] = match(allnames,newmap)
+    if(nrow(pv$vectors)>0) {
+        pv$vectors[,1] = match(vnames,newmap)
+        if(is.unsorted(unique(pv$vectors[,1]))) {
+            pv$vectors = pv.peaksort(pv$vectors)
+        }     
         rownames(pv$vectors) = 1:nrow(pv$vectors)
     }
+    if(is.unsorted(unique(pv$allvectors[,1]))) {
+        pv$allvectors = pv.peaksort(pv$allvectors)
+    } 
+    pv$chrmap = newmap
+    rownames(pv$allvectors) = 1:nrow(pv$allvectors)  
     
-    if(bAnalysis && ncol(pv$class)>1) {
-        #pv = pv.analysis(pv)
-    }
     pv$hc = NULL
     pv$pc = NULL
     pv$masks = pv.mask(pv)
@@ -411,7 +430,8 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
 }
 
 ## pv.list -- list attributes of samples in model
-pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,PV_REPLICATE,PV_CALLER,PV_INTERVALS,PV_SN_RATIO)
+pv.deflist = c(PV_ID,PV_TISSUE,PV_FACTOR,PV_CONDITION,PV_TREATMENT,
+               PV_REPLICATE,PV_CALLER,PV_INTERVALS,PV_SN_RATIO)
 pv.list = function(pv,mask,bContrasts=F,attributes=pv.deflist,th=0.1,bUsePval=F){
     
     if(!missing(mask)){

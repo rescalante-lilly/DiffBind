@@ -45,13 +45,13 @@ pv.model = function(model,mask,minOverlap=2,
     if(is.character(samplesheet)) {
         ext <- file_ext(samplesheet)
         if (ext %in% c("xls","xlsx")) {
-          if (requireNamespace("XLConnect",quietly=TRUE)) {
-            samples = XLConnect::readWorksheetFromFile(samplesheet,sheet=1)
-          } else {
-            stop("Package XLConnect is needed to read Excel-format sample sheets.")
-          }
+            if (requireNamespace("XLConnect",quietly=TRUE)) {
+                samples = XLConnect::readWorksheetFromFile(samplesheet,sheet=1)
+            } else {
+                stop("Package XLConnect is needed to read Excel-format sample sheets.")
+            }
         } else {
-          samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
+            samples = read.table(samplesheet,sep=',',stringsAsFactors=F,header=T)
         }
     } else samples = samplesheet
     
@@ -336,7 +336,9 @@ pv.counts = function(pv,peaks,minOverlap=2,defaultScore=PV_SCORE_RPKM_FOLD,bLog=
         }
     }
     
-    bed[,1] = pv$chrmap[bed[,1]]
+    if(!is.character(bed[1,1])) {
+        bed[,1] = pv$chrmap[bed[,1]]
+    }
     bed = pv.peaksort(bed)
     
     numChips = ncol(pv$class)
