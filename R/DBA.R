@@ -701,8 +701,11 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
                                  RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                                  ColScheme=colScheme, distMeth=distMethod, 
                                  margins=c(margin,margin), ...)
-            res = DBA$vectors[1:maxSites,1:3][res$rowInd,]
-            
+            res = DBA$vectors[1:maxSites,][res$rowInd,c(1:3,3+res$colInd)]
+            if(!is.character(res[1,1])) {
+                res[,1] = DBA$chrmap[res[,1]]
+            }
+            res = as(res,"GRanges")
         } else {
             
             if(!missing(sortFun)) {
@@ -714,8 +717,11 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
                                  RowAttributes=RowAttributes,ColAttributes=ColAttributes,rowSideCols=rowSideCols,colSideCols=colSideCols,
                                  minval=minval, maxval=maxval, ColScheme=colScheme, distMeth=distMethod, 
                                  margins=c(margin,margin),...)
-            res = NULL
-            
+            res = DBA$vectors[1:maxSites,][res$rowInd,c(1:3,3+res$colInd)]
+            if(!is.character(res[1,1])) {
+                res[,1] = DBA$chrmap[res[,1]]
+            }
+            res = as(res,"GRanges")
             if(!missing(sortFun)) {
                 DBA$vectors = savevecs
             }
