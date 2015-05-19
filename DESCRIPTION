@@ -1,6 +1,6 @@
 Package: DiffBind
 Type: Package
-Version: 1.15.2
+Version: 1.15.3
 Title: Differential Binding Analysis of ChIP-Seq peak data
 Author: Rory Stark<rory.stark@cruk.cam.ac.uk>, Gord Brown
         <gdbzork@gmail.com>
@@ -10,7 +10,8 @@ Description: Compute differentially bound sites from multiple ChIP-seq
         occupancy (overlap) analysis and plotting functions.
 License: Artistic-2.0
 LazyLoad: yes
-Depends: R (>= 3.0.2), GenomicRanges, limma, GenomicAlignments, locfit
+Depends: R (>= 3.0.2), GenomicRanges, SummarizedExperiment, limma,
+        GenomicAlignments, locfit
 Imports: RColorBrewer, amap, edgeR (>= 2.3.58), gplots, grDevices,
         stats, utils, IRanges, zlibbioc, lattice, systemPipeR, tools
 Suggests: DESeq, Rsamtools, DESeq2, BiocStyle

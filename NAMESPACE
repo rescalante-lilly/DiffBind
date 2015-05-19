@@ -91,6 +91,8 @@ import(IRanges)
 
 import(GenomicRanges)
 
+import(SummarizedExperiment)
+
 importFrom(graphics, abline, boxplot, plot, points, smoothScatter)
 
 importFrom(grDevices, colorRampPalette)
