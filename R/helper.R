@@ -180,21 +180,21 @@ pv.setScore = function(pv,score,bLog=F,minMaxval,rescore=TRUE,filterFun=max,bSig
                bCPM=TRUE
             }
          }
-         if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE || score == DBA_SCORE_TMM_MINUS_EFFECTIVE) {
+         if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE || score == DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM) {
             bMinus   = TRUE
             bFullLib = FALSE
             if(score == DBA_SCORE_TMM_MINUS_EFFECTIVE_CPM) {
                bCPM=TRUE
             }
          }
-         if(score == DBA_SCORE_TMM_READS_FULL || score == DBA_SCORE_TMM_READS_FULL) {
+         if(score == DBA_SCORE_TMM_READS_FULL || score == DBA_SCORE_TMM_READS_FULL_CPM) {
             bMinus   = FALSE
             bFullLib = TRUE	
             if(score == DBA_SCORE_TMM_READS_FULL_CPM) {
                bCPM=TRUE
             }
          }
-         if(score == DBA_SCORE_TMM_READS_EFFECTIVE || score == DBA_SCORE_TMM_READS_EFFECTIVE) {
+         if(score == DBA_SCORE_TMM_READS_EFFECTIVE || score == DBA_SCORE_TMM_READS_EFFECTIVE_CPM) {
             bMinus   = FALSE
             bFullLib = FALSE	
             if(score == DBA_SCORE_TMM_READS_EFFECTIVE_CPM) {
