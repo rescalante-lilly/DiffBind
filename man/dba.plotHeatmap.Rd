@@ -93,7 +93,8 @@ Score to use for count data. Only used when plotting the global binding matrix (
 }
 }
 \item{bLog}{
-Logical indicating that log2 values should be used.
+Logical indicating that log2 values should be used. 
+Only applicable to read coount scores (not peak scores).
 }
 \item{mask}{
 mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included.

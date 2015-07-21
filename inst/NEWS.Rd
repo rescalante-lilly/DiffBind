@@ -2,6 +2,12 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.14.5}{
+\itemize{
+   \item{Fix bug when plotting correlation heatmap for peak scores and bLog=TRUE}
+ }
+}
+
 \section{Version 1.14.4}{
 \itemize{
    \item{Fix bug when score=DBA_SCORE_TMM_READS_FULL_CPM}

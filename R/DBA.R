@@ -659,13 +659,15 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
     
     if(bLog) {
         vectors = DBA$vectors[,4:ncol(DBA$vectors)]
-        vectors[vectors<=0]=1
-        vectors = log2(vectors)
-        DBA$vectors[,4:ncol(DBA$vectors)] = vectors
-        if(missing(minval)) {
-            minval = 0
-        } else {
-            minval = max(0,minval)
+        if(max(vectors) > 1) { # must have positive counts to do log
+            vectors[vectors<1]=1
+            if(missing(minval)) {
+                minval = 0
+            } else {
+                minval = max(0,minval)
+            }
+            vectors = log2(vectors)
+            DBA$vectors[,4:ncol(DBA$vectors)] = vectors
         }
     }
     DBA$allvectors = DBA$vectors
