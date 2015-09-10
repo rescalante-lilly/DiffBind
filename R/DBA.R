@@ -91,7 +91,7 @@ dba = function(DBA,mask, minOverlap=2,
         if(class(DBA)=="character") {
             stop("DBA object is a character string; perhaps meant to be argument \'sampleSheet\'?")	
         }
-        DBA = pv.check(DBA,bCheckSort=F)	
+        DBA = pv.check(DBA,bCheckSort=FALSE)	
     } 
     
     res = pv.model(DBA, mask=mask, minOverlap=minOverlap, samplesheet=sampleSheet, config=config, 
@@ -179,7 +179,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
         if(class(peaks) != "DBA") {
             peaks = pv.DataType2Peaks(peaks)
         } else {
-            peaks = pv.check(peaks)	
+            peaks = pv.check(peaks,bDoVectors=FALSE)	
         }
     }
     
@@ -195,7 +195,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
         
         if(missing(peaks)) {
             if(!is.null(DBA)) {
-                DBA = pv.check(DBA,T)
+                DBA = pv.check(DBA,bCheckEmpty=TRUE,bDoVectors=FALSE)
             } else {
                 stop("DBA object is NULL; can't retrieve peakset.")	
             }	
@@ -224,7 +224,7 @@ dba.peakset = function(DBA=NULL, peaks, sampID, tissue, factor, condition, treat
     } else { ## ADD PEAKSET(S)
         
         if(!is.null(DBA)) {
-            DBA = pv.check(DBA)
+            DBA = pv.check(DBA,bDoVectors=FALSE)
         }
         if(!missing(peaks)) {
             if(class(peaks)=="DBA") {
@@ -309,7 +309,7 @@ dba.overlap = function(DBA, mask, mode=DBA_OLAP_PEAKS, minVal=0,
                        byAttribute, bCorOnly=TRUE, CorMethod="pearson", 
                        DataType=DBA$config$DataType)
 {                      
-    DBA = pv.check(DBA,T)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     if( (mode == DBA_OLAP_ALL) | (!missing(contrast)) | (!missing(report)) ) {
         
@@ -532,15 +532,13 @@ dba.analyze = function(DBA, method=DBA$config$AnalysisMethod,
     #   bParallel=F	
     #}
     
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     res = pv.DBA(DBA, method ,bSubControl,bFullLibrarySize,bTagwise=bTagwise,minMembers=3,bParallel)
     
     if(bReduceObjects) {
         if(!is.null(res$contrasts)) {
-            for(i in 1:length(res$contrasts)) {
-                res$contrasts[[i]] = pv.stripDBA(res$contrasts[[i]])   	
-            }
+            res$contrasts = lapply(res$contrasts,pv.stripDBA)
         }      	
     }
     
@@ -583,7 +581,7 @@ dba.report = function(DBA, contrast, method=DBA$config$AnalysisMethod, th=DBA$co
     
 {
     
-    DBA = pv.check(DBA,TRUE) 
+    DBA = pv.check(DBA,bCheckEmpty=TRUE) 
     
     if(DataType==DBA_DATA_SUMMARIZED_EXPERIMENT) {
         bCounts=T
@@ -638,7 +636,7 @@ dba.plotHeatmap = function(DBA, attributes=DBA$attributes, maxSites=1000, minval
                            margin=10, colScheme="Greens", distMethod="pearson",
                            ...)
 {
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     if( (missing(contrast) || !missing(mask)) && !missing(score) ) {
         DBA = dba.count(DBA,peaks=NULL,score=score,bCorPlot=FALSE)	
@@ -744,7 +742,7 @@ dba.plotPCA = function(DBA, attributes, minval, maxval,
                        b3D=FALSE, vColors, dotSize, labelSize, labelCols, ...)
     
 {
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     mask = pv.setMask(DBA,mask,contrast)
     
@@ -810,7 +808,7 @@ dba.plotBox = function(DBA, contrast=1, method=DBA$config$AnalysisMethod,
                        vColors, varwidth=TRUE, notch=TRUE, ...) 
     
 {
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     if(contrast > length(DBA$contrasts)) {
         stop('Supplied contrast greater than number of contrasts')	
@@ -835,7 +833,7 @@ dba.plotMA = function(DBA, contrast=1, method=DBA$config$AnalysisMethod,
                       factor="", bXY=FALSE, dotSize=.45, bSignificant=TRUE, bSmooth=TRUE, ...)
     
 {
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     res = pv.DBAplotMA(DBA, contrast=contrast, method=method, bMA=!bXY, bXY=bXY, th=th, bUsePval=bUsePval, fold=fold,
                        facname=factor, bNormalized=bNormalized, cex=dotSize, 
@@ -876,7 +874,7 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, mai
                         bDB=TRUE, bNotDB, bAll=TRUE, bGain=FALSE, bLoss=FALSE,
                         labelAttributes, bReturnPeaksets=FALSE, DataType=DBA$config$DataType)
 {
-    DBA = pv.check(DBA,TRUE)
+    DBA = pv.check(DBA,bCheckEmpty=TRUE)
     
     newDBA = NULL
     
@@ -894,9 +892,8 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, mai
         if(missing(label4)) {
             label4 = "D"
         }
-        for(i in 1:length(overlaps)) {
-            overlaps[[i]] = pv.DataType2Peaks(overlaps[[i]])
-        }
+            
+        overlaps = lapply(overlaps,pv.DataType2Peaks)
         
     } else if(!missing(contrast)){
         if(max(contrast)>length(DBA$contrasts)) {
@@ -1034,9 +1031,7 @@ dba.plotVenn = function(DBA, mask, overlaps, label1, label2, label3, label4, mai
                 warning('No DBA object to return.')
             }
         } else {
-            for(i in 1:length(overlaps)) {
-                overlaps[[i]] = pv.peaks2DataType(overlaps[[i]],DataType)
-            }
+            overlaps = lapply(overlaps, pv.peaks2DataType, DataType)
             return(overlaps)
         }   
     }   

@@ -79,7 +79,7 @@ pv.DataType2Peaks = function(RDpeaks){
 }
 
 pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=.1,bUsePval=FALSE,bNormalized=T,report,
-                          bPCA=F,bLog=T,minval,maxval,mask) {
+                          bPCA=F,bLog=T,minval,maxval,mask,fold=0) {
     
     if(contrast > length(pv$contrasts)) {
         stop('Specified contrast number is greater than number of contrasts')
@@ -90,10 +90,13 @@ pv.getPlotData = function(pv,attributes=PV_GROUP,contrast=1,method=DBA_EDGER,th=
     
     if(missing(report)) {
         report = pv.DBAreport(pv,contrast=contrast,method=method,th=th,bUsePval=bUsePval,
-                              bNormalized=bNormalized,bCounts=T,bSupressWarning=T)
+                              bNormalized=bNormalized,bCounts=T,bSupressWarning=T,
+                              minFold=fold)
         if(is.null(report)) {
             stop('Unable to plot -- no sites within threshold')	
         }
+    } else {
+        report = report[abs(report$Fold)>=fold,]
     }
     
     if(!missing(mask)){
@@ -928,6 +931,10 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
         } else {
             vals = unique(classdb[attribute,])
         }
+        numvals <- suppressWarnings(as.numeric(vals))
+        if(!sum(is.na(numvals))) {
+            vals <- sort(numvals)
+        }
         if ( (sum(!is.na(vals))>1) && (sum(!is.na(vals))<numsamps) ) {
             addcol = matrix(classdb[attribute,],numsamps,1)
             for(i in 1:length(vals)) {
@@ -941,6 +948,9 @@ pv.attributematrix = function(pv,mask,contrast,attributes,cols,bReverse=F,bAddGr
                 atts = cbind(atts,addcol)  	
             }
         }         	
+    }
+    if(is.null(atts)) {
+        return(NULL)
     }
     attnum = 1
     for(i in ncol(atts):1) {
