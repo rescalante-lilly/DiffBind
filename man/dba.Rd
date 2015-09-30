@@ -109,7 +109,7 @@ logical indicating whether to remove peaks on chrN_random when constructing a ne
 }
 
 \item{bSummarizedExperiment}{
-logical indicating whether to return resulting object as a \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}.
+logical indicating whether to return resulting object as a \code{\link{SummarizedExperiment}}.
 }
 \item{bCorPlot}{
 logical indicating that a correlation heatmap should be plotted before returning. If \code{DBA} is \code{NULL} (a new DBA object is being created), and \code{bCorPlot} is missing, then this will take the default value (\code{TRUE}). However if \code{DBA} is \code{NULL} (a new DBA object is being created), and \code{bCorPlot} is specified, then the specified value will become the default value of \code{bCorPlot} for the resultant \code{DBA} object.
@@ -141,7 +141,7 @@ MODE: Construct a DBA object based on an existing one:
 
 dba(DBA, mask, attributes)
 
-MODE: Convert a DBA object to a RangedSummarizedExperiment object:
+MODE: Convert a DBA object to a SummarizedExperiment object:
 
 dba(DBA, bSummarizedExperiment=TRUE)
 }
@@ -186,7 +186,7 @@ setwd(system.file("extra", package="DiffBind"))
 tamoxifen = dba(sampleSheet="tamoxifen.csv", peakCaller="macs", peakFormat="raw")
 dba.show(tamoxifen, attributes=c(DBA_TISSUE,DBA_CONDITION,DBA_REPLICATE,DBA_CALLER))
 
-# Convert DBA object to RangedSummarizedExperiment
+# Convert DBA object to SummarizedExperiment
 data(tamoxifen_counts)
 sset = dba(tamoxifen,bSummarizedExperiment=TRUE)
 sset

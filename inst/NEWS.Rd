@@ -2,6 +2,20 @@
 \title{DiffBind News}
 \encoding{UTF-8}
 
+\section{Version 1.15.5}{
+\itemize{
+   \item{Roll up bugfixes form release}
+ }
+}
+
+
+\section{Version 1.15.4}{
+\itemize{
+   \item{Fix bug when plotting correlation heatmap for peak scores and bLog=TRUE}
+ }
+}
+
+
 \section{Version 1.15.2}{
 \itemize{
    \item{Fix bug when not all chromosome names in first peakset}

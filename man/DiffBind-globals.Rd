@@ -302,7 +302,7 @@ Use RangedData class for peaksets and reports. Can be set as default (DBA$config
 Use data.frame class for peaksets and reports. Can be set as default (DBA$config$DataType = DBA_DATA_FRAME).
 }
 \item{DBA_DATA_SUMMARIZED_EXPERIMENT}{
-Return report as a \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}}.
+Return report as a \code{\link{SummarizedExperiment}}.
 }
 \item{DBA_DATA_DBAOBJECT}{
 Return a result-based DBA object from \code{\link{dba.plotVenn}}.

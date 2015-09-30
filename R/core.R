@@ -304,19 +304,21 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
             peaks = pv.listadd(peaks,pv$peaks[[i]])
             #}
         }
-        class     = pv$class[,mask]
-        chrmap    = pv$chrmap
-        config    = pv$config
-        samples   = pv$samples
-        contrasts = pv$contrasts
+        class      = pv$class[,mask]
+        chrmap     = pv$chrmap
+        config     = pv$config
+        samples    = pv$samples
+        contrasts  = pv$contrasts
+        #annotation = pv$annotation
         
         pv = NULL
-        pv$peaks     = peaks
-        pv$class     = class
-        pv$chrmap    = chrmap 
-        pv$config    = config
-        pv$samples   = samples 
-        pv$contrasts = contrasts  
+        pv$peaks      = peaks
+        pv$class      = class
+        pv$chrmap     = chrmap 
+        pv$config     = config
+        pv$samples    = samples 
+        pv$contrasts  = contrasts
+        #pv$annotation = annotation
     } 
     
     if(is.vector(pv$class)) {
@@ -400,7 +402,9 @@ pv.vectors = function(pv,mask,minOverlap=2,bKeepAll=T,bAnalysis=T,attributes,bAl
     
     pv$attributes = attributes
     pv$minOverlap = minOverlap
-    
+#     if(!is.null(pv$annotation)){
+#         pv$annotation = pv$annotation[as.numeric(rownames(pv$allvectors))]
+#     }
     
     if(nrow(pv$vectors)>0) {
         vnames = pv$chrmap[pv$vectors[,1]]
@@ -1112,7 +1116,9 @@ pv.plotHeatmap = function(pv,numSites=1000,attributes=pv$attributes,mask,sites,c
         }	
     }
     
-    cols = colorRampPalette(brewer.pal(9,ColScheme))(256)
+    if(length(ColScheme)==1) {
+        cols = colorRampPalette(brewer.pal(9,ColScheme))(256)
+    } else cols = ColScheme
     
     if(missing(rowSideCols)) {
         rowSideCols = pv.colsv	

@@ -97,7 +97,7 @@ The class of object for returned report:
 \item \link{DBA_DATA_RANGEDDATA}
 \item \link{DBA_DATA_FRAME}
 }
-If set to \code{\link{DBA_DATA_SUMMARIZED_EXPERIMENT}}, the result will be a \code{\link[SummarizedExperiment]{RangedSummarizedExperiment}} object, with all the count data and sample metadata for the experiment. The contrast statistics will be included as metadata columns in the \code{rowRanges} of the object.
+If set to \code{\link{DBA_DATA_SUMMARIZED_EXPERIMENT}}, the result will be a \code{\link{SummarizedExperiment}} object, with all the count data and sample metadata for the experiment. The contrast statistics will be included as metadata columns in the \code{rowData} of the object.
 
 Can be set as default behavior by setting DBA$config$DataType.
 }
@@ -166,7 +166,7 @@ tamoxifen.DB
 tamoxifen.DB = dba.report(tamoxifen, th=1, bCounts=TRUE,bNormalized=FALSE)
 tamoxifen.DB
 
-#Retrieve report as a RangedSummarizedExperiment object
+#Retrieve report as a SummarizedObject
 tamoxifen.sset = dba.report(tamoxifen, DataType=DBA_DATA_SUMMARIZED_EXPERIMENT)
 tamoxifen.sset
 

@@ -93,7 +93,8 @@ Score to use for count data. Only used when plotting the global binding matrix (
 }
 }
 \item{bLog}{
-Logical indicating that log2 values should be used.
+Logical indicating that log2 values should be used. 
+Only applicable to read coount scores (not peak scores).
 }
 \item{mask}{
 mask indicating a subset of peaksets to use when using global binding matrix scores. If a contrast is specified, these peaksets will be included, but only the significantly differentially bound sites (using th, bUsePval, and/or report) will be included.
@@ -187,8 +188,11 @@ dba.plotHeatmap(DBA, attributes, maxSites, minval, maxval,
 %%  ~Describe the value returned
 if  correlations is not \code{FALSE}, the overlap/correlation matrix is returned.
 
-if correlations is \code{FALSE}, the sites used in the heatmap are returned, 
-in the row order they appear (top to bottom).
+if correlations is \code{FALSE}, the sites used in the heatmap are returned in a
+\code{\link{GRanges}} object,
+in the row order they appear (top to bottom). The metadata contains a column for 
+each sample (also int he order they are appear int he lcusteruing plot), with
+the values being the actual plotted values.
 }
 %\references{
 %% ~put references to the literature/web site here ~
@@ -226,7 +230,9 @@ dba.plotHeatmap(tamoxifen,contrast=1)
 dba.plotHeatmap(tamoxifen,contrast=1,correlations=FALSE)
 
 #binding heatmap based on 1,000 sites with highest variance
-dba.plotHeatmap(tamoxifen,contrast=1,th=1,correlations=FALSE,sortFun=var)
+sites <- dba.plotHeatmap(tamoxifen,contrast=1,th=1,
+                         correlations=FALSE,sortFun=var)
+sites
 
 data(tamoxifen_counts)
 #Examples of  heatmaps using DB sites with different subsets of samples
